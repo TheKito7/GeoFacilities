@@ -87,10 +87,10 @@ fetch(urlGeoJSON)
                 // Compara as listas
                 if (listaSulgipeFormatada.includes(nomeMunicipio)) {
                     // Municípios Sulgipe -> Cinza
-                    return { fillColor: '#808080', color: '#555555', weight: 1, fillOpacity: 0.5 };
+                    return { fillColor: '#757474', color: '#555555', weight: 1, fillOpacity: 0.5 };
                 } else {
                     // Municípios Energisa -> Verde
-                    return { fillColor: '#28a745', color: '#1e7e34', weight: 1.5, fillOpacity: 0.3 };
+                    return { fillColor: '#3c6846', color: '#1e7e34', weight: 1.5, fillOpacity: 0.3 };
                 }
             },
             onEachFeature: function (feature, layer) {

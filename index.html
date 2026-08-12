@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>GeoFacilities Energisa Sergipe</title>
+    <!-- CSS do mapa Leaflet -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    
+    <style>
+        /* Estilos globais */
+        body, html { margin: 0; padding: 0; height: 100%; }
+        #map { height: 100vh; width: 100vw; }
+        
+        /* Estilos do balão de comentários (Popup) */
+        .popup-facilities h3 { margin: 0 0 5px 0; color: #005bb5; }
+        .popup-facilities textarea { width: 100%; height: 60px; margin-top: 10px; resize: none; font-family: inherit; }
+        .popup-facilities button { background-color: #f29100; color: white; border: none; padding: 8px; margin-top: 5px; cursor: pointer; width: 100%; font-weight: bold; }
+        .popup-facilities button:hover { background-color: #d87d00; }
+    </style>
+</head>
+<body>
+
+    <!-- Container onde o mapa será desenhado -->
+    <div id="map"></div>
+
+    <!-- 1º: Carrega a biblioteca principal do mapa -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    
+    <!-- 2º: Carrega o SEU arquivo com as lógicas, ícones e municípios -->
+    <script src="js/app.js"></script>
+
+</body>
+</html>

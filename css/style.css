@@ -1,0 +1,40 @@
+/* Remove margens padrão */
+body, html {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    font-family: Arial, sans-serif;
+}
+
+/* O mapa ocupará 100% da tela */
+#map {
+    height: 100vh;
+    width: 100vw;
+}
+
+/* Estilo para a caixa de comentários no mapa */
+.popup-facilities h3 {
+    margin: 0 0 5px 0;
+    color: #005bb5; /* Azul Energisa */
+}
+
+.popup-facilities textarea {
+    width: 100%;
+    height: 60px;
+    margin-top: 10px;
+    resize: none;
+}
+
+.popup-facilities button {
+    background-color: #f29100; /* Laranja Energisa */
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    margin-top: 5px;
+    cursor: pointer;
+    width: 100%;
+}
+
+.popup-facilities button:hover {
+    background-color: #d87d00;
+}

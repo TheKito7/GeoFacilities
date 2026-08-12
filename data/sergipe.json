@@ -1,0 +1,21 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": { "name": "Aracaju", "atendido": true },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[-37.10, -10.90], [-37.00, -10.90], [-37.00, -11.00], [-37.10, -11.00], [-37.10, -10.90]]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Município Fictício", "atendido": false },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[-37.30, -10.80], [-37.20, -10.80], [-37.20, -10.90], [-37.30, -10.90], [-37.30, -10.80]]]
+      }
+    }
+  ]
+}

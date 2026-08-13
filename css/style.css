@@ -1,130 +1,227 @@
-/* Reseta margens padrão do navegador e define a fonte */
+/* Variáveis de Cores (Fácil de alterar) */
+:root {
+    --primary-blue: #004b6b;
+    --primary-orange: #ed7523;
+    --primary-blue-light: #009ebf;
+    --bg-color: #f4f7f9;
+    --surface-color: #ffffff;
+    --text-main: #2d3748;
+    --text-muted: #718096;
+    --shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+    --border-radius: 16px;
+}
+
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    font-family: Arial, sans-serif;
+    font-family: 'Inter', sans-serif;
 }
 
 body {
+    background-color: var(--bg-color);
+    color: var(--text-main);
+    height: 100vh;
+    overflow: hidden; /* Mantém o formato de aplicativo */
+}
+
+.app-container {
+    display: flex;
+    width: 100%;
+    height: 100%;
+}
+
+/* ================== SIDEBAR ================== */
+.sidebar {
+    width: 340px;
+    background-color: var(--surface-color);
+    box-shadow: 2px 0 20px rgba(0, 0, 0, 0.05);
     display: flex;
     flex-direction: column;
-    height: 100vh; /* Ocupa 100% da tela */
-    background-color: #f8f9fa;
+    padding: 30px 24px;
+    z-index: 1000;
 }
 
-/* =========================================
-   1. CABEÇALHO (Header)
-========================================= */
-.top-bar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 10px 20px;
-    background-color: #ffffff;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-    height: 70px;
-    z-index: 1000; /* Fica por cima do mapa */
-}
-
-.menu-btn {
-    background: none;
-    border: none;
-    font-size: 24px;
-    cursor: pointer;
-    color: #333;
-}
-
-.title-badge {
-    background-color: #898b8b; /* Azul/Ciano do mockup */
-    padding: 5px 30px;
-    border-radius: 50px; /* Borda arredondada (formato pílula) */
-}
-
-.title-badge h1 {
-    color: #000000; /* Laranja Energisa */
-    font-size: 24px;
-    font-weight: bold;
-    text-transform: uppercase;
+.brand {
+    text-align: center;
+    margin-bottom: 40px;
 }
 
 .logo {
-    height: 40px;
-    object-fit: contain;
+    max-width: 160px;
+    margin-bottom: 12px;
 }
 
-/* =========================================
-   2. MAPA
-========================================= */
-.map-container {
-    flex-grow: 1; /* Ocupa o espaço restante disponível */
-    height: 55vh; /* Altura principal do mapa */
-    border-bottom: 3px solid #ccc;
+.brand h1 {
+    font-size: 1.1rem;
+    color: var(--primary-blue);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    font-weight: 700;
+}
+
+.sidebar-section {
+    margin-bottom: 35px;
+}
+
+.sidebar-section h2 {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    margin-bottom: 16px;
+    font-weight: 600;
+    letter-spacing: 1px;
+}
+
+.btn-link {
+    display: flex;
+    align-items: center;
+    padding: 14px 18px;
+    background-color: var(--bg-color);
+    color: var(--primary-blue);
+    text-decoration: none;
+    border-radius: 12px;
+    margin-bottom: 12px;
+    font-weight: 500;
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+    border: 1px solid transparent;
+}
+
+.btn-link i {
+    margin-right: 14px;
+    font-size: 1.2rem;
+    color: var(--primary-orange);
+    width: 24px;
+    text-align: center;
+}
+
+.btn-link:hover {
+    background-color: var(--surface-color);
+    border-color: var(--primary-blue-light);
+    box-shadow: 0 4px 12px rgba(0, 75, 107, 0.1);
+    transform: translateY(-2px);
+    color: var(--primary-orange);
+}
+
+.sidebar-footer {
+    margin-top: auto;
+    text-align: center;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    line-height: 1.5;
+}
+
+/* ================== ÁREA DO MAPA ================== */
+.map-wrapper {
+    flex: 1;
+    padding: 20px; /* Espaçamento ao redor do mapa */
 }
 
 #map {
-    height: 100%;
     width: 100%;
+    height: 100%;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow);
+    z-index: 1;
 }
 
-/* Estilos dos popups do mapa (que estavam no HTML antigo) */
-.popup-facilities h3 { margin: 0 0 5px 0; color: #005bb5; }
-.popup-facilities textarea { width: 100%; height: 60px; margin-top: 10px; resize: none; font-family: inherit; }
-.popup-facilities button { background-color: #f29100; color: white; border: none; padding: 8px; margin-top: 5px; cursor: pointer; width: 100%; font-weight: bold; }
-.popup-facilities button:hover { background-color: #d87d00; }
-
-/* =========================================
-   3. SEÇÃO DE DOCUMENTOS (Rodapé)
-========================================= */
-.documents-section {
-    background-color: #ffffff;
-    padding-bottom: 20px;
+/* Customizando os controles do Leaflet */
+.leaflet-control-layers {
+    border: none !important;
+    border-radius: 12px !important;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1) !important;
+    padding: 12px !important;
+    font-family: 'Inter', sans-serif !important;
 }
 
-.section-title {
-    background-color: #e9ecef;
-    text-align: center;
-    padding: 15px 0;
-    font-size: 22px;
-    color: #000;
+/* ================== POPUPS MODERNOS ================== */
+.leaflet-popup-content-wrapper {
+    border-radius: 12px !important;
+    box-shadow: var(--shadow) !important;
+    padding: 0 !important;
+    overflow: hidden;
 }
 
-.doc-list {
-    list-style: none;
-    max-width: 800px;
-    margin: 0 auto;
+.leaflet-popup-content {
+    margin: 0 !important;
+    width: 300px !important;
+}
+
+.modern-popup {
     padding: 20px;
 }
 
-.doc-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 15px 0;
-    border-bottom: 1px solid #eee;
+.modern-popup .tag {
+    display: inline-block;
+    background: #e1f5fe;
+    color: var(--primary-blue);
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    margin-bottom: 10px;
 }
 
-.doc-item:last-child {
-    border-bottom: none;
+.modern-popup h3 {
+    color: var(--primary-blue);
+    font-size: 1.15rem;
+    margin-bottom: 12px;
+    font-weight: 700;
 }
 
-.doc-name {
-    font-size: 18px;
-    font-weight: bold;
-    color: #000;
+.modern-popup p {
+    margin: 6px 0;
+    font-size: 0.9rem;
+    line-height: 1.5;
+    color: var(--text-main);
 }
 
-.doc-link {
-    text-decoration: none;
-    color: #005bb5;
-    background-color: #f1f5f9;
-    padding: 8px 16px;
-    border-radius: 4px;
-    font-weight: bold;
-    transition: 0.3s;
+.modern-popup hr {
+    border: 0;
+    border-top: 1px solid #edf2f7;
+    margin: 15px 0;
 }
 
-.doc-link:hover {
-    background-color: #005bb5;
-    color: #ffffff;
+.modern-popup label {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    font-weight: 600;
+}
+
+.modern-popup textarea {
+    width: 100%;
+    height: 70px;
+    margin-top: 8px;
+    border: 1px solid #cbd5e0;
+    border-radius: 8px;
+    padding: 10px;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.85rem;
+    resize: none;
+    transition: all 0.3s;
+}
+
+.modern-popup textarea:focus {
+    outline: none;
+    border-color: var(--primary-orange);
+    box-shadow: 0 0 0 3px rgba(237, 117, 35, 0.2);
+}
+
+.modern-popup button {
+    width: 100%;
+    margin-top: 12px;
+    padding: 12px;
+    background-color: var(--primary-orange);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.modern-popup button:hover {
+    background-color: #d86214;
 }

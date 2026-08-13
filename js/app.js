@@ -1,20 +1,20 @@
 // =====================================================================
-// GEO-FACILITIES ENERGISA SERGIPE - VERSÃO INTEGRADA COM CAPTURA DE COORDENADAS
+// GEO-FACILITIES ENERGISA SERGIPE - CÓDIGO COMPLETO FINAL
 // =====================================================================
-console.log(">>> O ARQUIVO APP.JS FOI CARREGADO COM SUCESSO! <<<");
-// 1. Inicializa o mapa centralizado no estado de Sergipe
-const map = L.map('map').setView([-10.5741, -37.3857], 8.5);
 
-// 2. Adiciona o mapa de fundo (ruas e estradas)
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '© OpenStreetMap | Energisa Facilities'
+// =====================================================================
+// PARTE 1: INICIALIZAÇÃO DO MAPA E BASEMAP
+// =====================================================================
+const map = L.map('map').setView([-10.57, -37.38], 8);
+
+L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+    attribution: '© OpenStreetMap contributors © CARTO | Energisa Facilities',
+    maxZoom: 19
 }).addTo(map);
 
 // =====================================================================
-// PARTE 1: DEFINIÇÃO DOS ÍCONES CUSTOMIZADOS (Base64)
-// Mantendo os ícones temáticos nas cores Energisa: Azul e Laranja.
+// PARTE 2: DEFINIÇÃO DOS ÍCONES CUSTOMIZADOS
 // =====================================================================
-
 const iconSizeConfig = {
     iconSize: [35, 35],
     iconAnchor: [17, 35],
@@ -36,14 +36,55 @@ const iconSede = L.icon({
     ...iconSizeConfig
 });
 
-const iconAgencia = L.icon({
-    iconUrl: 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iI2YyOTEwMCI+PHBhdGggZD0iTTEyIDJjMS4xIDAgMiAuOSAyIDJzLS45IDItMiAyLTIuMS0uOS0yLjEtMmMwLTEuMS45LTIgMi0yem05IDdIMXYyaDIydi0yek0xMS44NCAxNC43M2MtLjI4LS4wNy0uNTUtLjE4LS44LS4zMkw4IDEyLjhWMTVIMXY7aDF2LTdoNmgydjEwSDIydi03SDExLjg0eiIvPjwvc3ZnPg==',
-    ...iconSizeConfig
-});
-
 const iconAlmoxarifado = L.icon({
     iconUrl: 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iIzU1NTU1NSI+PHBhdGggZD0iTTE4LjYyNCAxNi4wOTRDMTku1MTU4LjU1MTk4MS44OTQyMjIuMDA5MTk5LjY1NzgyMS44MDkxOTkuNjU3MDk2LjcwOTE5NS43MDcyMDQuNTUxOTUxLjQwNzgwMS40ODU4MTkuMzQ0MTExLjMxNjgxOS4xMDY4MTguMzUxODE5Ljk0NjE5NS43NDE5NTEuNTk3ODIwLjU5NzhDMTguNjI0IDE2LjA5NFoiLz48cGF0aCBkPSJNMjEgNmgydjEzLjVMMyAyMFY2aDJWNEg5VjZoNlY0SDIxdjJaTTUgOGgyVjZINVY4Wk0xMSA4aDJWNkgxMXY4Wk0xNyA4aDJWNkoxN3Y4WiIvPjwvc3ZnPg==',
     ...iconSizeConfig
+});
+
+const svgAgenciaAtendimento = `
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="100%" height="100%">
+  <defs>
+    <style>
+      .outline { stroke: #004b6b; stroke-width: 5; stroke-linecap: round; stroke-linejoin: round; }
+      .orange { fill: #ed7523; }
+      .blue { fill: #009ebf; }
+      .white { fill: #ffffff; }
+      .no-stroke { stroke: none; }
+    </style>
+  </defs>
+  <rect x="20" y="55" width="125" height="135" class="outline white" />
+  <path d="M 35 40 L 35 20 L 95 20 L 95 40 L 130 40 L 130 55 L 20 55 L 20 40 Z" class="outline orange" />
+  <rect x="35" y="70" width="16" height="16" class="blue no-stroke" />
+  <rect x="35" y="95" width="16" height="16" class="blue no-stroke" />
+  <rect x="35" y="120" width="16" height="16" class="blue no-stroke" />
+  <rect x="35" y="145" width="16" height="16" class="blue no-stroke" />
+  <rect x="60" y="70" width="16" height="16" class="blue no-stroke" />
+  <rect x="60" y="95" width="16" height="16" class="blue no-stroke" />
+  <path d="M 120 40 H 175 A 10 10 0 0 1 185 50 V 80 A 10 10 0 0 1 175 90 H 145 L 130 105 V 90 H 120 A 10 10 0 0 1 110 80 V 50 A 10 10 0 0 1 120 40 Z" class="outline orange" />
+  <circle cx="132" cy="65" r="4.5" class="white no-stroke" />
+  <circle cx="147.5" cy="65" r="4.5" class="white no-stroke" />
+  <circle cx="163" cy="65" r="4.5" class="white no-stroke" />
+  <path d="M 70 155 C 70 125 80 115 100 115 C 120 115 130 125 130 155 Z" class="outline blue" />
+  <polygon points="90 115, 110 115, 100 130" class="outline white" />
+  <line x1="112" y1="135" x2="124" y2="135" class="outline" stroke-width="4"/>
+  <path d="M 75 120 C 75 105 80 65 100 65 C 120 65 125 105 125 120 L 115 120 C 115 110 110 105 100 105 C 90 105 85 110 85 120 Z" class="outline orange" />
+  <circle cx="100" cy="93" r="16" class="outline white" />
+  <path d="M 84 91 C 90 80 96 83 100 85 C 104 83 110 80 116 91 C 115 71 85 71 84 91 Z" class="outline orange" />
+  <circle cx="93" cy="90" r="2.5" class="outline" fill="#004b6b" stroke-width="0"/>
+  <circle cx="107" cy="90" r="2.5" class="outline" fill="#004b6b" stroke-width="0"/>
+  <path d="M 94 99 Q 100 105 106 99" fill="none" class="outline" stroke-width="3.5"/>
+  <rect x="65" y="165" width="115" height="25" class="outline orange" />
+  <rect x="55" y="155" width="135" height="10" class="outline orange" />
+  <line x1="10" y1="190" x2="190" y2="190" class="outline" fill="none"/>
+</svg>
+`;
+
+const iconAgencia = L.divIcon({
+    html: svgAgenciaAtendimento,
+    className: 'icone-transparente-svg', 
+    iconSize: [45, 45], 
+    iconAnchor: [22, 45], 
+    popupAnchor: [0, -45] 
 });
 
 const mapIconTypes = {
@@ -55,25 +96,20 @@ const mapIconTypes = {
 };
 
 // =====================================================================
-// PARTE 2: CARREGAMENTO DO MAPA DE MUNICÍPIOS (Energisa Verde vs Sulgipe Cinza)
+// PARTE 3: CARREGAMENTO DO MAPA DE MUNICÍPIOS (Energisa vs Sulgipe)
 // =====================================================================
-
-// Lista da área de concessão da Sulgipe
 const municipiosNaoAtendidos = [
     "Arauá", "Boquim", "Cristinápolis", "Estância", 
     "Indiaroba", "Itabaianinha", "Pedrinhas", "Riachão do Dantas", 
     "Santa Luzia do Itanhy", "Tobias Barreto", "Tomar do Geru", "Umbaúba"
 ];
 
-// Função que remove acentos e deixa tudo minúsculo para garantir a comparação
 function normalizarNome(nome) {
     if (!nome) return "";
     return nome.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
 }
 
 const listaSulgipeFormatada = municipiosNaoAtendidos.map(normalizarNome);
-
-// MUDANÇA AQUI: Nova fonte de dados que GARANTE o envio dos nomes das cidades
 const urlGeoJSON = 'https://raw.githubusercontent.com/tbrugz/geodata-br/master/geojson/geojs-28-mun.json';
 
 fetch(urlGeoJSON)
@@ -81,20 +117,14 @@ fetch(urlGeoJSON)
     .then(data => {
         L.geoJSON(data, {
             style: function(feature) {
-                // Agora sim, feature.properties.name tem o nome correto
                 const nomeMunicipio = normalizarNome(feature.properties.name);
-                
-                // Compara as listas
                 if (listaSulgipeFormatada.includes(nomeMunicipio)) {
-                    // Municípios Sulgipe -> Cinza
                     return { fillColor: '#757474', color: '#555555', weight: 1, fillOpacity: 0.5 };
                 } else {
-                    // Municípios Energisa -> Verde
                     return { fillColor: '#3c6846', color: '#1e7e34', weight: 1.5, fillOpacity: 0.3 };
                 }
             },
             onEachFeature: function (feature, layer) {
-                // O nome agora vai aparecer corretamente ao passar o mouse
                 if (feature.properties && feature.properties.name) {
                     layer.bindTooltip(`MUNICÍPIO: ${feature.properties.name}`);
                 }
@@ -102,97 +132,79 @@ fetch(urlGeoJSON)
         }).addTo(map);
     })
     .catch(error => console.error("Erro ao carregar mapa:", error));
+
 // =====================================================================
-// PARTE 3: BASE DE DADOS DE EXEMPLO DE IMÓVEIS (Sergipe)
+// PARTE 4: DADOS DAS AGÊNCIAS E BASES FÍSICAS (LISTAS COMPLETAS)
 // =====================================================================
-const basesFisicasEnergisa = [
-    { nome: "Sede Administrativa Sergipe", lat: -10.9416, lng: -37.0673, tipo: "Sede Administrative", status: "Operacional" },
-    { nome: "Base Operacional Aracaju Norte", lat: -10.9011, lng: -37.0712, tipo: "Base Operacional", status: "Operacional" },
-    { nome: "Subestação Inácio Barbosa", lat: -10.9431, lng: -37.0660, tipo: "Subestação", status: "Manutenção Preventiva" },
-    { nome: "Agência de Atendimento Centro", lat: -10.9108, lng: -37.0452, tipo: "Agência de Atendimento", status: "Operacional" },
-    { nome: "Agência CEAC RioMar", lat: -10.9318, lng: -37.0461, tipo: "Agência de Atendimento", status: "Operacional" },
-    { nome: "Subestação Itabaiana I", lat: -10.6830, lng: -37.4285, tipo: "Subestação", status: "Operacional" },
-    { nome: "Base Operacional Sul", lat: -11.2710, lng: -37.4320, tipo: "Base Operacional", status: "Reforma Pendente" },
-    { nome: "Agência Propriá", lat: -10.2091, lng: -36.8391, tipo: "Agência de Atendimento", status: "Operacional" }
+const dadosAgencias = [
+    { "agencia": "Energisa - Amparo do São Francisco", "endereco": "R. General Teixeira, Lote 9, Amparo do São Francisco", "latitude": -10.2185, "longitude": -36.8335 },
+    { "agencia": "Energisa - Aquidabã", "endereco": "Av. Parag, 2179 - Centro, Aquidabã", "latitude": -10.2806, "longitude": -37.0189 },
+    { "agencia": "Energisa - Aracaju", "endereco": "R. Carlos Correia, 398 - Siqueira Campos, Aracaju", "latitude": -10.9261, "longitude": -37.0678 },
+    { "agencia": "Energisa - Barra dos Coqueiros", "endereco": "Barra dos Coqueiros - SE", "latitude": -10.9091, "longitude": -37.0396 },
+    { "agencia": "Energisa - Canindé de São Francisco", "endereco": "Canindé de São Francisco - SE", "latitude": -9.6457, "longitude": -37.7892 },
+    { "agencia": "Energisa - Capela", "endereco": "Capela - SE", "latitude": -10.5050, "longitude": -37.0520 },
+    { "agencia": "Energisa - Carmópolis", "endereco": "Carmópolis - SE", "latitude": -10.6480, "longitude": -36.9880 },
+    { "agencia": "Energisa - Itabaiana", "endereco": "Itabaiana - SE", "latitude": -10.6850, "longitude": -37.4250 },
+    { "agencia": "Energisa - Lagarto", "endereco": "Lagarto - SE", "latitude": -10.9170, "longitude": -37.6650 },
+    { "agencia": "Energisa - Laranjeiras", "endereco": "Laranjeiras - SE", "latitude": -10.8030, "longitude": -37.1720 },
+    { "agencia": "Energisa - Nossa Senhora da Glória", "endereco": "Nossa Senhora da Glória - SE", "latitude": -10.2180, "longitude": -37.4200 },
+    { "agencia": "Energisa - Nossa Senhora do Socorro", "endereco": "Nossa Senhora do Socorro - SE", "latitude": -10.8540, "longitude": -37.1260 },
+    { "agencia": "Energisa - Propriá", "endereco": "Propriá - SE", "latitude": -10.2100, "longitude": -36.8400 },
+    { "agencia": "Energisa - São Cristóvão", "endereco": "São Cristóvão - SE", "latitude": -11.0140, "longitude": -37.2060 },
+    { "agencia": "Energisa - Simão Dias", "endereco": "Simão Dias - SE", "latitude": -10.7380, "longitude": -37.8100 },
+    { "agencia": "Energisa - Poço Verde", "endereco": "R. José Vieira de Santana, 129 - Centro, Poço Verde", "latitude": -10.7103, "longitude": -38.1814 },
+    { "agencia": "Energisa - Porto da Folha", "endereco": "Pç. Padre Oliveira, 889 - Centro, Porto da Folha", "latitude": -9.9144, "longitude": -37.2758 }
 ];
 
-// =====================================================================
-// PARTE 4: RENDERIZAÇÃO DOS PINS COM OS ÍCONES CUSTOMIZADOS
-// =====================================================================
-basesFisicasEnergisa.forEach(base => {
-    const iconeCorreto = mapIconTypes[base.tipo] || iconSede;
-    const marker = L.marker([base.lat, base.lng], { icon: iconeCorreto }).addTo(map);
-    
-    const popupContent = `
-        <div class="popup-facilities">
-            <h3>${base.nome}</h3>
-            <b>Tipo:</b> ${base.tipo}<br>
-            <b>Status:</b> ${base.status}<br>
-            <hr>
-            <small>Adicionar ocorrência/comentário:</small>
-            <textarea id="comentario-${base.nome.replace(/\s+/g, '')}" placeholder="Ex: Infiltração na sala 2..."></textarea>
-            <button onclick="salvarComentario('${base.nome}')">Registrar</button>
-        </div>
-    `;
-    
-    marker.bindPopup(popupContent);
+const subestacoesEnergisa = [
+    { "agencia": "Subestação - Aracaju (ARJ)", "endereco": "Av. Chanceler Osvaldo Aranha, Veneza, Aracaju", "latitude": -10.9250, "longitude": -37.0760 },
+    { "agencia": "Subestação - Atalaia (ATL)", "endereco": "Atalaia, Aracaju", "latitude": -10.9850, "longitude": -37.0490 },
+    { "agencia": "Subestação - Cabrita (CBT)", "endereco": "Zona Rural, São Cristóvão", "latitude": -10.9700, "longitude": -37.2100 },
+    { "agencia": "Subestação - Coroa do Meio (CME)", "endereco": "Coroa do Meio, Aracaju", "latitude": -10.9630, "longitude": -37.0430 },
+    { "agencia": "Subestação - Distrito Industrial (DIN)", "endereco": "Distrito Industrial, Aracaju", "latitude": -10.9300, "longitude": -37.0850 },
+    { "agencia": "Subestação - Eduardo Gomes (EDG)", "endereco": "Eduardo Gomes, São Cristóvão", "latitude": -10.9000, "longitude": -37.1000 },
+    { "agencia": "Subestação - Jardins (JAR)", "endereco": "Jardins, Aracaju", "latitude": -10.9450, "longitude": -37.0550 },
+    { "agencia": "Subestação - Marcos Freire (MKF)", "endereco": "Marcos Freire, Socorro", "latitude": -10.8650, "longitude": -37.0800 },
+    { "agencia": "Subestação - Socorro (SOC)", "endereco": "Socorro - SE", "latitude": -10.8500, "longitude": -37.1200 },
+    { "agencia": "Subestação - Itabaiana (ITB)", "endereco": "Itabaiana - SE", "latitude": -10.6800, "longitude": -37.4200 },
+    { "agencia": "Subestação - Lagarto (LAG)", "endereco": "Lagarto - SE", "latitude": -10.9100, "longitude": -37.6600 },
+    { "agencia": "Subestação - Glória (GLO)", "endereco": "N. Sra. da Glória - SE", "latitude": -10.2150, "longitude": -37.4150 },
+    { "agencia": "Subestação - Propriá (PRO)", "endereco": "Propriá - SE", "latitude": -10.2050, "longitude": -36.8350 },
+    { "agencia": "Subestação - Urubu (URB)", "endereco": "Urubu, Sergipe", "latitude": -10.8980, "longitude": -37.0500 },
+    { "agencia": "Subestação - Xingó (XNG)", "endereco": "Canindé de São Francisco", "latitude": -9.6240, "longitude": -37.7910 }
+];
+
+// 1º PASSO: Mapeia as Agências
+const basesFisicasEnergisa = dadosAgencias.map(item => {
+    return {
+        nome: item.agencia,
+        endereco: item.endereco,
+        lat: item.latitude,
+        lng: item.longitude,
+        tipo: "Agência de Atendimento",
+        status: "Ativo"
+    };
 });
 
-// =====================================================================
-// NOVO: PARTE 5: FUNÇÃO DE CAPTURA DE COORDENADAS AO CLICAR NO MAPA
-// =====================================================================
-// Prepara uma janela de informação para mostrar o resultado do clique
-const infoWindow = L.popup();
+// 2º PASSO: Mapeia as Subestações
+const basesSubestacoes = subestacoesEnergisa.map(item => {
+    return {
+        nome: item.agencia,
+        endereco: item.endereco,
+        lat: item.latitude,
+        lng: item.longitude,
+        tipo: "Subestação", 
+        status: "Ativo"
+    };
+});
 
-// Função que é executada quando você clica em qualquer lugar do mapa
-function onClickMap(e) {
-    // e.latlng contém as coordenadas exatas do clique
-    const lat = e.latlng.lat;
-    const lng = e.latlng.lng;
+// 3º PASSO: Junta as duas listas 
+const todasBasesFisicas = basesFisicasEnergisa.concat(basesSubestacoes);
 
-    // Configura e abre o popup no local do clique
-    infoWindow
-        .setLatLng(e.latlng)
-        .setContent(`
-            <div style="text-align:center; padding: 5px;">
-                <b>Nova Unidade?</b><br>
-                Use estas coordenadas no seu cadastro:<br>
-                <code style="background-color: #eee; padding: 2px 5px; font-size: 1.1em; display:inline-block; margin-top:5px;">
-                    ${lat.toFixed(6)}, ${lng.toFixed(6)}
-                </span>
-            </div>
-        `)
-        .openOn(map);
-
-    // Também mostra no Console (F12) para facilitar a cópia
-    console.log(`Coordenadas do clique: ${lat.toFixed(6)}, ${lng.toFixed(6)}`);
-}
-
-// Ativa o ouvinte de eventos: "map, quando alguém clicar, execute a função onClickMap"
-map.on('click', onClickMap);
 
 // =====================================================================
-// PARTE 6: FUNÇÃO DE SALVAMENTO (Simulação)
+// PARTE 5: RENDERIZAÇÃO DOS PINS E CRIAÇÃO DO MENU DE FILTROS
 // =====================================================================
-window.salvarComentario = function(nomeBase) {
-    const idTextarea = `comentario-${nomeBase.replace(/\s+/g, '')}`;
-    const texto = document.getElementById(idTextarea).value;
-    
-    if(texto.trim() === "") {
-        alert("Digite um comentário antes de salvar.");
-        return;
-    }
-    
-    alert(`Comentário para a ${nomeBase} salvo com sucesso:\n\n"${texto}"`);
-    document.getElementById(idTextarea).value = "";
-};
-
-// =====================================================================
-// PARTE 4: RENDERIZAÇÃO DOS PINS E CRIAÇÃO DO MENU DE FILTROS
-// =====================================================================
-
-// 4.1 Criação dos "Grupos de Camadas" (Layer Groups)
-// Cada grupo representará um filtro no menu
 const camadas = {
     "Subestações": L.layerGroup().addTo(map),
     "Bases Operacionais": L.layerGroup().addTo(map),
@@ -201,7 +213,6 @@ const camadas = {
     "Almoxarifados": L.layerGroup().addTo(map)
 };
 
-// 4.2 Dicionário para direcionar cada tipo de base para a sua camada correta
 const mapTypeToLayer = {
     "Subestação": camadas["Subestações"],
     "Base Operacional": camadas["Bases Operacionais"],
@@ -210,12 +221,12 @@ const mapTypeToLayer = {
     "Almoxarifado": camadas["Almoxarifados"]
 };
 
-// 4.3 Loop para criar os pins e adicioná-los às camadas (e não direto no mapa)
-basesFisicasEnergisa.forEach(base => {
+// Aqui usamos "todasBasesFisicas" para varrer toda a lista combinada
+todasBasesFisicas.forEach(base => {
     // Define o ícone correto
-    const iconeCorreto = mapIconTypes[base.tipo] || iconSede;
+    const iconeCorreto = mapIconTypes[base.tipo] || new L.Icon.Default();
     
-    // Cria o marcador (Note que removemos o .addTo(map) daqui)
+    // Cria o marcador
     const marker = L.marker([base.lat, base.lng], { icon: iconeCorreto });
     
     const popupContent = `
@@ -223,6 +234,7 @@ basesFisicasEnergisa.forEach(base => {
             <h3>${base.nome}</h3>
             <b>Tipo:</b> ${base.tipo}<br>
             <b>Status:</b> ${base.status}<br>
+            <b>Endereço:</b> ${base.endereco}<br>
             <hr>
             <small>Adicionar ocorrência/comentário:</small>
             <textarea id="comentario-${base.nome.replace(/\s+/g, '')}" placeholder="Ex: Infiltração na sala 2..."></textarea>
@@ -232,17 +244,57 @@ basesFisicasEnergisa.forEach(base => {
     
     marker.bindPopup(popupContent);
 
-    // Identifica qual é a camada desse marcador e o adiciona a ela
-    const camadaDestino = mapTypeToLayer[base.tipo] || camadas["Sedes Administrativas"];
+    // Adiciona o marcador ao respectivo LayerGroup
+    const camadaDestino = mapTypeToLayer[base.tipo] || camadas["Agências de Atendimento"];
     marker.addTo(camadaDestino);
 });
 
-// 4.4 Cria o Menu (Painel de Controle) no canto superior direito do mapa
+// Adiciona os controles (filtros) ao mapa
 L.control.layers(
-    null,       // Camadas base (mapa de fundo, vamos deixar null para não mexer)
-    camadas,    // Nossos filtros com as caixinhas de marcação (Checkboxes)
+    null,       
+    camadas,    
     { 
-        position: 'topright', // Posição na tela
-        collapsed: false      // Mantém o menu sempre aberto para o gestor ver facilmente
+        position: 'topright',
+        collapsed: false      
     }
 ).addTo(map);
+
+// =====================================================================
+// PARTE 6: INTERAÇÕES - CAPTURA DE COORDENADAS E SALVAMENTO DE COMENTÁRIOS
+// =====================================================================
+const infoWindow = L.popup();
+
+function onClickMap(e) {
+    const lat = e.latlng.lat;
+    const lng = e.latlng.lng;
+
+    infoWindow
+        .setLatLng(e.latlng)
+        .setContent(`
+            <div style="text-align:center; padding: 5px;">
+                <b>Nova Unidade?</b><br>
+                Use estas coordenadas no seu cadastro:<br>
+                <code style="background-color: #eee; padding: 2px 5px; font-size: 1.1em; display:inline-block; margin-top:5px;">
+                    ${lat.toFixed(6)}, ${lng.toFixed(6)}
+                </code>
+            </div>
+        `)
+        .openOn(map);
+
+    console.log(`Coordenadas do clique: ${lat.toFixed(6)}, ${lng.toFixed(6)}`);
+}
+
+map.on('click', onClickMap);
+
+window.salvarComentario = function(nomeBase) {
+    const idTextarea = `comentario-${nomeBase.replace(/\s+/g, '')}`;
+    const textarea = document.getElementById(idTextarea);
+    
+    if(!textarea || textarea.value.trim() === "") {
+        alert("Digite um comentário antes de salvar.");
+        return;
+    }
+    
+    alert(`Comentário para a ${nomeBase} salvo com sucesso:\n\n"${textarea.value}"`);
+    textarea.value = "";
+};

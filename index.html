@@ -1,62 +1,61 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <title>Central Facilities Energisa</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Central Facilities - Energisa Sergipe</title>
+    
+    <!-- Fonte Moderna: Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Biblioteca de Ícones (FontAwesome) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <!-- CSS do Leaflet -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     
-    <!-- SEU NOVO ARQUIVO CSS EXTERNO -->
-    <link rel="stylesheet" href="css/style.css" />
+    <!-- Nosso CSS Personalizado -->
+    <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 
-    <!-- 1. CABEÇALHO (Header) -->
-    <header class="top-bar">
-        <button class="menu-btn">☰</button>
-        <div class="title-badge">
-            <h1>Central Facilities</h1>
-        </div>
-        <div class="logo-container">
-            <!-- Substitua pelo caminho real da sua logo -->
-            <img src="imagens/Energisa.svg" alt="Energisa" class="logo">
-        </div>
-    </header>
+    <div class="app-container">
+        <!-- Barra Lateral de Menu -->
+        <aside class="sidebar">
+            <div class="brand">
+                <!-- URL de uma logo pública da energisa (pode trocar pela sua local) -->
+                <img src="imagens/Energisa.svg" alt="Energisa Logo" class="logo">
+                <h1>Central Facilities</h1>
+            </div>
 
-    <!-- 2. MAPA -->
-    <main class="map-container">
-        <div id="map"></div>
-    </main>
+            <div class="sidebar-section">
+                <h2>Acompanhamento dos Imóveis</h2>
+                <a href="#" class="btn-link"><i class="fa-solid fa-file-excel"></i> Controle AVCB</a>
+                <a href="#" class="btn-link"><i class="fa-solid fa-fire-extinguisher"></i> Controle de Extintores</a>
+                <a href="#" class="btn-link"><i class="fa-solid fa-folder-open"></i> Documentos Gerais</a>
+            </div>
 
-    <!-- 3. SEÇÃO DE DOCUMENTOS (Rodapé) -->
-    <section class="documents-section">
-        <h2 class="section-title">Acompanhamento dos imóveis</h2>
-        
-        <ul class="doc-list">
-            <li class="doc-item">
-                <span class="doc-name">Controle AVCB</span>
-                <a href="#" class="doc-link">Acessar Planilha</a>
-            </li>
-            <li class="doc-item">
-                <span class="doc-name">Controle de extintores</span>
-                <a href="#" class="doc-link">Acessar Planilha</a>
-            </li>
-            <li class="doc-item">
-                <span class="doc-name">Documentos</span>
-                <a href="#" class="doc-link">Abrir Pasta</a>
-            </li>
-
-
-
-
+            <div class="sidebar-section">
+                <h2>Parceiros & Contratos</h2>
+                <a href="#" class="btn-link"><i class="fa-solid fa-handshake"></i> Gestão de Contratos</a>
+                <a href="#" class="btn-link"><i class="fa-solid fa-users-gear"></i> Equipes Terceirizadas</a>
+            </div>
             
-        </ul>
-    </section>
+            <div class="sidebar-footer">
+                <p>Desenvolvido por Gustavo</p>
+                <p>Central Facilities © 2026<br>Energisa Sergipe</p>
+            </div>
+        </aside>
 
-    <!-- Scripts no final do body -->
+        <!-- Área do Mapa -->
+        <main class="map-wrapper">
+            <div id="map"></div>
+        </main>
+    </div>
+
+    <!-- JS do Leaflet -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <!-- Nosso JS Personalizado -->
     <script src="js/app.js"></script>
-
 </body>
 </html>

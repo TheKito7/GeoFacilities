@@ -40,6 +40,33 @@ body {
     flex-direction: column;
     padding: 30px 24px;
     z-index: 1000;
+    
+    /* ATIVAR O SCROLL */
+    overflow-y: auto; 
+}
+/* ================== SCROLLBAR DA SIDEBAR ================== */
+/* Customização para navegadores baseados em WebKit (Chrome, Edge, Safari) */
+.sidebar::-webkit-scrollbar {
+    width: 6px; /* Largura da barra bem fina */
+}
+
+.sidebar::-webkit-scrollbar-track {
+    background: transparent; /* Fundo invisível */
+}
+
+.sidebar::-webkit-scrollbar-thumb {
+    background-color: #cbd5e0; /* Cor cinza suave da barrinha */
+    border-radius: 10px; /* Bordas arredondadas */
+}
+
+.sidebar::-webkit-scrollbar-thumb:hover {
+    background-color: #a0aec0; /* Cor um pouco mais escura ao passar o mouse */
+}
+
+/* Customização para Firefox */
+.sidebar {
+    scrollbar-width: thin;
+    scrollbar-color: #cbd5e0 transparent;
 }
 
 .brand {

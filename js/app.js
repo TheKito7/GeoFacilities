@@ -298,3 +298,21 @@ window.salvarComentario = function(nomeBase) {
     alert(`Comentário para a ${nomeBase} salvo com sucesso:\n\n"${textarea.value}"`);
     textarea.value = "";
 };
+
+// =====================================================================
+// INTERATIVIDADE DO MENU LATERAL
+// =====================================================================
+document.addEventListener('DOMContentLoaded', () => {
+    const btnTerceirizados = document.getElementById('btn-terceirizados');
+    const listaTerceirizados = document.getElementById('lista-terceirizados');
+
+    if (btnTerceirizados && listaTerceirizados) {
+        btnTerceirizados.addEventListener('click', (e) => {
+            e.preventDefault(); 
+            // Alterna a classe que mostra a lista
+            listaTerceirizados.classList.toggle('mostrar');
+            // Alterna a classe que gira a setinha do botão
+            btnTerceirizados.classList.toggle('ativo');
+        });
+    }
+});

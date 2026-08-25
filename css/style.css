@@ -44,6 +44,7 @@ body {
     /* ATIVAR O SCROLL */
     overflow-y: auto; 
 }
+
 /* ================== SCROLLBAR DA SIDEBAR ================== */
 /* Customização para navegadores baseados em WebKit (Chrome, Edge, Safari) */
 .sidebar::-webkit-scrollbar {
@@ -164,100 +165,121 @@ body {
 
 /* ================== POPUPS MODERNOS ================== */
 .leaflet-popup-content-wrapper {
-    border-radius: 12px !important;
+    border-radius: 16px !important;
     box-shadow: var(--shadow) !important;
     padding: 0 !important;
     overflow: hidden;
+    border: 1px solid #edf2f7;
 }
 
 .leaflet-popup-content {
     margin: 0 !important;
-    width: 300px !important;
+    width: 320px !important;
 }
 
 .modern-popup {
-    padding: 20px;
+    padding: 24px;
+    background-color: var(--surface-color);
 }
 
 .modern-popup .tag {
     display: inline-block;
     background: #e1f5fe;
     color: var(--primary-blue);
-    padding: 4px 8px;
-    border-radius: 6px;
+    padding: 6px 12px;
+    border-radius: 8px;
     font-size: 0.75rem;
-    font-weight: 600;
-    margin-bottom: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 12px;
 }
 
 .modern-popup h3 {
     color: var(--primary-blue);
-    font-size: 1.15rem;
-    margin-bottom: 12px;
-    font-weight: 700;
+    font-size: 1.25rem;
+    margin-bottom: 16px;
+    font-weight: 800;
+    line-height: 1.2;
 }
 
-.modern-popup p {
-    margin: 6px 0;
+.modern-popup .info-row {
+    display: flex;
+    align-items: flex-start;
+    margin-bottom: 10px;
     font-size: 0.9rem;
-    line-height: 1.5;
+    line-height: 1.4;
     color: var(--text-main);
+}
+
+.modern-popup .info-row strong {
+    color: var(--text-muted);
+    min-width: 85px; 
+    font-weight: 600;
+    margin-right: 8px;
 }
 
 .modern-popup hr {
     border: 0;
     border-top: 1px solid #edf2f7;
-    margin: 15px 0;
+    margin: 20px 0;
 }
 
 .modern-popup label {
-    font-size: 0.8rem;
-    color: var(--text-muted);
-    font-weight: 600;
+    display: block;
+    font-size: 0.85rem;
+    color: var(--primary-blue);
+    font-weight: 700;
+    margin-bottom: 8px;
 }
 
 .modern-popup textarea {
     width: 100%;
-    height: 70px;
-    margin-top: 8px;
-    border: 1px solid #cbd5e0;
-    border-radius: 8px;
-    padding: 10px;
+    height: 75px;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 12px;
     font-family: 'Inter', sans-serif;
     font-size: 0.85rem;
     resize: none;
     transition: all 0.3s;
+    background-color: #f8fafc;
+    color: var(--text-main);
 }
 
 .modern-popup textarea:focus {
     outline: none;
     border-color: var(--primary-orange);
-    box-shadow: 0 0 0 3px rgba(237, 117, 35, 0.2);
+    background-color: var(--surface-color);
+    box-shadow: 0 0 0 4px rgba(237, 117, 35, 0.15);
 }
 
 .modern-popup button {
     width: 100%;
-    margin-top: 12px;
+    margin-top: 16px;
     padding: 12px;
     background-color: var(--primary-orange);
     color: white;
     border: none;
-    border-radius: 8px;
-    font-weight: 600;
+    border-radius: 10px;
+    font-weight: 700;
     font-size: 0.95rem;
     cursor: pointer;
-    transition: background-color 0.3s;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 12px rgba(237, 117, 35, 0.2);
 }
 
 .modern-popup button:hover {
     background-color: #d86214;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(237, 117, 35, 0.3);
 }
 
 /* ================== DROPDOWN DE CONTATOS (WHATSAPP) ================== */
 .btn-dropdown {
     width: 100%;
     cursor: pointer;
-    justify-content: space-between; /* Coloca o ícone e a seta nos extremos */
+    justify-content: space-between;
     background: transparent;
     text-align: left;
 }
@@ -269,13 +291,12 @@ body {
     transition: transform 0.3s ease;
 }
 
-/* Gira a setinha quando o menu abre */
 .btn-dropdown.ativo .seta-direita {
     transform: rotate(180deg);
 }
 
 .lista-contatos {
-    display: none; /* Escondido por padrão */
+    display: none;
     flex-direction: column;
     background-color: var(--surface-color);
     border: 1px solid #edf2f7;
@@ -308,7 +329,7 @@ body {
 }
 
 .contato-item:hover {
-    background-color: #f0fdf4; /* Fundo verde claro ao passar o mouse */
+    background-color: #f0fdf4;
 }
 
 .empresa-nome {
@@ -316,9 +337,151 @@ body {
 }
 
 .empresa-zap {
-    color: #25D366; /* Cor oficial do WhatsApp */
+    color: #25D366;
     font-weight: 700;
     display: flex;
     align-items: center;
     gap: 6px;
+}
+
+/* ================== TERCEIRIZADOS & SERVIÇOS ================== */
+.terceirizado-card {
+    background-color: var(--surface-color);
+    border: 1px solid #edf2f7;
+    border-radius: 10px;
+    margin-bottom: 10px;
+    overflow: hidden;
+}
+
+.terceirizado-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 16px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.terceirizado-header:hover {
+    background-color: #f8fafc;
+}
+
+.terceirizado-header.aberto {
+    background-color: #e1f5fe;
+    border-bottom: 1px solid #edf2f7;
+}
+
+.empresa-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 600;
+    color: var(--text-main);
+    font-size: 0.95rem;
+}
+
+.btn-whatsapp {
+    color: #25D366;
+    text-decoration: none;
+    font-size: 0.85rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 8px;
+    border-radius: 6px;
+    background-color: #e8fbf0;
+    transition: all 0.2s;
+}
+
+.btn-whatsapp:hover {
+    background-color: #25D366;
+    color: white;
+}
+
+.terceirizado-body {
+    display: none; /* Escondido por padrão */
+    padding: 12px;
+    background-color: #fafbfc;
+}
+
+.terceirizado-body.mostrar {
+    display: block;
+    animation: fadeIn 0.3s ease;
+}
+
+.servico-item {
+    background: white;
+    border: 1px solid #e2e8f0;
+    padding: 12px;
+    border-radius: 8px;
+    margin-bottom: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+    border-left: 4px solid #cbd5e0;
+}
+
+.servico-item:hover {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    transform: translateX(4px);
+    border-color: var(--primary-blue-light);
+}
+
+.servico-item.andamento {
+    border-left-color: var(--primary-orange);
+}
+
+.servico-item.realizado {
+    border-left-color: #38a169; /* Verde sucesso */
+}
+
+.servico-local {
+    font-weight: 700;
+    font-size: 0.85rem;
+    color: var(--primary-blue);
+    margin-bottom: 4px;
+}
+
+.servico-desc {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+}
+
+.badge-status {
+    display: inline-block;
+    font-size: 0.7rem;
+    padding: 3px 8px;
+    border-radius: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.badge-status.andamento { background: #feebc8; color: #c05621; }
+.badge-status.realizado { background: #c6f6d5; color: #22543d; }
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+/* ================== ESTILOS DOS DROPDOWNS DO POPUP ================== */
+.modern-popup select.popup-select {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 8px;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 10px;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.85rem;
+    background-color: #f8fafc;
+    color: var(--text-main);
+    transition: all 0.3s;
+    outline: none;
+    cursor: pointer;
+}
+
+.modern-popup select.popup-select:focus {
+    border-color: var(--primary-orange);
+    background-color: var(--surface-color);
+    box-shadow: 0 0 0 4px rgba(237, 117, 35, 0.15);
 }

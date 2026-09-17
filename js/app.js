@@ -1,8 +1,6 @@
 // =====================================================================
 // GEO-FACILITIES ENERGISA SERGIPE - CÓDIGO COMPLETO (COM IDs E CHAMADO)
 // =====================================================================
-// =====================================================================
-// =====================================================================
 // PARTE 1: INICIALIZAÇÃO DO MAPA E REFERÊNCIA GEOGRÁFICA
 // =====================================================================
 
@@ -12,13 +10,10 @@ const COORD_SEDE = L.latLng(-10.95483, -37.05581);
 // Inicializa o mapa centralizado na Sede com Zoom 12
 const map = L.map('map').setView([COORD_SEDE.lat, COORD_SEDE.lng], 12);
 
-// SUBSTITUA A CAMADA DO OPENSTREETMAP POR ESTA DA CARTO (MAPA BRANCO):
-L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
     maxZoom: 19,
-    subdomains: 'abcd',
-    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
+    attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
 }).addTo(map);
-
 
 // =====================================================================
 // PARTE 2: DEFINIÇÃO DOS ÍCONES CUSTOMIZADOS (SVG)
@@ -26,18 +21,16 @@ L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
 
 const iconSizeConfig = { iconSize: [35, 35], iconAnchor: [17, 35], popupAnchor: [1, -34] };
 
-// Ícones legados em Base64
-const iconSede = L.icon({ 
-    iconUrl: 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iIzAwNWJiNSI+PHBhdGggZD0iTTE5IDZIOXY0SDVYMTNoMTBWMTBIMTlWNlpNMTEgOGgydjJIMTFWOlpNMTcgOGgydjJIMTdWOlpNMyAxMEgxdjhoMlYxMFpNMjMgMTBIMjF2OGgyVjEwWk0xOSAxNEg5djhIMTNWMTdoMnY1SDE5VjE0Wk0xMSA4SDl2OEgxMVY4Wk0xNyA4SDE1djhIMTdWOHoiLz48L3N2Zz4=', 
-    ...iconSizeConfig 
+const iconSede = L.icon({
+    iconUrl: 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iIzAwNWJiNSI+PHBhdGggZD0iTTE5IDZIOXY0SDVYMTNoMTBWMTBIMTlWNlpNMTEgOGgydjJIMTFWOlpNMTcgOGgydjJIMTdWOlpNMyAxMEgxdjhoMlYxMFpNMjMgMTBIMjF2OGgyVjEwWk0xOSAxNEg5djhIMTNWMTdoMnY1SDE5VjE0Wk0xMSA4SDl2OEgxMVY4Wk0xNyA4SDE1djhIMTdWOHoiLz48L3N2Zz4=',
+    ...iconSizeConfig
 });
 
-const iconAlmoxarifado = L.icon({ 
-    iconUrl: 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iIzU1NTU1NSI+PHBhdGggZD0iTTE4LjYyNCAxNi4wOTRDMTku1MTU4LjU1MTk4MS44OTQyMjIuMDA5MTk5LjY1NzgyMS44MDkxOTkuNjU3MDk2LjcwOTE5NS43MDcyMDQuNTUxOTUxLjQwNzgwMS40ODU4MTkuMzQ0MTExLjMxNjgxOS4xMDY4MTguMzUxODE5Ljk0NjE5NS43MDcyMDQuNTUxOTUxLjQwNzgwMS40ODU4MTkuMzQ0MTExLjMxNjgxOS4xMDY4MTguMzUxODE5Ljk0NjE5NS43NDE5NTEuNTk3ODIwLjU5NzhDMTguNjI0IDE2LjA5NFoiLz48cGF0aCBkPSJNMjEgNmgydjEzLjVMMyAyMFY2aDJWNEg5VjZoNlY4SDIxdjJaTTUgOGgyVjZINVY4Wk0xMSA4aDJWNkgxMXY4Wk0xNyA4aDJWNkoxN3Y4WiIvPjwvc3ZnPg==', 
-    ...iconSizeConfig 
+const iconAlmoxarifado = L.icon({
+    iconUrl: 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iIzU1NTU1NSI+PHBhdGggZD0iTTE4LjYyNCAxNi4wOTRDMTku1MTU4LjU1MTk4MS44OTQyMjIuMDA5MTk5LjY1NzgyMS44MDkxOTkuNjU3MDk2LjcwOTE5NS43MDcyMDQuNTUxOTUxLjQwNzgwMS40ODU4MTkuMzQ0MTExLjMxNjgxOS4xMDY4MTguMzUxODE5Ljk0NjE5NS43MDcyMDQuNTUxOTUxLjQwNzgwMS40ODU4MTkuMzQ0MTExLjMxNjgxOS4xMDY4MTguMzUxODE5Ljk0NjE5NS43NDE5NTEuNTk3ODIwLjU5NzhDMTguNjI0IDE2LjA5NFoiLz48cGF0aCBkPSJNMjEgNmgydjEzLjVMMyAyMFY2aDJWNEg5VjZoNlY4SDIxdjJaTTUgOGgyVjZINVY4Wk0xMSA4aDJWNkgxMXY4Wk0xNyA4aDJWNkoxN3Y4WiIvPjwvc3ZnPg==',
+    ...iconSizeConfig
 });
 
-// Vetores SVG Inline
 const svgAgenciaAtendimento = `
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="100%" height="100%">
   <defs><style>.outline { stroke: #004b6b; stroke-width: 5; stroke-linecap: round; stroke-linejoin: round; } .orange { fill: #ed7523; } .blue { fill: #009ebf; } .white { fill: #ffffff; } .no-stroke { stroke: none; }</style></defs>
@@ -204,58 +197,29 @@ const svgBaseOperacional = `
   </g>
 </svg>`;
 
-// DivIcons do Leaflet para os SVGs
 const iconAgencia = L.divIcon({ html: svgAgenciaAtendimento, className: 'icone-transparente-svg', iconSize: [45, 45], iconAnchor: [22, 45], popupAnchor: [0, -45] });
 const iconSubestacao = L.divIcon({ html: svgSubestacao, className: 'icone-transparente-svg', iconSize: [45, 45], iconAnchor: [22, 45], popupAnchor: [0, -45] });
 const iconBaseOperacional = L.divIcon({ html: svgBaseOperacional, className: 'icone-transparente-svg', iconSize: [45, 45], iconAnchor: [22, 45], popupAnchor: [0, -45] });
 
-// Mapeamento dos tipos para os ícones
 const mapIconTypes = {
-    "Subestação": iconSubestacao, 
-    "Base Operacional": iconBaseOperacional, 
-    "Sede Administrativa": iconSede, 
-    "Agência de Atendimento": iconAgencia, 
+    "Subestação": iconSubestacao,
+    "Base Operacional": iconBaseOperacional,
+    "Sede Administrativa": iconSede,
+    "Agência de Atendimento": iconAgencia,
     "Almoxarifado": iconAlmoxarifado
 };
 
-
 // =====================================================================
-// PARTE 3: DADOS DE EXEMPLO (LOCAIS)
+// PARTE 3: DADOS DE EXEMPLO (LOCAIS) — pins de demonstração
 // =====================================================================
 
 const unidades = [
-    {
-        nome: "Sede Administrativa (Aracaju)",
-        tipo: "Sede Administrativa",
-        lat: -10.95483,
-        lng: -37.05581
-    },
-    {
-        nome: "Subestação Jardins",
-        tipo: "Subestação",
-        lat: -10.94500,
-        lng: -37.06800
-    },
-    {
-        nome: "Base Operacional Centro",
-        tipo: "Base Operacional",
-        lat: -10.91000,
-        lng: -37.05000
-    },
-    {
-        nome: "Agência de Atendimento Siqueira Campos",
-        tipo: "Agência de Atendimento",
-        lat: -10.92500,
-        lng: -37.07200
-    },
-    {
-        nome: "Almoxarifado Central",
-        tipo: "Almoxarifado",
-        lat: -10.98000,
-        lng: -37.04000
-    }
+    { nome: "Sede Administrativa (Aracaju)", tipo: "Sede Administrativa", lat: -10.95483, lng: -37.05581 },
+    { nome: "Subestação Jardins", tipo: "Subestação", lat: -10.94500, lng: -37.06800 },
+    { nome: "Base Operacional Centro", tipo: "Base Operacional", lat: -10.91000, lng: -37.05000 },
+    { nome: "Agência de Atendimento Siqueira Campos", tipo: "Agência de Atendimento", lat: -10.92500, lng: -37.07200 },
+    { nome: "Almoxarifado Central", tipo: "Almoxarifado", lat: -10.98000, lng: -37.04000 }
 ];
-
 
 // =====================================================================
 // PARTE 4: POPULAÇÃO DO MAPA COM CÁLCULO DE DISTÂNCIA
@@ -263,35 +227,29 @@ const unidades = [
 
 unidades.forEach(unidade => {
     const coordPonto = L.latLng(unidade.lat, unidade.lng);
-    
-    // Cálculo de distância geométrica usando Leaflet (Fórmula de Haversine)
     const distanciaMetros = COORD_SEDE.distanceTo(coordPonto);
     const distanciaKm = (distanciaMetros / 1000).toFixed(2);
-    
-    // Identificação do ícone
     const iconeAplicado = mapIconTypes[unidade.tipo] || iconAgencia;
 
-    // Formatação do Popup
     const conteudoPopup = `
         <div style="font-family: sans-serif; font-size: 13px;">
             <h4 style="margin: 0 0 5px 0; color: #004b6b;">${unidade.nome}</h4>
             <b>Tipo:</b> ${unidade.tipo}<br>
             <hr style="border: 0; border-top: 1px solid #ccc; margin: 8px 0;">
-            ${unidade.tipo === "Sede Administrativa" 
-                ? '📍 <strong>Ponto de Origem / Referência</strong>' 
+            ${unidade.tipo === "Sede Administrativa"
+                ? '📍 <strong>Ponto de Origem / Referência</strong>'
                 : `📏 <strong>Distância da Sede:</strong> ${distanciaKm} km`
             }
         </div>
     `;
 
-    // Criação do marcador
     L.marker(coordPonto, { icon: iconeAplicado })
      .addTo(map)
      .bindPopup(conteudoPopup);
 });
 
 // =====================================================================
-// PARTE 3: CARREGAMENTO DO MAPA DE MUNICÍPIOS
+// PARTE 3b: CARREGAMENTO DO MAPA DE MUNICÍPIOS
 // =====================================================================
 const municipiosNaoAtendidos = [
     "Arauá", "Boquim", "Cristinápolis", "Estância", "Indiaroba", "Itabaianinha", "Pedrinhas", "Riachão do Dantas", "Santa Luzia do Itanhy", "Tobias Barreto", "Tomar do Geru", "Umbaúba"
@@ -313,7 +271,7 @@ fetch('https://raw.githubusercontent.com/tbrugz/geodata-br/master/geojson/geojs-
     }).catch(e => console.error(e));
 
 // =====================================================================
-// PARTE 4: DADOS (AGORA COM IDs PARA CADA LOCAL)
+// PARTE 4b: DADOS (AGORA COM IDs PARA CADA LOCAL)
 // =====================================================================
 const dadosAgencias = [
     { "id": "ag-amparo", "agencia": "Energisa - Amparo do São Francisco", "endereco": "R. General Teixeira, Lote 9, Amparo", "latitude": -10.2185, "longitude": -36.8335 },
@@ -350,7 +308,7 @@ const todasBasesFisicas = [...basesFisicasEnergisa, ...basesSubestacoes];
 
 const dadosTerceirizados = [
     {
-        id: 'lugar-eng', nome: 'Lugar Engenharia', telefone: '5579999999999', 
+        id: 'lugar-eng', nome: 'Lugar Engenharia', telefone: '5579999999999',
         servicos: [
             { id: 'sv-1', chamado: '847291', statusAtual: 'andamento', local: 'Energisa - Aracaju', desc: 'Reforma da fachada e pintura', historico: [{ status: 'andamento', data: '2026-08-25' }] },
             { id: 'sv-2', chamado: '901233', statusAtual: 'realizado', local: 'Subestação - Atalaia (ATL)', desc: 'Construção do muro de contenção', historico: [{ status: 'andamento', data: '2026-08-01' }, { status: 'realizado', data: '2026-08-10' }] }
@@ -363,73 +321,126 @@ const dadosTerceirizados = [
         ]
     },
     {
-        id: 'silva-frio', nome: 'Silva Frio', telefone: '5579777777777',
+        id: 'silva-frio', nome: 'ServMix', telefone: '5579777777777',
         servicos: [
             { id: 'sv-4', chamado: '1234567', statusAtual: 'realizado', local: 'Subestação - Itabaiana (ITB)', desc: 'Instalação de climatizadores', historico: [{ status: 'realizado', data: '2026-08-15' }] },
             { id: 'sv-5', chamado: '1234566', statusAtual: 'andamento', local: 'Energisa - São Cristóvão', desc: 'Troca de Ar-Condicionado', historico: [{ status: 'andamento', data: '2026-08-24' }] }
         ]
+    },
+    {
+        id: 'silva-frio', nome: 'Evanio', telefone: '5579777777777',
+        servicos: []
     }
 ];
 
 // =====================================================================
 // PARTE 5: RENDERIZAÇÃO DOS PINS E FORMULÁRIO DO POPUP
 // =====================================================================
+
+window.marcadoresGlobais = {};
+
+// Verifica se a base ainda tem algum serviço "em andamento" e ativa/desativa
+// a animação de piscar no ícone do mapa.
+window.verificarEAtualizarMarcador = function(baseId, nomeBase) {
+    const marcador = window.marcadoresGlobais[baseId];
+    if (!marcador || !marcador._icon) return;
+
+    const aindaTemAndamento = dadosTerceirizados.some(empresa =>
+        empresa.servicos && empresa.servicos.some(servico =>
+            servico.local === nomeBase && servico.statusAtual === 'andamento'
+        )
+    );
+
+    marcador._icon.classList.toggle('icone-em-andamento', aindaTemAndamento);
+};
+
 const camadas = {
     "Subestações": L.layerGroup().addTo(map), "Bases Operacionais": L.layerGroup().addTo(map),
     "Sedes Administrativas": L.layerGroup().addTo(map), "Agências de Atendimento": L.layerGroup().addTo(map),
 };
 const mapTypeToLayer = { "Subestação": camadas["Subestações"], "Base Operacional": camadas["Bases Operacionais"], "Sede Administrative": camadas["Sedes Administrativas"], "Agência de Atendimento": camadas["Agências de Atendimento"], "Almoxarifado": camadas["Almoxarifados"] };
 
-function calcularDistancia(lat1, lon1, lat2, lon2) {
-    const R = 6371, dLat = (lat2 - lat1) * (Math.PI / 180), dLon = (lon2 - lon1) * (Math.PI / 180);
+function calcularDistanciaHaversine(lat1, lon1, lat2, lon2) {
+    const R = 6371;
+    const dLat = (lat2 - lat1) * (Math.PI / 180);
+    const dLon = (lon2 - lon1) * (Math.PI / 180);
     const a = Math.sin(dLat / 2) ** 2 + Math.cos(lat1 * (Math.PI / 180)) * Math.cos(lat2 * (Math.PI / 180)) * Math.sin(dLon / 2) ** 2;
-    return (R * (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)))).toFixed(1);
+    return R * (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)));
 }
 
-window.marcadoresGlobais = {};
+// Calcula a distância real percorrida por estrada (OSRM), que reflete a
+// "vida real" muito melhor do que a linha reta. Se a API de rotas falhar
+// (sem internet, fora do ar, etc.), cai de volta na linha reta (Haversine).
+async function calcularDistanciaRodoviaria(origem, destino) {
+    const url = `https://router.project-osrm.org/route/v1/driving/${origem.lng},${origem.lat};${destino.lng},${destino.lat}?overview=false`;
+    try {
+        const resposta = await fetch(url);
+        const dados = await resposta.json();
+        if (dados.code === 'Ok' && dados.routes && dados.routes[0]) {
+            return dados.routes[0].distance / 1000; // metros -> km
+        }
+    } catch (erro) {
+        console.warn(`Não foi possível calcular a rota real até ${destino.lat},${destino.lng}. Usando distância em linha reta como alternativa.`, erro);
+    }
+    return calcularDistanciaHaversine(origem.lat, origem.lng, destino.lat, destino.lng);
+}
 
-todasBasesFisicas.forEach(base => {
-    const iconeCorreto = mapIconTypes[base.tipo] || new L.Icon.Default();
-    const distanciaKm = calcularDistancia(-10.9261, -37.0678, base.lat, base.lng);
-    const marker = L.marker([base.lat, base.lng], { icon: iconeCorreto });
-    
-    // Agora o marcador global é salvo pela ID da base, mais seguro!
-    window.marcadoresGlobais[base.id] = marker;
-    
-    let optionsEmpresas = dadosTerceirizados.map(emp => `<option value="${emp.id}">${emp.nome}</option>`).join('');
-    
-    // Agora usamos o base.id em vez do safeId nos campos HTML
-    const popupContent = `
-        <div class="modern-popup">
-            <span class="tag">${base.tipo}</span>
-            <h3>${base.nome}</h3>
-            <div class="info-row"><strong>Distância:</strong> <span>${distanciaKm} km da sede</span></div>
-            <div class="info-row"><strong>Endereço:</strong> <span>${base.endereco}</span></div>
-            <hr>
-            <label>Vincular Serviço / Ocorrência</label>
-            <select id="empresa-${base.id}" class="popup-select">
-                <option value="" disabled selected>Selecione a Empresa Parceira</option>
-                ${optionsEmpresas}
-            </select>
-            <select id="status-${base.id}" class="popup-select">
-                <option value="andamento">Em Andamento</option>
-                <option value="realizado">Realizado</option>
-            </select>
-            
-            <input type="text" id="chamado-${base.id}" class="popup-select" style="margin-bottom: 10px;" placeholder="Nº do Chamado (Obrigatório)">
-            
-            <input type="date" id="data-${base.id}" class="popup-select" style="margin-bottom: 10px; cursor: pointer;">
-            <textarea id="desc-${base.id}" placeholder="Descrição do serviço (Ex: Pintura da fachada...)"></textarea>
-            
-            <button onclick="registrarServico('${base.id}', '${base.nome}')">Registrar Serviço</button>
-        </div>
-    `;
-    
-    marker.bindPopup(popupContent);
-    marker.addTo(mapTypeToLayer[base.tipo] || camadas["Agências de Atendimento"]); 
-});
+async function criarMarcadoresComDistanciaReal() {
+    // Busca todas as distâncias por estrada em paralelo antes de desenhar os pins,
+    // para não deixar o mapa "aparecendo aos poucos" nem travar em requisições sequenciais.
+    const distancias = await Promise.all(
+        todasBasesFisicas.map(base =>
+            calcularDistanciaRodoviaria(COORD_SEDE, { lat: base.lat, lng: base.lng })
+        )
+    );
 
-L.control.layers(null, camadas, { position: 'topright', collapsed: false }).addTo(map);
+    todasBasesFisicas.forEach((base, indice) => {
+        const iconeCorreto = mapIconTypes[base.tipo] || new L.Icon.Default();
+        const distanciaKm = distancias[indice].toFixed(1);
+        const marker = L.marker([base.lat, base.lng], { icon: iconeCorreto });
+
+        // Toda vez que o marcador é adicionado ao mapa (inclusive ao trocar de camada/zoom),
+        // reavalia se ele deve ou não piscar.
+        marker.on('add', () => window.verificarEAtualizarMarcador(base.id, base.nome));
+
+        window.marcadoresGlobais[base.id] = marker;
+
+        let optionsEmpresas = dadosTerceirizados.map(emp => `<option value="${emp.id}">${emp.nome}</option>`).join('');
+
+        const popupContent = `
+            <div class="modern-popup">
+                <span class="tag">${base.tipo}</span>
+                <h3>${base.nome}</h3>
+                <div class="info-row"><strong>Distância:</strong> <span>${distanciaKm} km da sede (por rodovia)</span></div>
+                <div class="info-row"><strong>Endereço:</strong> <span>${base.endereco}</span></div>
+                <hr>
+                <label>Vincular Serviço / Ocorrência</label>
+                <select id="empresa-${base.id}" class="popup-select">
+                    <option value="" disabled selected>Selecione a Empresa Parceira</option>
+                    ${optionsEmpresas}
+                </select>
+                <select id="status-${base.id}" class="popup-select">
+                    <option value="andamento">Em Andamento</option>
+                    <option value="realizado">Realizado</option>
+                </select>
+                
+                <input type="text" id="chamado-${base.id}" class="popup-select" style="margin-bottom: 10px;" placeholder="Nº do Chamado (Obrigatório)">
+                
+                <input type="date" id="data-${base.id}" class="popup-select" style="margin-bottom: 10px; cursor: pointer;">
+                <textarea id="desc-${base.id}" placeholder="Descrição do serviço (Ex: Pintura da fachada...)"></textarea>
+                
+                <button onclick="registrarServico('${base.id}', '${base.nome}')">Registrar Serviço</button>
+            </div>
+        `;
+
+        marker.bindPopup(popupContent);
+        marker.addTo(mapTypeToLayer[base.tipo] || camadas["Agências de Atendimento"]);
+    });
+
+    L.control.layers(null, camadas, { position: 'topright', collapsed: false }).addTo(map);
+}
+
+criarMarcadoresComDistanciaReal();
 
 // =====================================================================
 // PARTE 6: LÓGICA DE REGISTRO E ABA LATERAL
@@ -437,7 +448,7 @@ L.control.layers(null, camadas, { position: 'topright', collapsed: false }).addT
 function formatarDataBR(dataString) {
     if (!dataString) return '--/--/----';
     const partes = dataString.split('-');
-    if(partes.length !== 3) return dataString; 
+    if(partes.length !== 3) return dataString;
     return `${partes[2]}/${partes[1]}/${partes[0]}`;
 }
 
@@ -447,33 +458,35 @@ window.registrarServico = function(baseId, nomeBase) {
     const numeroChamado = document.getElementById(`chamado-${baseId}`).value;
     const dataServico = document.getElementById(`data-${baseId}`).value;
     const descricao = document.getElementById(`desc-${baseId}`).value;
-    
+
     if (!empresaId) return alert("Por favor, selecione uma empresa parceira.");
     if (!numeroChamado.trim()) return alert("Por favor, informe o número do chamado.");
     if (!dataServico) return alert("Por favor, selecione a data do serviço.");
     if (!descricao.trim()) return alert("Por favor, digite a descrição do serviço.");
-    
+
     const empresa = dadosTerceirizados.find(e => e.id === empresaId);
+
     if(empresa) {
-        empresa.servicos.push({ 
-            id: 'sv-' + Date.now(), 
+        empresa.servicos.push({
+            id: 'sv-' + Date.now(),
             chamado: numeroChamado,
-            statusAtual: statusServico, 
-            localId: baseId, // Salvando a ID do local para referência futura
-            local: nomeBase, 
+            statusAtual: statusServico,
+            localId: baseId,
+            local: nomeBase,
             desc: descricao,
             historico: [ { status: statusServico, data: dataServico } ]
         });
-        
-        // Limpando campos
+
+        window.verificarEAtualizarMarcador(baseId, nomeBase);
+
         document.getElementById(`empresa-${baseId}`).value = "";
         document.getElementById(`status-${baseId}`).value = "andamento";
         document.getElementById(`chamado-${baseId}`).value = "";
         document.getElementById(`data-${baseId}`).value = "";
         document.getElementById(`desc-${baseId}`).value = "";
-        
+
         alert(`Serviço (Chamado: ${numeroChamado}) registrado com sucesso para a empresa ${empresa.nome}!`);
-        
+
         window.renderizarTerceirizados();
         document.getElementById('lista-terceirizados').classList.add('mostrar');
         document.getElementById('btn-terceirizados').classList.add('ativo');
@@ -484,29 +497,38 @@ window.registrarServico = function(baseId, nomeBase) {
 window.mudarStatusServico = function(empresaId, servicoId) {
     const novoStatus = document.getElementById(`select-status-${servicoId}`).value;
     const novaData = document.getElementById(`input-data-${servicoId}`).value;
-    
+
     if (!novaData) return alert("Por favor, selecione a data dessa etapa.");
-    
+
     const empresa = dadosTerceirizados.find(e => e.id === empresaId);
     if(empresa) {
         const servico = empresa.servicos.find(s => s.id === servicoId);
         if(servico) {
             servico.statusAtual = novoStatus;
             servico.historico.push({ status: novoStatus, data: novaData });
+
+            // Atualiza o pin no mapa para parar (ou não) de piscar.
+            // Alguns serviços antigos (mock) não têm "localId" salvo, então
+            // buscamos o ID da base pelo nome do local como alternativa.
+            let baseIdParaAtualizar = servico.localId;
+            if (!baseIdParaAtualizar) {
+                const baseEncontrada = todasBasesFisicas.find(b => b.nome === servico.local);
+                if (baseEncontrada) baseIdParaAtualizar = baseEncontrada.id;
+            }
+            window.verificarEAtualizarMarcador(baseIdParaAtualizar, servico.local);
+
             alert("Status atualizado e registrado no histórico!");
             window.renderizarTerceirizados();
         }
     }
 };
 
-// Agora a função de foco usa o ID do local, garantindo que não quebre por causa de acentos/espaços!
 window.focarNoMapa = function(localId) {
     const marker = window.marcadoresGlobais[localId];
     if (marker) {
         map.flyTo(marker.getLatLng(), 16, { duration: 1.5 });
-        setTimeout(() => marker.openPopup(), 1500); 
+        setTimeout(() => marker.openPopup(), 1500);
     } else {
-        // Fallback caso seja um dado antigo (mock) que não tenha localId salvo
         console.warn("Local não encontrado pelo ID. Verifique o ID do serviço.");
     }
 };
@@ -533,14 +555,14 @@ window.renderizarTerceirizados = function() {
     dadosTerceirizados.forEach(empresa => {
         let htmlServicos = empresa.servicos.map(s => {
             const labelStatusAtual = s.statusAtual === 'andamento' ? 'Em Andamento' : 'Realizado';
-            
+
             const htmlHistorico = s.historico.map(h => {
                 const badgeTxt = h.status === 'andamento' ? 'Iniciado:' : 'Concluído:';
                 return `<div style="font-size: 0.75em; color: #666; margin-top: 3px;">
                             <strong>${badgeTxt}</strong> ${formatarDataBR(h.data)}
                         </div>`;
             }).join('');
-            
+
             let htmlMudarStatus = '';
             if (s.statusAtual === 'andamento') {
                 htmlMudarStatus = `
@@ -557,7 +579,6 @@ window.renderizarTerceirizados = function() {
                 `;
             }
 
-            // Agora passamos uma variável para tentar focar no mapa usando localId, ou o nome (fallback para os mocks antigos se precisar)
             const paramFocoMapa = s.localId ? `'${s.localId}'` : `Object.keys(window.marcadoresGlobais).find(k => window.marcadoresGlobais[k].getPopup().getContent().includes('${s.local}'))`;
 
             return `
@@ -571,7 +592,7 @@ window.renderizarTerceirizados = function() {
                 </div>
             `;
         }).join('');
-        
+
         if(empresa.servicos.length === 0) htmlServicos = `<div class="servico-desc" style="text-align:center;">Nenhum serviço registrado.</div>`;
 
         htmlCards += `
@@ -592,13 +613,13 @@ window.renderizarTerceirizados = function() {
 document.addEventListener('DOMContentLoaded', () => {
     const btn = document.getElementById('btn-terceirizados');
     const lista = document.getElementById('lista-terceirizados');
-    
+
     if (btn && lista) {
         btn.addEventListener('click', (e) => {
-            e.preventDefault(); 
+            e.preventDefault();
             lista.classList.toggle('mostrar');
             btn.classList.toggle('ativo');
         });
-        window.renderizarTerceirizados(); 
+        window.renderizarTerceirizados();
     }
 });

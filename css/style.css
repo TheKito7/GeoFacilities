@@ -31,6 +31,16 @@ body {
     height: 100%;
 }
 
+@keyframes piscar-marcador {
+    0% { opacity: 1; }
+    50% { opacity: 0.3; }
+    100% { opacity: 1; }
+}
+
+.icone-em-andamento {
+    animation: piscar-marcador 1.5s infinite ease-in-out;
+}
+
 /* ================== SIDEBAR ================== */
 .sidebar {
     width: 340px;

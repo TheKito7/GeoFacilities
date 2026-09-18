@@ -495,3 +495,23 @@ body {
     background-color: var(--surface-color);
     box-shadow: 0 0 0 4px rgba(237, 117, 35, 0.15);
 }
+
+/* Estilo dos Filtros no Menu Lateral */
+.filtro-select {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    color: #004b6b;
+    background-color: #ffffff;
+    cursor: pointer;
+    outline: none;
+    transition: border-color 0.3s ease;
+}
+
+.filtro-select:hover, .filtro-select:focus {
+    border-color: #ed7523;
+}

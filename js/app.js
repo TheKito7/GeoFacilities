@@ -1,4 +1,53 @@
 // =====================================================================
+// INICIALIZAÇÃO DO FIREBASE
+// =====================================================================
+// =====================================================================
+// INICIALIZAÇÃO DO FIREBASE (Apenas Texto)
+// =====================================================================
+// MANTENHA A SUA CONFIGURAÇÃO AQUI (Aquelas chaves que você copiou da tela)
+const firebaseConfig = {
+    apiKey: "AIzaSyAHocNZt0ihtkTplDjLYWMpOFoOj80ycBs",
+    authDomain: "geo-facilities.firebaseapp.com",
+    projectId: "geo-facilities",
+    storageBucket: "geo-facilities.firebasestorage.app",
+    messagingSenderId: "379130334399",
+    appId: "1:379130334399:web:3ca7ef35480b7ddb6c8a0a"
+  };
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore(); 
+// APAGUE a linha: const storage = firebase.storage(); (não precisamos mais dela)
+
+let dadosTerceirizados = [];
+
+window.carregarDadosDaNuvem = async function() {
+    try {
+        const doc = await db.collection("facilities").doc("chamados").get();
+        if (doc.exists) {
+            dadosTerceirizados = doc.data().empresas;
+        } else {
+            dadosTerceirizados = [
+                { id: 'lugar-eng', nome: 'Lugar Engenharia', telefone: '5579999999999', servicos: [] },
+                { id: 'pr-const', nome: 'PR Construção', telefone: '5579888888888', servicos: [] }
+            ];
+        }
+        window.renderizarTerceirizados();
+    } catch (error) {
+        console.error("Erro ao carregar dados do Firebase:", error);
+    }
+};
+
+carregarDadosDaNuvem();
+
+window.salvarDadosGlobais = function() {
+    db.collection("facilities").doc("chamados").set({
+        empresas: dadosTerceirizados
+    }).catch(error => console.error("Erro ao salvar no banco:", error));
+};
+
+
+
+
+// =====================================================================
 // GEO-FACILITIES ENERGISA SERGIPE - CÓDIGO COMPLETO (COM IDs E CHAMADO)
 // =====================================================================
 // PARTE 1: INICIALIZAÇÃO DO MAPA E REFERÊNCIA GEOGRÁFICA
@@ -306,33 +355,6 @@ const basesFisicasEnergisa = dadosAgencias.map(item => ({ id: item.id, nome: ite
 const basesSubestacoes = subestacoesEnergisa.map(item => ({ id: item.id, nome: item.agencia, endereco: item.endereco, lat: item.latitude, lng: item.longitude, tipo: "Subestação" }));
 const todasBasesFisicas = [...basesFisicasEnergisa, ...basesSubestacoes];
 
-const dadosTerceirizados = [
-    {
-        id: 'lugar-eng', nome: 'Lugar Engenharia', telefone: '5579999999999',
-        servicos: [
-            { id: 'sv-1', chamado: '847291', statusAtual: 'andamento', local: 'Energisa - Aracaju', desc: 'Reforma da fachada e pintura', historico: [{ status: 'andamento', data: '2026-08-25' }] },
-            { id: 'sv-2', chamado: '901233', statusAtual: 'realizado', local: 'Subestação - Atalaia (ATL)', desc: 'Construção do muro de contenção', historico: [{ status: 'andamento', data: '2026-08-01' }, { status: 'realizado', data: '2026-08-10' }] }
-        ]
-    },
-    {
-        id: 'pr-const', nome: 'PR Construção', telefone: '5579888888888',
-        servicos: [
-            { id: 'sv-3', chamado: '7654321', statusAtual: 'andamento', local: 'Energisa - Lagarto', desc: 'Manutenção civil nas salas', historico: [{ status: 'andamento', data: '2026-08-22' }] }
-        ]
-    },
-    {
-        id: 'silva-frio', nome: 'ServMix', telefone: '5579777777777',
-        servicos: [
-            { id: 'sv-4', chamado: '1234567', statusAtual: 'realizado', local: 'Subestação - Itabaiana (ITB)', desc: 'Instalação de climatizadores', historico: [{ status: 'realizado', data: '2026-08-15' }] },
-            { id: 'sv-5', chamado: '1234566', statusAtual: 'andamento', local: 'Energisa - São Cristóvão', desc: 'Troca de Ar-Condicionado', historico: [{ status: 'andamento', data: '2026-08-24' }] }
-        ]
-    },
-    {
-        id: 'silva-frio', nome: 'Evanio', telefone: '5579777777777',
-        servicos: []
-    }
-];
-
 // =====================================================================
 // PARTE 5: RENDERIZAÇÃO DOS PINS E FORMULÁRIO DO POPUP
 // =====================================================================
@@ -345,13 +367,32 @@ window.verificarEAtualizarMarcador = function(baseId, nomeBase) {
     const marcador = window.marcadoresGlobais[baseId];
     if (!marcador || !marcador._icon) return;
 
-    const aindaTemAndamento = dadosTerceirizados.some(empresa =>
-        empresa.servicos && empresa.servicos.some(servico =>
-            servico.local === nomeBase && servico.statusAtual === 'andamento'
-        )
-    );
+    let temAndamento = false;
+    let temAguardando = false;
 
-    marcador._icon.classList.toggle('icone-em-andamento', aindaTemAndamento);
+    dadosTerceirizados.forEach(empresa => {
+        if (empresa.servicos) {
+            empresa.servicos.forEach(servico => {
+                if (servico.local === nomeBase) {
+                    if (servico.statusAtual === 'andamento') {
+                        temAndamento = true;
+                    } else if (servico.statusAtual === 'aguardando') {
+                        temAguardando = true;
+                    }
+                }
+            });
+        }
+    });
+
+    // Reseta as classes de animação do ícone (mantendo a limpeza caso a classe ainda exista)
+    marcador._icon.classList.remove('icone-em-andamento', 'icone-atrasado', 'icone-aguardando');
+
+    // Aplica a classe com base na prioridade (Andamento se sobrepõe a Aguardando)
+    if (temAndamento) {
+        marcador._icon.classList.add('icone-em-andamento');
+    } else if (temAguardando) {
+        marcador._icon.classList.add('icone-aguardando');
+    }
 };
 
 const camadas = {
@@ -415,22 +456,46 @@ async function criarMarcadoresComDistanciaReal() {
                 <div class="info-row"><strong>Endereço:</strong> <span>${base.endereco}</span></div>
                 <hr>
                 <label>Vincular Serviço / Ocorrência</label>
+                
                 <select id="empresa-${base.id}" class="popup-select">
                     <option value="" disabled selected>Selecione a Empresa Parceira</option>
                     ${optionsEmpresas}
                 </select>
+
+                <!-- NOVO: TIPO DE SERVIÇO -->
+                <select id="tipo-servico-${base.id}" class="popup-select" style="margin-bottom: 10px;" onchange="atualizarChecklist('${base.id}')">
+                    <option value="" disabled selected>Tipo de Serviço...</option>
+                    <option value="civil">Reforma Civil / Predial</option>
+                    <option value="climatizacao">Ar-Condicionado / PMOC</option>
+                    <option value="eletrica">Manutenção Elétrica / Subestação</option>
+                </select>
+
+                <!-- NOVO: CAIXA DO CHECKLIST (Oculta por padrão) -->
+                <div id="checklist-container-${base.id}" style="display:none; margin-bottom: 10px; font-size: 0.85em; background: #f1f5f9; padding: 10px; border-radius: 6px; border: 1px solid #e2e8f0; color: #334155;"></div>
+                
                 <select id="status-${base.id}" class="popup-select">
                     <option value="andamento">Em Andamento</option>
+                    <option value="aguardando">Aguardando Peça/Aprovação</option>
                     <option value="realizado">Realizado</option>
+                    <option value="cancelado">Cancelado</option>
                 </select>
                 
                 <input type="text" id="chamado-${base.id}" class="popup-select" style="margin-bottom: 10px;" placeholder="Nº do Chamado (Obrigatório)">
-                
                 <input type="date" id="data-${base.id}" class="popup-select" style="margin-bottom: 10px; cursor: pointer;">
                 <textarea id="desc-${base.id}" placeholder="Descrição do serviço (Ex: Pintura da fachada...)"></textarea>
-                
-                <button onclick="registrarServico('${base.id}', '${base.nome}')">Registrar Serviço</button>
-            </div>
+                <label style="font-size: 0.8em; color: #555; display: block; margin-top: 5px; margin-bottom: 2px;">
+            <b>Anexar Evidência (Foto):</b>
+        </label>
+        <input type="file" id="evidencia-${base.id}" accept="image/*" style="width: 100%; font-size: 0.8em; margin-bottom: 12px;">
+        <!-- ========================================================= -->
+
+        <!-- Botão de Salvar -->
+        <button onclick="registrarServico('${base.id}', '${base.nome}')" 
+                class="btn-link" 
+                style="background-color: #f26522; color: white; border: none; width: 100%; padding: 10px; border-radius: 4px; cursor: pointer; font-weight: bold;">
+            Registrar Serviço
+        </button>
+    </div>
         `;
 
         marker.bindPopup(popupContent);
@@ -452,17 +517,124 @@ function formatarDataBR(dataString) {
     return `${partes[2]}/${partes[1]}/${partes[0]}`;
 }
 
-window.registrarServico = function(baseId, nomeBase) {
+window.atualizarChecklist = function(baseId) {
+    const tipo = document.getElementById(`tipo-servico-${baseId}`).value;
+    const container = document.getElementById(`checklist-container-${baseId}`);
+    let html = '';
+
+    if (tipo === 'civil') {
+        html = `
+            <strong style="display:block; margin-bottom:8px; color:#004b6b;">Checklist de Segurança (Obrigatório):</strong>
+            <label style="display:flex; gap:8px; margin-bottom:4px;"><input type="checkbox" class="chk-${baseId}"> Isolamento da área realizado</label>
+            <label style="display:flex; gap:8px; margin-bottom:4px;"><input type="checkbox" class="chk-${baseId}"> EPIs completos utilizados</label>
+            <label style="display:flex; gap:8px; margin-bottom:4px;"><input type="checkbox" class="chk-${baseId}"> Entulho recolhido/descartado corretamente</label>
+        `;
+    } else if (tipo === 'climatizacao') {
+        html = `
+            <strong style="display:block; margin-bottom:8px; color:#004b6b;">Checklist Operacional (Obrigatório):</strong>
+            <label style="display:flex; gap:8px; margin-bottom:4px;"><input type="checkbox" class="chk-${baseId}"> Limpeza de filtros realizada</label>
+            <label style="display:flex; gap:8px; margin-bottom:4px;"><input type="checkbox" class="chk-${baseId}"> Verificação de gás refrigerante (Pressão OK)</label>
+            <label style="display:flex; gap:8px; margin-bottom:4px;"><input type="checkbox" class="chk-${baseId}"> Teste de dreno desobstruído concluído</label>
+        `;
+    } else if (tipo === 'eletrica') {
+        html = `
+            <strong style="display:block; margin-bottom:8px; color:#004b6b;">Regras de Ouro (Obrigatório):</strong>
+            <label style="display:flex; gap:8px; margin-bottom:4px;"><input type="checkbox" class="chk-${baseId}"> Desenergização / Seccionamento confirmado</label>
+            <label style="display:flex; gap:8px; margin-bottom:4px;"><input type="checkbox" class="chk-${baseId}"> Travamento e bloqueio aplicados (LOTO)</label>
+            <label style="display:flex; gap:8px; margin-bottom:4px;"><input type="checkbox" class="chk-${baseId}"> Teste de ausência de tensão realizado</label>
+        `;
+    }
+
+    if (html) {
+        container.innerHTML = html;
+        container.style.display = 'block';
+    } else {
+        container.style.display = 'none';
+        container.innerHTML = '';
+    }
+};
+// =====================================================================
+// UPLOAD NO CLOUDINARY E SALVAR NO FIREBASE
+// =====================================================================
+
+// Função separada para enviar a foto para o Cloudinary
+// Função separada para enviar a foto para o ImgBB
+async function enviarFotoImgBB(file) {
+    const API_KEY = "3f159529a71f1e4c44c57132ad219a99"; // Cole a chave gerada no site do ImgBB
+    const url = `https://api.imgbb.com/1/upload?key=${API_KEY}`;
+    
+    const formData = new FormData();
+    formData.append("image", file); // O ImgBB exige que o campo se chame "image"
+
+    const response = await fetch(url, {
+        method: "POST",
+        body: formData
+    });
+
+    const data = await response.json();
+    if (data.success) {
+        return data.data.url; // Retorna o link público e seguro da foto pronta
+    } else {
+        throw new Error("Erro ao fazer upload da imagem no ImgBB");
+    }
+}
+
+window.registrarServico = async function(baseId, nomeBase) {
     const empresaId = document.getElementById(`empresa-${baseId}`).value;
     const statusServico = document.getElementById(`status-${baseId}`).value;
     const numeroChamado = document.getElementById(`chamado-${baseId}`).value;
     const dataServico = document.getElementById(`data-${baseId}`).value;
     const descricao = document.getElementById(`desc-${baseId}`).value;
+    const inputArquivo = document.getElementById(`evidencia-${baseId}`);
+    const arquivo = (inputArquivo && inputArquivo.files) ? inputArquivo.files[0] : null;
 
-    if (!empresaId) return alert("Por favor, selecione uma empresa parceira.");
-    if (!numeroChamado.trim()) return alert("Por favor, informe o número do chamado.");
-    if (!dataServico) return alert("Por favor, selecione a data do serviço.");
-    if (!descricao.trim()) return alert("Por favor, digite a descrição do serviço.");
+    if (!empresaId || !numeroChamado.trim() || !dataServico || !descricao.trim()) {
+        return alert("Por favor, preencha todos os campos obrigatórios.");
+    }
+
+    const btn = event.target;
+    const textoOriginal = btn.innerText;
+    btn.innerText = "Enviando foto e salvando...";
+    btn.disabled = true;
+
+    let urlFoto = null;
+
+    // Se houver arquivo, envia para o Cloudinary primeiro
+    if (arquivo) {
+        try {
+            urlFoto = await enviarFotoImgBB(arquivo);
+        } catch (e) {
+            console.error(e);
+            alert("Erro ao enviar a foto. Verifique a chave de API.");
+            btn.innerText = textoOriginal;
+            btn.disabled = false;
+            return;
+        }
+    }
+
+    // Salva tudo no Firebase (Texto + Link do Cloudinary)
+    const empresa = dadosTerceirizados.find(e => e.id === empresaId);
+    if(empresa) {
+        empresa.servicos.push({
+            id: 'sv-' + Date.now(),
+            chamado: numeroChamado,
+            statusAtual: statusServico,
+            localId: baseId,
+            local: nomeBase,
+            desc: descricao,
+            foto: urlFoto, // Salva o link do Cloudinary!
+            historico: [ { status: statusServico, data: dataServico } ]
+        });
+
+        window.salvarDadosGlobais(); // Manda o JSON para o Firestore
+        window.verificarEAtualizarMarcador(baseId, nomeBase);
+        alert(`Serviço #${numeroChamado} registrado com sucesso!`);
+        window.renderizarTerceirizados();
+    }
+    
+    btn.innerText = textoOriginal;
+    btn.disabled = false;
+};
 
     const empresa = dadosTerceirizados.find(e => e.id === empresaId);
 
@@ -492,7 +664,31 @@ window.registrarServico = function(baseId, nomeBase) {
         document.getElementById('btn-terceirizados').classList.add('ativo');
         setTimeout(() => window.toggleTerceirizado(empresaId), 100);
     }
-};
+    window.deletarServico = function(empresaId, servicoId) {
+        if (!confirm("Tem certeza que deseja excluir este chamado? Esta ação não pode ser desfeita.")) {
+            return;
+        }
+    
+        const empresa = dadosTerceirizados.find(e => e.id === empresaId);
+        if (empresa) {
+            // Encontra o serviço antes de remover para saber qual marcador atualizar
+            const servico = empresa.servicos.find(s => s.id === servicoId);
+            const baseId = servico ? servico.localId : null;
+            const nomeBase = servico ? servico.local : null;
+    
+            // Filtra removendo o serviço selecionado
+            empresa.servicos = empresa.servicos.filter(s => s.id !== servicoId);
+    
+            // Atualiza o banco e a interface
+            window.salvarDadosGlobais();
+            if (baseId && nomeBase) {
+                window.verificarEAtualizarMarcador(baseId, nomeBase);
+            }
+    
+            alert("Chamado excluído com sucesso!");
+            window.renderizarTerceirizados();
+        }
+    };
 
 window.mudarStatusServico = function(empresaId, servicoId) {
     const novoStatus = document.getElementById(`select-status-${servicoId}`).value;
@@ -548,6 +744,7 @@ window.toggleTerceirizado = function(id) {
 };
 
 window.renderizarTerceirizados = function() {
+    
     const listaTerceirizados = document.getElementById('lista-terceirizados');
     if(!listaTerceirizados) return;
 
@@ -562,6 +759,16 @@ window.renderizarTerceirizados = function() {
                             <strong>${badgeTxt}</strong> ${formatarDataBR(h.data)}
                         </div>`;
             }).join('');
+
+            // ---  FOTO NA LATERAL ---
+            const htmlFoto = s.foto ? `
+                <div style="margin: 8px 0; text-align: center;">
+                    <a href="${s.foto}" target="_blank" title="Clique para abrir imagem completa">
+                        <img src="${s.foto}" alt="Evidência do chamado" 
+                             style="width: 100%; max-height: 120px; border-radius: 6px; border: 1px solid #ccc; object-fit: cover;">
+                    </a>
+                </div>
+            ` : '';
 
             let htmlMudarStatus = '';
             if (s.statusAtual === 'andamento') {
@@ -587,6 +794,10 @@ window.renderizarTerceirizados = function() {
                     <div style="font-size: 0.75em; font-weight: bold; color: #004b6b; margin-top: 4px;">Chamado: #${s.chamado}</div>
                     <div style="margin-bottom: 8px;">${htmlHistorico}</div>
                     <div class="servico-desc">${s.desc}</div>
+                    
+                    <!-- INSERÇÃO DA FOTO AQUI -->
+                    ${htmlFoto}
+
                     <span class="badge-status ${s.statusAtual}">${labelStatusAtual}</span>
                     ${htmlMudarStatus}
                 </div>
@@ -623,3 +834,58 @@ document.addEventListener('DOMContentLoaded', () => {
         window.renderizarTerceirizados();
     }
 });
+
+// =====================================================================
+// LÓGICA DE FILTROS NO MAPA
+// =====================================================================
+window.aplicarFiltros = function() {
+    const filtroStatus = document.getElementById('filtro-status').value;
+    const filtroTipo = document.getElementById('filtro-tipo').value;
+
+    todasBasesFisicas.forEach(base => {
+        const marker = window.marcadoresGlobais[base.id];
+        if (!marker) return;
+
+        // 1. Verifica filtro de Tipo
+        let mostrarPorTipo = (filtroTipo === 'todos' || base.tipo === filtroTipo);
+        
+        // 2. Verifica filtro de Status
+        let mostrarPorStatus = true;
+        if (filtroStatus !== 'todos') {
+            let statusBase = 'nenhum';
+            let temAndamento = false, temAguardando = false;
+
+            dadosTerceirizados.forEach(empresa => {
+                if (empresa.servicos) {
+                    empresa.servicos.forEach(servico => {
+                        if (servico.local === base.nome) {
+                            if (servico.statusAtual === 'andamento') {
+                                temAndamento = true;
+                            } else if (servico.statusAtual === 'aguardando') {
+                                temAguardando = true;
+                            }
+                        }
+                    });
+                }
+            });
+
+            if (temAndamento) statusBase = 'andamento';
+            else if (temAguardando) statusBase = 'aguardando';
+
+            mostrarPorStatus = (filtroStatus === statusBase);
+        }
+
+        // 3. Aplica o filtro
+        const camadaCorreta = mapTypeToLayer[base.tipo] || camadas["Agências de Atendimento"];
+
+        if (mostrarPorTipo && mostrarPorStatus) {
+            if (!camadaCorreta.hasLayer(marker)) {
+                camadaCorreta.addLayer(marker);
+            }
+        } else {
+            if (camadaCorreta.hasLayer(marker)) {
+                camadaCorreta.removeLayer(marker);
+            }
+        }
+    });
+};

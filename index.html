@@ -19,7 +19,6 @@
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-
     <div class="app-container">
         <!-- Barra Lateral de Menu -->
         <aside class="sidebar">
@@ -28,6 +27,22 @@
                 <img src="imagens/Energisa.svg" alt="Energisa Logo" class="logo">
                 <h1>Central Facilities</h1>
             </div>
+
+<!-- NOVA SEÇÃO: FILTROS DO MAPA -->
+<div class="sidebar-section">
+    <h2>Filtros no Mapa</h2>
+    <select id="filtro-status" class="filtro-select" onchange="aplicarFiltros()">
+        <option value="todos">Todos os Status</option>
+        <option value="andamento">🟠 Em Andamento</option>
+        <option value="aguardando">🟡 Aguardando Peça</option>
+    </select>
+    <select id="filtro-tipo" class="filtro-select" onchange="aplicarFiltros()">
+        <option value="todos">Todos os Tipos de Base</option>
+        <option value="Subestação"> Subestações</option>
+        <option value="Base Operacional"> Bases Operacionais</option>
+        <option value="Agência de Atendimento"> Agências</option>
+    </select>
+</div>
 
            <!-- SEÇÃO 1: SEGURANÇA E INCÊNDIO (A sua atual) -->
             <div class="sidebar-section">
@@ -111,8 +126,13 @@
         </main>
     </div>
 
-    <!-- JS do Leaflet -->
+    <!-- JS do Leaflet (já existente) -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <!-- FIREBASE SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+
     <!-- Nosso JS Personalizado -->
     <script src="js/app.js"></script>
 </body>

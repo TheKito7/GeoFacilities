@@ -1,10 +1,12 @@
 // =====================================================================
-// INICIALIZAÇÃO DO FIREBASE
+// GEO FACILITIES 1.1
+// app.js completo
 // =====================================================================
+
 // =====================================================================
-// INICIALIZAÇÃO DO FIREBASE (Apenas Texto)
+// 1. FIREBASE
 // =====================================================================
-// MANTENHA A SUA CONFIGURAÇÃO AQUI (Aquelas chaves que você copiou da tela)
+
 const firebaseConfig = {
     apiKey: "AIzaSyAHocNZt0ihtkTplDjLYWMpOFoOj80ycBs",
     authDomain: "geo-facilities.firebaseapp.com",
@@ -12,90 +14,223 @@ const firebaseConfig = {
     storageBucket: "geo-facilities.firebasestorage.app",
     messagingSenderId: "379130334399",
     appId: "1:379130334399:web:3ca7ef35480b7ddb6c8a0a"
-  };
+};
+
 firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore(); 
-// APAGUE a linha: const storage = firebase.storage(); (não precisamos mais dela)
+
+const db = firebase.firestore();
 
 let dadosTerceirizados = [];
 
-window.carregarDadosDaNuvem = async function() {
+window.salvarDadosGlobais = async function () {
     try {
-        const doc = await db.collection("facilities").doc("chamados").get();
-        if (doc.exists) {
-            dadosTerceirizados = doc.data().empresas;
-        } else {
-            dadosTerceirizados = [
-                { id: 'lugar-eng', nome: 'Lugar Engenharia', telefone: '5579999999999', servicos: [] },
-                { id: 'pr-const', nome: 'PR Construção', telefone: '5579888888888', servicos: [] }
-            ];
-        }
-        window.renderizarTerceirizados();
+        await db.collection("facilities").doc("chamados").set({
+            empresas: dadosTerceirizados
+        });
+
+        return true;
     } catch (error) {
-        console.error("Erro ao carregar dados do Firebase:", error);
+        console.error("Erro ao salvar dados no Firestore:", error);
+        throw error;
     }
 };
 
-carregarDadosDaNuvem();
+window.carregarDadosDaNuvem = async function () {
+    try {
+        const doc = await db.collection("facilities").doc("chamados").get();
 
-window.salvarDadosGlobais = function() {
-    db.collection("facilities").doc("chamados").set({
-        empresas: dadosTerceirizados
-    }).catch(error => console.error("Erro ao salvar no banco:", error));
+        if (doc.exists && Array.isArray(doc.data()?.empresas)) {
+            dadosTerceirizados = doc.data().empresas;
+        } else {
+            dadosTerceirizados = [
+                {
+                    id: "lugar-eng",
+                    nome: "Lugar Engenharia",
+                    telefone: "5579999999999",
+                    servicos: []
+                },
+                {
+                    id: "pr-const",
+                    nome: "PR Construção",
+                    telefone: "5579888888888",
+                    servicos: []
+                }
+            ];
+
+            await window.salvarDadosGlobais();
+        }
+
+        dadosTerceirizados.forEach(empresa => {
+            if (!Array.isArray(empresa.servicos)) {
+                empresa.servicos = [];
+            }
+        });
+
+        window.renderizarTerceirizados?.();
+    } catch (error) {
+        console.error("Erro ao carregar dados do Firebase:", error);
+
+        if (!dadosTerceirizados.length) {
+            dadosTerceirizados = [
+                {
+                    id: "lugar-eng",
+                    nome: "Lugar Engenharia",
+                    telefone: "5579999999999",
+                    servicos: []
+                },
+                {
+                    id: "pr-const",
+                    nome: "PR Construção",
+                    telefone: "5579888888888",
+                    servicos: []
+                }
+            ];
+        }
+    }
 };
-
-
-
-
 // =====================================================================
-// GEO-FACILITIES ENERGISA SERGIPE - CÓDIGO COMPLETO (COM IDs E CHAMADO)
-// =====================================================================
-// PARTE 1: INICIALIZAÇÃO DO MAPA E REFERÊNCIA GEOGRÁFICA
+// ATUALIZAR SELECTS DE EMPRESAS NOS POPUPS
 // =====================================================================
 
-// Coordenadas da Sede (Aracaju/SE - Referência IBGE)
+window.atualizarSelectsEmpresas = function () {
+
+    const optionsEmpresas =
+        dadosTerceirizados
+            .map(
+                empresa => `
+                    <option value="${escapeHtml(empresa.id)}">
+                        ${escapeHtml(empresa.nome)}
+                    </option>
+                `
+            )
+            .join("");
+
+    todasBasesFisicas.forEach(
+        base => {
+
+            const select =
+                document.getElementById(
+                    `empresa-${base.id}`
+                );
+
+            if (!select) {
+                return;
+            }
+
+            const valorAtual =
+                select.value;
+
+            select.innerHTML = `
+                <option
+                    value=""
+                    disabled
+                >
+                    Selecione a Empresa Parceira
+                </option>
+
+                ${optionsEmpresas}
+            `;
+
+            // Mantém o valor selecionado, se ainda existir
+            if (
+                dadosTerceirizados.some(
+                    empresa =>
+                        empresa.id ===
+                        valorAtual
+                )
+            ) {
+                select.value =
+                    valorAtual;
+            } else {
+                select.value =
+                    "";
+            }
+        }
+    );
+};
+// =====================================================================
+// 2. MAPA
+// =====================================================================
+
 const COORD_SEDE = L.latLng(-10.95483, -37.05581);
 
-// Inicializa o mapa centralizado na Sede com Zoom 12
-const map = L.map('map').setView([COORD_SEDE.lat, COORD_SEDE.lng], 12);
+const map = L.map("map").setView(
+    [COORD_SEDE.lat, COORD_SEDE.lng],
+    12
+);
 
-L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    maxZoom: 19,
-    attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-}).addTo(map);
+L.tileLayer(
+    "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+    {
+        maxZoom: 19,
+        attribution:
+            '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+    }
+).addTo(map);
 
 // =====================================================================
-// PARTE 2: DEFINIÇÃO DOS ÍCONES CUSTOMIZADOS (SVG)
+// 3. ÍCONES
 // =====================================================================
 
-const iconSizeConfig = { iconSize: [35, 35], iconAnchor: [17, 35], popupAnchor: [1, -34] };
+const iconSizeConfig = {
+    iconSize: [35, 35],
+    iconAnchor: [17, 35],
+    popupAnchor: [1, -34]
+};
 
 const iconSede = L.icon({
-    iconUrl: 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iIzAwNWJiNSI+PHBhdGggZD0iTTE5IDZIOXY0SDVYMTNoMTBWMTBIMTlWNlpNMTEgOGgydjJIMTFWOlpNMTcgOGgydjJIMTdWOlpNMyAxMEgxdjhoMlYxMFpNMjMgMTBIMjF2OGgyVjEwWk0xOSAxNEg5djhIMTNWMTdoMnY1SDE5VjE0Wk0xMSA4SDl2OEgxMVY4Wk0xNyA4SDE1djhIMTdWOHoiLz48L3N2Zz4=',
+    iconUrl:
+        "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iIzAwNWJiNSI+PHBhdGggZD0iTTE5IDZIOXY0SDVYMTNoMTBWMTBIMTlWNlpNMTEgOGgydjJIMTFWOlpNMTcgOGgydjJIMTdWOlpNMyAxMEgxdjhoMlYxMFpNMjMgMTBIMjF2OGgyVjEwWk0xOSAxNEg5djhIMTNWMTdoMnY1SDE5VjE0Wk0xMSA4SDl2OEgxMVY4Wk0xNyA4SDE1djhIMTdWOHoiLz48L3N2Zz4=",
     ...iconSizeConfig
 });
 
 const iconAlmoxarifado = L.icon({
-    iconUrl: 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iIzU1NTU1NSI+PHBhdGggZD0iTTE4LjYyNCAxNi4wOTRDMTku1MTU4LjU1MTk4MS44OTQyMjIuMDA5MTk5LjY1NzgyMS44MDkxOTkuNjU3MDk2LjcwOTE5NS43MDcyMDQuNTUxOTUxLjQwNzgwMS40ODU4MTkuMzQ0MTExLjMxNjgxOS4xMDY4MTguMzUxODE5Ljk0NjE5NS43MDcyMDQuNTUxOTUxLjQwNzgwMS40ODU4MTkuMzQ0MTExLjMxNjgxOS4xMDY4MTguMzUxODE5Ljk0NjE5NS43NDE5NTEuNTk3ODIwLjU5NzhDMTguNjI0IDE2LjA5NFoiLz48cGF0aCBkPSJNMjEgNmgydjEzLjVMMyAyMFY2aDJWNEg5VjZoNlY4SDIxdjJaTTUgOGgyVjZINVY4Wk0xMSA4aDJWNkgxMXY4Wk0xNyA4aDJWNkoxN3Y4WiIvPjwvc3ZnPg==',
+    iconUrl:
+        "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iIzU1NTU1NSI+PHBhdGggZD0iTTE4LjYyNCAxNi4wOTRDMTku1NTU4LjU1MTk4MS44OTQyMjIuMDA5MTk5LjY1NzgyMS44MDkxOTkuNjU3MDk2LjcwOTE5NS43MDcyMDQuNTUxOTUxLjQwNzgwMS40ODU4MTkuMzQ0MTExLjMxNjgxOS4xMDY4MTguMzUxODE5Ljk0NjE5NS43MDcyMDQuNTUxOTUxLjQwNzgwMS40ODU4MTkuMzQ0MTExLjMxNjgxOS4xMDY4MTguMzUxODE5Ljk0NjE5NS43NDE5NTEuNTk3ODIwLjU5NzhDMTguNjI0IDE2LjA5NFoiLz48cGF0aCBkPSJNMjEgNmgydjEzLjVMMyAyMFY2aDJWNEg5VjZoNlY4SDIxdjJaTTUgOGgyVjZINVY4Wk0xMSA4aDJWNkgxMXY4Wk0xNyA4aDJWNkoxN3Y4WiIvPjwvc3ZnPg==",
     ...iconSizeConfig
 });
 
 const svgAgenciaAtendimento = `
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="100%" height="100%">
-  <defs><style>.outline { stroke: #004b6b; stroke-width: 5; stroke-linecap: round; stroke-linejoin: round; } .orange { fill: #ed7523; } .blue { fill: #009ebf; } .white { fill: #ffffff; } .no-stroke { stroke: none; }</style></defs>
+  <defs>
+    <style>
+      .outline { stroke: #004b6b; stroke-width: 5; stroke-linecap: round; stroke-linejoin: round; }
+      .orange { fill: #ed7523; }
+      .blue { fill: #009ebf; }
+      .white { fill: #ffffff; }
+      .no-stroke { stroke: none; }
+    </style>
+  </defs>
+
   <rect x="20" y="55" width="125" height="135" class="outline white" />
   <path d="M 35 40 L 35 20 L 95 20 L 95 40 L 130 40 L 130 55 L 20 55 L 20 40 Z" class="outline orange" />
-  <rect x="35" y="70" width="16" height="16" class="blue no-stroke" /><rect x="35" y="95" width="16" height="16" class="blue no-stroke" /><rect x="35" y="120" width="16" height="16" class="blue no-stroke" /><rect x="35" y="145" width="16" height="16" class="blue no-stroke" /><rect x="60" y="70" width="16" height="16" class="blue no-stroke" /><rect x="60" y="95" width="16" height="16" class="blue no-stroke" />
+
+  <rect x="35" y="70" width="16" height="16" class="blue no-stroke" />
+  <rect x="35" y="95" width="16" height="16" class="blue no-stroke" />
+  <rect x="35" y="120" width="16" height="16" class="blue no-stroke" />
+  <rect x="35" y="145" width="16" height="16" class="blue no-stroke" />
+  <rect x="60" y="70" width="16" height="16" class="blue no-stroke" />
+  <rect x="60" y="95" width="16" height="16" class="blue no-stroke" />
+
   <path d="M 120 40 H 175 A 10 10 0 0 1 185 50 V 80 A 10 10 0 0 1 175 90 H 145 L 130 105 V 90 H 120 A 10 10 0 0 1 110 80 V 50 A 10 10 0 0 1 120 40 Z" class="outline orange" />
-  <circle cx="132" cy="65" r="4.5" class="white no-stroke" /><circle cx="147.5" cy="65" r="4.5" class="white no-stroke" /><circle cx="163" cy="65" r="4.5" class="white no-stroke" />
+
+  <circle cx="132" cy="65" r="4.5" class="white no-stroke" />
+  <circle cx="147.5" cy="65" r="4.5" class="white no-stroke" />
+  <circle cx="163" cy="65" r="4.5" class="white no-stroke" />
+
   <path d="M 70 155 C 70 125 80 115 100 115 C 120 115 130 125 130 155 Z" class="outline blue" />
   <polygon points="90 115, 110 115, 100 130" class="outline white" />
   <line x1="112" y1="135" x2="124" y2="135" class="outline" stroke-width="4"/>
+
   <path d="M 75 120 C 75 105 80 65 100 65 C 120 65 125 105 125 120 L 115 120 C 115 110 110 105 100 105 C 90 105 85 110 85 120 Z" class="outline orange" />
+
   <circle cx="100" cy="93" r="16" class="outline white" />
   <path d="M 84 91 C 90 80 96 83 100 85 C 104 83 110 80 116 91 C 115 71 85 71 84 91 Z" class="outline orange" />
-  <circle cx="93" cy="90" r="2.5" class="outline" fill="#004b6b" stroke-width="0"/><circle cx="107" cy="90" r="2.5" class="outline" fill="#004b6b" stroke-width="0"/>
+
+  <circle cx="93" cy="90" r="2.5" fill="#004b6b"/>
+  <circle cx="107" cy="90" r="2.5" fill="#004b6b"/>
   <path d="M 94 99 Q 100 105 106 99" fill="none" class="outline" stroke-width="3.5"/>
+
   <rect x="65" y="165" width="115" height="25" class="outline orange" />
   <rect x="55" y="155" width="135" height="10" class="outline orange" />
   <line x1="10" y1="190" x2="190" y2="190" class="outline" fill="none"/>
@@ -112,70 +247,86 @@ const svgSubestacao = `
       .orange-stroke { stroke: #ed7523; stroke-linecap: round; stroke-linejoin: round; fill: none; }
       .orange-fill { fill: #ed7523; }
       .white-fill { fill: #ffffff; }
-      .white-stroke { stroke: #ffffff; stroke-linecap: round; stroke-linejoin: round; fill: none; }
     </style>
   </defs>
+
   <line x1="5" y1="185" x2="235" y2="185" class="blue-stroke" stroke-width="4" />
+
   <g class="blue-stroke" stroke-width="3">
     <path d="M 15 185 L 35 40 M 65 185 L 45 40 M 35 40 L 40 10 L 45 40" />
     <path d="M 20 150 L 60 150 M 25 115 L 55 115 M 30 80 L 50 80 M 33 55 L 47 55" />
     <path d="M 20 150 L 55 115 M 60 150 L 25 115 M 25 115 L 50 80 M 55 115 L 30 80 M 30 80 L 47 55 M 50 80 L 33 55" />
+
     <path d="M 175 185 L 195 40 M 225 185 L 205 40 M 195 40 L 200 10 L 205 40" />
     <path d="M 180 150 L 220 150 M 185 115 L 215 115 M 190 80 L 210 80 M 193 55 L 207 55" />
     <path d="M 180 150 L 215 115 M 220 150 L 185 115 M 185 115 L 210 80 M 215 115 L 190 80 M 190 80 L 207 55 M 210 80 L 193 55" />
-  </g>
-  <g class="blue-stroke" stroke-width="3">
+
     <path d="M 35 40 L 205 40" />
     <path d="M 42 55 L 198 55" />
     <path d="M 45 55 L 55 40 L 65 55 L 75 40 L 85 55 L 95 40 L 105 55 L 115 40 L 125 55 L 135 40 L 145 55 L 155 40 L 165 55 L 175 40 L 185 55 L 195 40 L 198 55" stroke-width="2.5" />
   </g>
+
   <rect x="52" y="115" width="38" height="18" class="green-fill" rx="2" />
   <rect x="49" y="113" width="5" height="22" class="blue-fill" rx="1.5" />
   <rect x="88" y="113" width="5" height="22" class="blue-fill" rx="1.5" />
+
   <rect x="63" y="137" width="16" height="48" class="blue-fill" />
   <rect x="69" y="133" width="4" height="4" class="green-fill" />
+
   <rect x="54" y="133" width="4" height="39" class="green-fill" />
   <rect x="54" y="172" width="9" height="4" class="green-fill" />
+
   <rect x="79" y="160" width="12" height="4" class="green-fill" />
   <rect x="79" y="172" width="12" height="4" class="green-fill" />
+
   <rect x="94" y="145" width="52" height="8" class="green-fill" rx="2" />
   <rect x="94" y="177" width="52" height="6" class="green-fill" rx="1" />
   <rect x="98" y="153" width="44" height="24" class="green-fill" />
+
   <path d="M 102 153 v 24 M 107 153 v 24 M 112 153 v 24 M 117 153 v 24 M 122 153 v 24 M 127 153 v 24 M 132 153 v 24 M 137 153 v 24" class="blue-stroke" stroke-width="2.5" />
+
   <rect x="91" y="153" width="7" height="24" class="green-fill" rx="1" />
   <rect x="142" y="153" width="7" height="24" class="green-fill" rx="1" />
+
   <rect x="154" y="123" width="67" height="62" class="orange-fill" />
   <rect x="150" y="115" width="75" height="8" class="blue-fill" />
+
   <rect x="159" y="133" width="57" height="17" class="white-fill" />
   <rect x="159" y="133" width="57" height="17" class="blue-stroke" stroke-width="2.5" />
   <line x1="187.5" y1="133" x2="187.5" y2="150" class="blue-stroke" stroke-width="2.5" />
+
   <rect x="190" y="160" width="24" height="25" class="white-fill" />
   <rect x="190" y="160" width="24" height="25" class="blue-stroke" stroke-width="2.5" />
   <line x1="202" y1="160" x2="202" y2="185" class="blue-stroke" stroke-width="2.5" />
+
   <path d="M 85 80 C 85 105, 90 120, 97 122" class="green-stroke" stroke-width="3.5" />
   <path d="M 120 80 L 120 125" class="green-stroke" stroke-width="3.5" />
   <path d="M 155 80 C 155 105, 150 120, 143 122" class="green-stroke" stroke-width="3.5" />
+
   <g class="blue-stroke">
     <path d="M 85 55 v 25 M 120 55 v 25 M 155 55 v 25" stroke-width="2.5" />
     <path d="M 81 65 h 8 M 80 72 h 10 M 81 79 h 8" stroke-width="4.5" />
     <path d="M 116 65 h 8 M 115 72 h 10 M 116 79 h 8" stroke-width="4.5" />
     <path d="M 151 65 h 8 M 150 72 h 10 M 151 79 h 8" stroke-width="4.5" />
   </g>
+
   <g class="orange-stroke">
     <line x1="120" y1="125" x2="120" y2="145" stroke-width="2.5" />
     <path d="M 115 130 h 10 M 114 136 h 12 M 115 142 h 10" stroke-width="4.5" />
-    <g transform="translate(105, 145) rotate(-20) translate(-105, -145)">
+
+    <g transform="translate(105,145) rotate(-20) translate(-105,-145)">
       <line x1="105" y1="125" x2="105" y2="145" stroke-width="2.5" />
       <path d="M 100 130 h 10 M 99 136 h 12 M 100 142 h 10" stroke-width="4.5" />
     </g>
-    <g transform="translate(135, 145) rotate(20) translate(-135, -145)">
+
+    <g transform="translate(135,145) rotate(20) translate(-135,-145)">
       <line x1="135" y1="125" x2="135" y2="145" stroke-width="2.5" />
       <path d="M 130 130 h 10 M 129 136 h 12 M 130 142 h 10" stroke-width="4.5" />
     </g>
-  </g>
-  <g class="orange-stroke">
+
     <line x1="165" y1="95" x2="165" y2="115" stroke-width="2.5" />
     <path d="M 161 100 h 8 M 160 106 h 10 M 161 112 h 8" stroke-width="4.5" />
+
     <line x1="178" y1="95" x2="178" y2="115" stroke-width="2.5" />
     <path d="M 174 100 h 8 M 173 106 h 10 M 174 112 h 8" stroke-width="4.5" />
   </g>
@@ -192,63 +343,105 @@ const svgBaseOperacional = `
       .white { fill: #ffffff; }
       .no-stroke { stroke: none; }
     </style>
+
     <clipPath id="truck-clip">
       <path d="M 65 180 V 150 H 95 V 140 H 125 L 140 155 H 165 C 172 155, 175 160, 175 170 V 180 H 160 A 12 12 0 0 0 136 180 H 95 A 12 12 0 0 0 71 180 Z" />
     </clipPath>
   </defs>
+
   <line x1="10" y1="190" x2="190" y2="190" class="outline" fill="none"/>
+
   <path d="M 20 190 V 90 L 55 70 V 90 L 90 70 V 90 L 125 70 V 190 Z" class="outline-filled" />
+
   <rect x="28" y="130" width="22" height="60" class="outline-filled" />
   <line x1="28" y1="140" x2="50" y2="140" class="outline" />
   <line x1="28" y1="150" x2="50" y2="150" class="outline" />
+
   <rect x="68" y="105" width="16" height="10" class="outline-filled" />
   <rect x="98" y="105" width="16" height="10" class="outline-filled" />
+
   <rect x="145" y="25" width="8" height="165" class="outline-filled" />
   <rect x="130" y="32" width="38" height="5" class="outline-filled" />
   <rect x="130" y="55" width="38" height="5" class="outline-filled" />
+
   <rect x="132" y="22" width="4" height="10" rx="2" class="outline-filled" />
   <rect x="140" y="22" width="4" height="10" rx="2" class="outline-filled" />
   <rect x="154" y="22" width="4" height="10" rx="2" class="outline-filled" />
   <rect x="162" y="22" width="4" height="10" rx="2" class="outline-filled" />
+
   <rect x="132" y="45" width="4" height="10" rx="2" class="outline-filled" />
   <rect x="140" y="45" width="4" height="10" rx="2" class="outline-filled" />
   <rect x="154" y="45" width="4" height="10" rx="2" class="outline-filled" />
   <rect x="162" y="45" width="4" height="10" rx="2" class="outline-filled" />
+
   <line x1="145" y1="80" x2="153" y2="80" class="outline" />
   <line x1="145" y1="92" x2="153" y2="92" class="outline" />
+
   <rect x="153" y="75" width="14" height="22" class="outline orange" />
   <rect x="157" y="69" width="6" height="6" class="outline-filled" />
   <path d="M 160 69 Q 160 59 156 55" class="outline" fill="none" />
+
   <line x1="75" y1="150" x2="75" y2="129" class="outline" />
   <line x1="90" y1="150" x2="90" y2="129" class="outline" />
+
   <rect x="62" y="117" width="120" height="4" class="outline orange" />
   <rect x="62" y="125" width="120" height="4" class="outline orange" />
+
   <path d="M 67 117 V 129 M 77 117 V 129 M 87 117 V 129 M 97 117 V 129 M 107 117 V 129 M 117 117 V 129 M 127 117 V 129 M 137 117 V 129 M 147 117 V 129 M 157 117 V 129 M 167 117 V 129 M 177 117 V 129" class="outline" fill="none" stroke-width="3" />
+
   <g>
     <path d="M 65 180 V 150 H 95 V 140 H 125 L 140 155 H 165 C 172 155, 175 160, 175 170 V 180 H 160 A 12 12 0 0 0 136 180 H 95 A 12 12 0 0 0 71 180 Z" class="white no-stroke" />
+
     <g clip-path="url(#truck-clip)">
       <path d="M 50 160 Q 75 160 85 190 H 50 Z" class="orange no-stroke" />
       <path d="M 70 190 Q 95 155 125 170 T 160 190 H 70 Z" class="blue no-stroke" />
       <path d="M 140 190 Q 155 170 185 170 V 190 Z" class="orange no-stroke" />
     </g>
+
     <path d="M 65 180 V 150 H 95 V 140 H 125 L 140 155 H 165 C 172 155, 175 160, 175 170 V 180 H 160 A 12 12 0 0 0 136 180 H 95 A 12 12 0 0 0 71 180 Z" class="outline" fill="none" />
+
     <path d="M 105 144 H 122 L 132 155 H 105 Z" class="outline-filled" />
     <line x1="105" y1="155" x2="105" y2="180" class="outline" />
     <line x1="110" y1="162" x2="115" y2="162" class="outline" />
+
     <path d="M 166 162 Q 170 162 172 166 H 166 Z" class="outline-filled" />
+
     <path d="M 124 172 L 127 164 L 130 172 Z" class="orange no-stroke" />
     <path d="M 124 172 Q 127 167 130 172 Z" class="blue no-stroke" />
+
     <rect x="132" y="168" width="12" height="3" class="no-stroke" fill="#004b6b" rx="1.5" />
+
     <circle cx="83" cy="180" r="10" class="outline-filled" />
-    <circle cx="83" cy="180" r="4" class="outline" fill="#004b6b" />
+    <circle cx="83" cy="180" r="4" fill="#004b6b" />
+
     <circle cx="148" cy="180" r="10" class="outline-filled" />
-    <circle cx="148" cy="180" r="4" class="outline" fill="#004b6b" />
+    <circle cx="148" cy="180" r="4" fill="#004b6b" />
   </g>
 </svg>`;
 
-const iconAgencia = L.divIcon({ html: svgAgenciaAtendimento, className: 'icone-transparente-svg', iconSize: [45, 45], iconAnchor: [22, 45], popupAnchor: [0, -45] });
-const iconSubestacao = L.divIcon({ html: svgSubestacao, className: 'icone-transparente-svg', iconSize: [45, 45], iconAnchor: [22, 45], popupAnchor: [0, -45] });
-const iconBaseOperacional = L.divIcon({ html: svgBaseOperacional, className: 'icone-transparente-svg', iconSize: [45, 45], iconAnchor: [22, 45], popupAnchor: [0, -45] });
+const iconAgencia = L.divIcon({
+    html: svgAgenciaAtendimento,
+    className: "icone-transparente-svg",
+    iconSize: [45, 45],
+    iconAnchor: [22, 45],
+    popupAnchor: [0, -45]
+});
+
+const iconSubestacao = L.divIcon({
+    html: svgSubestacao,
+    className: "icone-transparente-svg",
+    iconSize: [45, 45],
+    iconAnchor: [22, 45],
+    popupAnchor: [0, -45]
+});
+
+const iconBaseOperacional = L.divIcon({
+    html: svgBaseOperacional,
+    className: "icone-transparente-svg",
+    iconSize: [45, 45],
+    iconAnchor: [22, 45],
+    popupAnchor: [0, -45]
+});
 
 const mapIconTypes = {
     "Subestação": iconSubestacao,
@@ -259,633 +452,4315 @@ const mapIconTypes = {
 };
 
 // =====================================================================
-// PARTE 3: DADOS DE EXEMPLO (LOCAIS) — pins de demonstração
+// 4. PONTOS DE DEMONSTRAÇÃO EXISTENTES
 // =====================================================================
 
 const unidades = [
-    { nome: "Sede Administrativa (Aracaju)", tipo: "Sede Administrativa", lat: -10.95483, lng: -37.05581 },
-    { nome: "Subestação Jardins", tipo: "Subestação", lat: -10.94500, lng: -37.06800 },
-    { nome: "Base Operacional Centro", tipo: "Base Operacional", lat: -10.91000, lng: -37.05000 },
-    { nome: "Agência de Atendimento Siqueira Campos", tipo: "Agência de Atendimento", lat: -10.92500, lng: -37.07200 },
-    { nome: "Almoxarifado Central", tipo: "Almoxarifado", lat: -10.98000, lng: -37.04000 }
+    {
+        nome: "Sede Administrativa (Aracaju)",
+        tipo: "Sede Administrativa",
+        lat: -10.95483,
+        lng: -37.05581
+    },
+    {
+        nome: "Subestação Jardins",
+        tipo: "Subestação",
+        lat: -10.945,
+        lng: -37.068
+    },
+    {
+        nome: "Base Operacional Centro",
+        tipo: "Base Operacional",
+        lat: -10.91,
+        lng: -37.05
+    },
+    {
+        nome: "Agência de Atendimento Siqueira Campos",
+        tipo: "Agência de Atendimento",
+        lat: -10.925,
+        lng: -37.072
+    },
+    {
+        nome: "Almoxarifado Central",
+        tipo: "Almoxarifado",
+        lat: -10.98,
+        lng: -37.04
+    }
 ];
 
-// =====================================================================
-// PARTE 4: POPULAÇÃO DO MAPA COM CÁLCULO DE DISTÂNCIA
-// =====================================================================
-
 unidades.forEach(unidade => {
-    const coordPonto = L.latLng(unidade.lat, unidade.lng);
-    const distanciaMetros = COORD_SEDE.distanceTo(coordPonto);
-    const distanciaKm = (distanciaMetros / 1000).toFixed(2);
-    const iconeAplicado = mapIconTypes[unidade.tipo] || iconAgencia;
+    const coordPonto = L.latLng(
+        unidade.lat,
+        unidade.lng
+    );
+
+    const distanciaMetros =
+        COORD_SEDE.distanceTo(
+            coordPonto
+        );
+
+    const distanciaKm =
+        (
+            distanciaMetros /
+            1000
+        ).toFixed(2);
+
+    const iconeAplicado =
+        mapIconTypes[
+            unidade.tipo
+        ] ||
+        iconAgencia;
 
     const conteudoPopup = `
-        <div style="font-family: sans-serif; font-size: 13px;">
-            <h4 style="margin: 0 0 5px 0; color: #004b6b;">${unidade.nome}</h4>
-            <b>Tipo:</b> ${unidade.tipo}<br>
-            <hr style="border: 0; border-top: 1px solid #ccc; margin: 8px 0;">
-            ${unidade.tipo === "Sede Administrativa"
-                ? '📍 <strong>Ponto de Origem / Referência</strong>'
-                : `📏 <strong>Distância da Sede:</strong> ${distanciaKm} km`
+        <div
+            style="
+                font-family:sans-serif;
+                font-size:13px;
+            "
+        >
+            <h4
+                style="
+                    margin:0 0 5px;
+                    color:#004b6b;
+                "
+            >
+                ${unidade.nome}
+            </h4>
+
+            <b>Tipo:</b>
+            ${unidade.tipo}
+            <br>
+
+            <hr
+                style="
+                    border:0;
+                    border-top:1px solid #ccc;
+                    margin:8px 0;
+                "
+            >
+
+            ${
+                unidade.tipo ===
+                "Sede Administrativa"
+                    ? `
+                        📍
+                        <strong>
+                            Ponto de Origem / Referência
+                        </strong>
+                    `
+                    : `
+                        📏
+                        <strong>
+                            Distância da Sede:
+                        </strong>
+                        ${distanciaKm} km
+                    `
             }
         </div>
     `;
 
-    L.marker(coordPonto, { icon: iconeAplicado })
-     .addTo(map)
-     .bindPopup(conteudoPopup);
+    L.marker(
+        coordPonto,
+        {
+            icon: iconeAplicado
+        }
+    )
+        .addTo(map)
+        .bindPopup(
+            conteudoPopup
+        );
 });
 
 // =====================================================================
-// PARTE 3b: CARREGAMENTO DO MAPA DE MUNICÍPIOS
+// 5. MUNICÍPIOS
 // =====================================================================
+
 const municipiosNaoAtendidos = [
-    "Arauá", "Boquim", "Cristinápolis", "Estância", "Indiaroba", "Itabaianinha", "Pedrinhas", "Riachão do Dantas", "Santa Luzia do Itanhy", "Tobias Barreto", "Tomar do Geru", "Umbaúba"
+    "Arauá",
+    "Boquim",
+    "Cristinápolis",
+    "Estância",
+    "Indiaroba",
+    "Itabaianinha",
+    "Pedrinhas",
+    "Riachão do Dantas",
+    "Santa Luzia do Itanhy",
+    "Tobias Barreto",
+    "Tomar do Geru",
+    "Umbaúba"
 ];
 
-function normalizarNome(nome) { return nome ? nome.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim() : ""; }
-const listaSulgipeFormatada = municipiosNaoAtendidos.map(normalizarNome);
+function normalizarNome(nome) {
+    return nome
+        ? nome
+              .normalize(
+                  "NFD"
+              )
+              .replace(
+                  /[\u0300-\u036f]/g,
+                  ""
+              )
+              .toLowerCase()
+              .trim()
+        : "";
+}
 
-fetch('https://raw.githubusercontent.com/tbrugz/geodata-br/master/geojson/geojs-28-mun.json')
-    .then(r => r.json())
-    .then(data => {
-        L.geoJSON(data, {
-            style: feature => {
-                const isSulgipe = listaSulgipeFormatada.includes(normalizarNome(feature.properties.name));
-                return { fillColor: isSulgipe ? '#757474' : '#3c6846', color: isSulgipe ? '#555555' : '#1e7e34', weight: isSulgipe ? 1 : 1.5, fillOpacity: isSulgipe ? 0.5 : 0.3 };
-            },
-            onEachFeature: (feature, layer) => { if (feature.properties?.name) layer.bindTooltip(`MUNICÍPIO: ${feature.properties.name}`); }
-        }).addTo(map);
-    }).catch(e => console.error(e));
+const listaSulgipeFormatada =
+    municipiosNaoAtendidos.map(
+        normalizarNome
+    );
+
+fetch(
+    "https://raw.githubusercontent.com/tbrugz/geodata-br/master/geojson/geojs-28-mun.json"
+)
+    .then(
+        resposta =>
+            resposta.json()
+    )
+    .then(
+        data => {
+            L.geoJSON(
+                data,
+                {
+                    style:
+                        feature => {
+                            const isSulgipe =
+                                listaSulgipeFormatada.includes(
+                                    normalizarNome(
+                                        feature.properties.name
+                                    )
+                                );
+
+                            return {
+                                fillColor:
+                                    isSulgipe
+                                        ? "#757474"
+                                        : "#3c6846",
+
+                                color:
+                                    isSulgipe
+                                        ? "#555555"
+                                        : "#1e7e34",
+
+                                weight:
+                                    isSulgipe
+                                        ? 1
+                                        : 1.5,
+
+                                fillOpacity:
+                                    isSulgipe
+                                        ? 0.5
+                                        : 0.3
+                            };
+                        },
+
+                    onEachFeature:
+                        (
+                            feature,
+                            layer
+                        ) => {
+                            if (
+                                feature
+                                    .properties
+                                    ?.name
+                            ) {
+                                layer.bindTooltip(
+                                    `MUNICÍPIO: ${feature.properties.name}`
+                                );
+                            }
+                        }
+                }
+            ).addTo(map);
+        }
+    )
+    .catch(
+        error => {
+            console.error(
+                "Erro ao carregar GeoJSON dos municípios:",
+                error
+            );
+        }
+    );
 
 // =====================================================================
-// PARTE 4b: DADOS (AGORA COM IDs PARA CADA LOCAL)
+// 6. DADOS DAS UNIDADES
 // =====================================================================
+
 const dadosAgencias = [
-    { "id": "ag-amparo", "agencia": "Energisa - Amparo do São Francisco", "endereco": "R. General Teixeira, Lote 9, Amparo", "latitude": -10.2185, "longitude": -36.8335 },
-    { "id": "ag-aquidaba", "agencia": "Energisa - Aquidabã", "endereco": "Av. Parag, 2179 - Centro", "latitude": -10.2806, "longitude": -37.0189 },
-    { "id": "ag-aracaju", "agencia": "Energisa - Aracaju", "endereco": "R. Carlos Correia, 398 - Siqueira Campos", "latitude": -10.9261, "longitude": -37.0678 },
-    { "id": "ag-barradoscoqueiros", "agencia": "Energisa - Barra dos Coqueiros", "endereco": "Barra dos Coqueiros - SE", "latitude": -10.9091, "longitude": -37.0396 },
-    { "id": "ag-caninde", "agencia": "Energisa - Canindé de São Francisco", "endereco": "Canindé de São Francisco - SE", "latitude": -9.6457, "longitude": -37.7892 },
-    { "id": "ag-capela", "agencia": "Energisa - Capela", "endereco": "Capela - SE", "latitude": -10.5050, "longitude": -37.0520 },
-    { "id": "ag-carmopolis", "agencia": "Energisa - Carmópolis", "endereco": "Carmópolis - SE", "latitude": -10.6480, "longitude": -36.9880 },
-    { "id": "ag-itabaiana", "agencia": "Energisa - Itabaiana", "endereco": "Itabaiana - SE", "latitude": -10.6850, "longitude": -37.4250 },
-    { "id": "ag-lagarto", "agencia": "Energisa - Lagarto", "endereco": "Lagarto - SE", "latitude": -10.9170, "longitude": -37.6650 },
-    { "id": "ag-laranjeiras", "agencia": "Energisa - Laranjeiras", "endereco": "Laranjeiras - SE", "latitude": -10.8030, "longitude": -37.1720 },
-    { "id": "ag-nossasenhoradagloria", "agencia": "Energisa - Nossa Senhora da Glória", "endereco": "Nossa Senhora da Glória - SE", "latitude": -10.2180, "longitude": -37.4200 },
-    { "id": "ag-socorro", "agencia": "Energisa - Nossa Senhora do Socorro", "endereco": "Nossa Senhora do Socorro - SE", "latitude": -10.8540, "longitude": -37.1260 },
-    { "id": "ag-propria", "agencia": "Energisa - Propriá", "endereco": "Propriá - SE", "latitude": -10.2100, "longitude": -36.8400 },
-    { "id": "ag-saocristovao", "agencia": "Energisa - São Cristóvão", "endereco": "São Cristóvão - SE", "latitude": -11.0140, "longitude": -37.2060 },
-    { "id": "ag-simaodias", "agencia": "Energisa - Simão Dias", "endereco": "Simão Dias - SE", "latitude": -10.7380, "longitude": -37.8100 }
+    {
+        id: "ag-amparo",
+        agencia:
+            "Energisa - Amparo do São Francisco",
+        endereco:
+            "R. General Teixeira, Lote 9, Amparo",
+        latitude:
+            -10.2185,
+        longitude:
+            -36.8335
+    },
+    {
+        id: "ag-aquidaba",
+        agencia:
+            "Energisa - Aquidabã",
+        endereco:
+            "Av. Parag, 2179 - Centro",
+        latitude:
+            -10.2806,
+        longitude:
+            -37.0189
+    },
+    {
+        id: "ag-aracaju",
+        agencia:
+            "Energisa - Aracaju",
+        endereco:
+            "R. Carlos Correia, 398 - Siqueira Campos",
+        latitude:
+            -10.9261,
+        longitude:
+            -37.0678
+    },
+    {
+        id: "ag-barradoscoqueiros",
+        agencia:
+            "Energisa - Barra dos Coqueiros",
+        endereco:
+            "Barra dos Coqueiros - SE",
+        latitude:
+            -10.9091,
+        longitude:
+            -37.0396
+    },
+    {
+        id: "ag-caninde",
+        agencia:
+            "Energisa - Canindé de São Francisco",
+        endereco:
+            "Canindé de São Francisco - SE",
+        latitude:
+            -9.6457,
+        longitude:
+            -37.7892
+    },
+    {
+        id: "ag-capela",
+        agencia:
+            "Energisa - Capela",
+        endereco:
+            "Capela - SE",
+        latitude:
+            -10.505,
+        longitude:
+            -37.052
+    },
+    {
+        id: "ag-carmopolis",
+        agencia:
+            "Energisa - Carmópolis",
+        endereco:
+            "Carmópolis - SE",
+        latitude:
+            -10.648,
+        longitude:
+            -36.988
+    },
+    {
+        id: "ag-itabaiana",
+        agencia:
+            "Energisa - Itabaiana",
+        endereco:
+            "Itabaiana - SE",
+        latitude:
+            -10.685,
+        longitude:
+            -37.425
+    },
+    {
+        id: "ag-lagarto",
+        agencia:
+            "Energisa - Lagarto",
+        endereco:
+            "Lagarto - SE",
+        latitude:
+            -10.917,
+        longitude:
+            -37.665
+    },
+    {
+        id: "ag-laranjeiras",
+        agencia:
+            "Energisa - Laranjeiras",
+        endereco:
+            "Laranjeiras - SE",
+        latitude:
+            -10.803,
+        longitude:
+            -37.172
+    },
+    {
+        id: "ag-nossasenhoradagloria",
+        agencia:
+            "Energisa - Nossa Senhora da Glória",
+        endereco:
+            "Nossa Senhora da Glória - SE",
+        latitude:
+            -10.218,
+        longitude:
+            -37.42
+    },
+    {
+        id: "ag-socorro",
+        agencia:
+            "Energisa - Nossa Senhora do Socorro",
+        endereco:
+            "Nossa Senhora do Socorro - SE",
+        latitude:
+            -10.854,
+        longitude:
+            -37.126
+    },
+    {
+        id: "ag-propria",
+        agencia:
+            "Energisa - Propriá",
+        endereco:
+            "Propriá - SE",
+        latitude:
+            -10.21,
+        longitude:
+            -36.84
+    },
+    {
+        id: "ag-saocristovao",
+        agencia:
+            "Energisa - São Cristóvão",
+        endereco:
+            "São Cristóvão - SE",
+        latitude:
+            -11.014,
+        longitude:
+            -37.206
+    },
+    {
+        id: "ag-simaodias",
+        agencia:
+            "Energisa - Simão Dias",
+        endereco:
+            "Simão Dias - SE",
+        latitude:
+            -10.738,
+        longitude:
+            -37.81
+    }
 ];
 
 const subestacoesEnergisa = [
-    { "id": "sub-arj", "agencia": "Subestação - Aracaju (ARJ)", "endereco": "Av. Chanceler Osvaldo Aranha", "latitude": -10.9250, "longitude": -37.0760 },
-    { "id": "sub-atl", "agencia": "Subestação - Atalaia (ATL)", "endereco": "Atalaia, Aracaju", "latitude": -10.9850, "longitude": -37.0490 },
-    { "id": "sub-cbt", "agencia": "Subestação - Cabrita (CBT)", "endereco": "Zona Rural, São Cristóvão", "latitude": -10.9700, "longitude": -37.2100 },
-    { "id": "sub-cme", "agencia": "Subestação - Coroa do Meio (CME)", "endereco": "Coroa do Meio, Aracaju", "latitude": -10.9630, "longitude": -37.0430 },
-    { "id": "sub-din", "agencia": "Subestação - Distrito Industrial (DIN)", "endereco": "Distrito Industrial, Aracaju", "latitude": -10.9300, "longitude": -37.0850 },
-    { "id": "sub-edg", "agencia": "Subestação - Eduardo Gomes (EDG)", "endereco": "Eduardo Gomes", "latitude": -10.9000, "longitude": -37.1000 },
-    { "id": "sub-itb", "agencia": "Subestação - Itabaiana (ITB)", "endereco": "Itabaiana - SE", "latitude": -10.6800, "longitude": -37.4200 },
-    { "id": "sub-lag", "agencia": "Subestação - Lagarto (LAG)", "endereco": "Lagarto - SE", "latitude": -10.9100, "longitude": -37.6600 }
+    {
+        id: "sub-arj",
+        agencia:
+            "Subestação - Aracaju (ARJ)",
+        endereco:
+            "Av. Chanceler Osvaldo Aranha",
+        latitude:
+            -10.925,
+        longitude:
+            -37.076
+    },
+    {
+        id: "sub-atl",
+        agencia:
+            "Subestação - Atalaia (ATL)",
+        endereco:
+            "Atalaia, Aracaju",
+        latitude:
+            -10.985,
+        longitude:
+            -37.049
+    },
+    {
+        id: "sub-cbt",
+        agencia:
+            "Subestação - Cabrita (CBT)",
+        endereco:
+            "Zona Rural, São Cristóvão",
+        latitude:
+            -10.97,
+        longitude:
+            -37.21
+    },
+    {
+        id: "sub-cme",
+        agencia:
+            "Subestação - Coroa do Meio (CME)",
+        endereco:
+            "Coroa do Meio, Aracaju",
+        latitude:
+            -10.963,
+        longitude:
+            -37.043
+    },
+    {
+        id: "sub-din",
+        agencia:
+            "Subestação - Distrito Industrial (DIN)",
+        endereco:
+            "Distrito Industrial, Aracaju",
+        latitude:
+            -10.93,
+        longitude:
+            -37.085
+    },
+    {
+        id: "sub-edg",
+        agencia:
+            "Subestação - Eduardo Gomes (EDG)",
+        endereco:
+            "Eduardo Gomes",
+        latitude:
+            -10.9,
+        longitude:
+            -37.1
+    },
+    {
+        id: "sub-itb",
+        agencia:
+            "Subestação - Itabaiana (ITB)",
+        endereco:
+            "Itabaiana - SE",
+        latitude:
+            -10.68,
+        longitude:
+            -37.42
+    },
+    {
+        id: "sub-lag",
+        agencia:
+            "Subestação - Lagarto (LAG)",
+        endereco:
+            "Lagarto - SE",
+        latitude:
+            -10.91,
+        longitude:
+            -37.66
+    }
 ];
 
-const basesFisicasEnergisa = dadosAgencias.map(item => ({ id: item.id, nome: item.agencia, endereco: item.endereco, lat: item.latitude, lng: item.longitude, tipo: "Agência de Atendimento" }));
-const basesSubestacoes = subestacoesEnergisa.map(item => ({ id: item.id, nome: item.agencia, endereco: item.endereco, lat: item.latitude, lng: item.longitude, tipo: "Subestação" }));
-const todasBasesFisicas = [...basesFisicasEnergisa, ...basesSubestacoes];
+const basesFisicasEnergisa =
+    dadosAgencias.map(
+        item => ({
+            id:
+                item.id,
 
-// =====================================================================
-// PARTE 5: RENDERIZAÇÃO DOS PINS E FORMULÁRIO DO POPUP
-// =====================================================================
+            nome:
+                item.agencia,
 
-window.marcadoresGlobais = {};
+            endereco:
+                item.endereco,
 
-// Verifica se a base ainda tem algum serviço "em andamento" e ativa/desativa
-// a animação de piscar no ícone do mapa.
-window.verificarEAtualizarMarcador = function(baseId, nomeBase) {
-    const marcador = window.marcadoresGlobais[baseId];
-    if (!marcador || !marcador._icon) return;
+            lat:
+                item.latitude,
 
-    let temAndamento = false;
-    let temAguardando = false;
+            lng:
+                item.longitude,
 
-    dadosTerceirizados.forEach(empresa => {
-        if (empresa.servicos) {
-            empresa.servicos.forEach(servico => {
-                if (servico.local === nomeBase) {
-                    if (servico.statusAtual === 'andamento') {
-                        temAndamento = true;
-                    } else if (servico.statusAtual === 'aguardando') {
-                        temAguardando = true;
-                    }
-                }
-            });
-        }
-    });
-
-    // Reseta as classes de animação do ícone (mantendo a limpeza caso a classe ainda exista)
-    marcador._icon.classList.remove('icone-em-andamento', 'icone-atrasado', 'icone-aguardando');
-
-    // Aplica a classe com base na prioridade (Andamento se sobrepõe a Aguardando)
-    if (temAndamento) {
-        marcador._icon.classList.add('icone-em-andamento');
-    } else if (temAguardando) {
-        marcador._icon.classList.add('icone-aguardando');
-    }
-};
-
-const camadas = {
-    "Subestações": L.layerGroup().addTo(map), "Bases Operacionais": L.layerGroup().addTo(map),
-    "Sedes Administrativas": L.layerGroup().addTo(map), "Agências de Atendimento": L.layerGroup().addTo(map),
-};
-const mapTypeToLayer = { "Subestação": camadas["Subestações"], "Base Operacional": camadas["Bases Operacionais"], "Sede Administrative": camadas["Sedes Administrativas"], "Agência de Atendimento": camadas["Agências de Atendimento"], "Almoxarifado": camadas["Almoxarifados"] };
-
-function calcularDistanciaHaversine(lat1, lon1, lat2, lon2) {
-    const R = 6371;
-    const dLat = (lat2 - lat1) * (Math.PI / 180);
-    const dLon = (lon2 - lon1) * (Math.PI / 180);
-    const a = Math.sin(dLat / 2) ** 2 + Math.cos(lat1 * (Math.PI / 180)) * Math.cos(lat2 * (Math.PI / 180)) * Math.sin(dLon / 2) ** 2;
-    return R * (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)));
-}
-
-// Calcula a distância real percorrida por estrada (OSRM), que reflete a
-// "vida real" muito melhor do que a linha reta. Se a API de rotas falhar
-// (sem internet, fora do ar, etc.), cai de volta na linha reta (Haversine).
-async function calcularDistanciaRodoviaria(origem, destino) {
-    const url = `https://router.project-osrm.org/route/v1/driving/${origem.lng},${origem.lat};${destino.lng},${destino.lat}?overview=false`;
-    try {
-        const resposta = await fetch(url);
-        const dados = await resposta.json();
-        if (dados.code === 'Ok' && dados.routes && dados.routes[0]) {
-            return dados.routes[0].distance / 1000; // metros -> km
-        }
-    } catch (erro) {
-        console.warn(`Não foi possível calcular a rota real até ${destino.lat},${destino.lng}. Usando distância em linha reta como alternativa.`, erro);
-    }
-    return calcularDistanciaHaversine(origem.lat, origem.lng, destino.lat, destino.lng);
-}
-
-async function criarMarcadoresComDistanciaReal() {
-    // Busca todas as distâncias por estrada em paralelo antes de desenhar os pins,
-    // para não deixar o mapa "aparecendo aos poucos" nem travar em requisições sequenciais.
-    const distancias = await Promise.all(
-        todasBasesFisicas.map(base =>
-            calcularDistanciaRodoviaria(COORD_SEDE, { lat: base.lat, lng: base.lng })
-        )
+            tipo:
+                "Agência de Atendimento"
+        })
     );
 
-    todasBasesFisicas.forEach((base, indice) => {
-        const iconeCorreto = mapIconTypes[base.tipo] || new L.Icon.Default();
-        const distanciaKm = distancias[indice].toFixed(1);
-        const marker = L.marker([base.lat, base.lng], { icon: iconeCorreto });
+const basesSubestacoes =
+    subestacoesEnergisa.map(
+        item => ({
+            id:
+                item.id,
 
-        // Toda vez que o marcador é adicionado ao mapa (inclusive ao trocar de camada/zoom),
-        // reavalia se ele deve ou não piscar.
-        marker.on('add', () => window.verificarEAtualizarMarcador(base.id, base.nome));
+            nome:
+                item.agencia,
 
-        window.marcadoresGlobais[base.id] = marker;
+            endereco:
+                item.endereco,
 
-        let optionsEmpresas = dadosTerceirizados.map(emp => `<option value="${emp.id}">${emp.nome}</option>`).join('');
+            lat:
+                item.latitude,
 
-        const popupContent = `
-            <div class="modern-popup">
-                <span class="tag">${base.tipo}</span>
-                <h3>${base.nome}</h3>
-                <div class="info-row"><strong>Distância:</strong> <span>${distanciaKm} km da sede (por rodovia)</span></div>
-                <div class="info-row"><strong>Endereço:</strong> <span>${base.endereco}</span></div>
-                <hr>
-                <label>Vincular Serviço / Ocorrência</label>
-                
-                <select id="empresa-${base.id}" class="popup-select">
-                    <option value="" disabled selected>Selecione a Empresa Parceira</option>
-                    ${optionsEmpresas}
-                </select>
+            lng:
+                item.longitude,
 
-                <!-- NOVO: TIPO DE SERVIÇO -->
-                <select id="tipo-servico-${base.id}" class="popup-select" style="margin-bottom: 10px;" onchange="atualizarChecklist('${base.id}')">
-                    <option value="" disabled selected>Tipo de Serviço...</option>
-                    <option value="civil">Reforma Civil / Predial</option>
-                    <option value="climatizacao">Ar-Condicionado / PMOC</option>
-                    <option value="eletrica">Manutenção Elétrica / Subestação</option>
-                </select>
+            tipo:
+                "Subestação"
+        })
+    );
 
-                <!-- NOVO: CAIXA DO CHECKLIST (Oculta por padrão) -->
-                <div id="checklist-container-${base.id}" style="display:none; margin-bottom: 10px; font-size: 0.85em; background: #f1f5f9; padding: 10px; border-radius: 6px; border: 1px solid #e2e8f0; color: #334155;"></div>
-                
-                <select id="status-${base.id}" class="popup-select">
-                    <option value="andamento">Em Andamento</option>
-                    <option value="aguardando">Aguardando Peça/Aprovação</option>
-                    <option value="realizado">Realizado</option>
-                    <option value="cancelado">Cancelado</option>
-                </select>
-                
-                <input type="text" id="chamado-${base.id}" class="popup-select" style="margin-bottom: 10px;" placeholder="Nº do Chamado (Obrigatório)">
-                <input type="date" id="data-${base.id}" class="popup-select" style="margin-bottom: 10px; cursor: pointer;">
-                <textarea id="desc-${base.id}" placeholder="Descrição do serviço (Ex: Pintura da fachada...)"></textarea>
-                <label style="font-size: 0.8em; color: #555; display: block; margin-top: 5px; margin-bottom: 2px;">
-            <b>Anexar Evidência (Foto):</b>
-        </label>
-        <input type="file" id="evidencia-${base.id}" accept="image/*" style="width: 100%; font-size: 0.8em; margin-bottom: 12px;">
-        <!-- ========================================================= -->
-
-        <!-- Botão de Salvar -->
-        <button onclick="registrarServico('${base.id}', '${base.nome}')" 
-                class="btn-link" 
-                style="background-color: #f26522; color: white; border: none; width: 100%; padding: 10px; border-radius: 4px; cursor: pointer; font-weight: bold;">
-            Registrar Serviço
-        </button>
-    </div>
-        `;
-
-        marker.bindPopup(popupContent);
-        marker.addTo(mapTypeToLayer[base.tipo] || camadas["Agências de Atendimento"]);
-    });
-
-    L.control.layers(null, camadas, { position: 'topright', collapsed: false }).addTo(map);
-}
-
-criarMarcadoresComDistanciaReal();
+const todasBasesFisicas = [
+    ...basesFisicasEnergisa,
+    ...basesSubestacoes
+];
 
 // =====================================================================
-// PARTE 6: LÓGICA DE REGISTRO E ABA LATERAL
-// =====================================================================
-function formatarDataBR(dataString) {
-    if (!dataString) return '--/--/----';
-    const partes = dataString.split('-');
-    if(partes.length !== 3) return dataString;
-    return `${partes[2]}/${partes[1]}/${partes[0]}`;
-}
-
-window.atualizarChecklist = function(baseId) {
-    const tipo = document.getElementById(`tipo-servico-${baseId}`).value;
-    const container = document.getElementById(`checklist-container-${baseId}`);
-    let html = '';
-
-    if (tipo === 'civil') {
-        html = `
-            <strong style="display:block; margin-bottom:8px; color:#004b6b;">Checklist de Segurança (Obrigatório):</strong>
-            <label style="display:flex; gap:8px; margin-bottom:4px;"><input type="checkbox" class="chk-${baseId}"> Isolamento da área realizado</label>
-            <label style="display:flex; gap:8px; margin-bottom:4px;"><input type="checkbox" class="chk-${baseId}"> EPIs completos utilizados</label>
-            <label style="display:flex; gap:8px; margin-bottom:4px;"><input type="checkbox" class="chk-${baseId}"> Entulho recolhido/descartado corretamente</label>
-        `;
-    } else if (tipo === 'climatizacao') {
-        html = `
-            <strong style="display:block; margin-bottom:8px; color:#004b6b;">Checklist Operacional (Obrigatório):</strong>
-            <label style="display:flex; gap:8px; margin-bottom:4px;"><input type="checkbox" class="chk-${baseId}"> Limpeza de filtros realizada</label>
-            <label style="display:flex; gap:8px; margin-bottom:4px;"><input type="checkbox" class="chk-${baseId}"> Verificação de gás refrigerante (Pressão OK)</label>
-            <label style="display:flex; gap:8px; margin-bottom:4px;"><input type="checkbox" class="chk-${baseId}"> Teste de dreno desobstruído concluído</label>
-        `;
-    } else if (tipo === 'eletrica') {
-        html = `
-            <strong style="display:block; margin-bottom:8px; color:#004b6b;">Regras de Ouro (Obrigatório):</strong>
-            <label style="display:flex; gap:8px; margin-bottom:4px;"><input type="checkbox" class="chk-${baseId}"> Desenergização / Seccionamento confirmado</label>
-            <label style="display:flex; gap:8px; margin-bottom:4px;"><input type="checkbox" class="chk-${baseId}"> Travamento e bloqueio aplicados (LOTO)</label>
-            <label style="display:flex; gap:8px; margin-bottom:4px;"><input type="checkbox" class="chk-${baseId}"> Teste de ausência de tensão realizado</label>
-        `;
-    }
-
-    if (html) {
-        container.innerHTML = html;
-        container.style.display = 'block';
-    } else {
-        container.style.display = 'none';
-        container.innerHTML = '';
-    }
-};
-// =====================================================================
-// UPLOAD NO CLOUDINARY E SALVAR NO FIREBASE
+// 7. CAMADAS DO MAPA
 // =====================================================================
 
-// Função separada para enviar a foto para o Cloudinary
-// Função separada para enviar a foto para o ImgBB
-async function enviarFotoImgBB(file) {
-    const API_KEY = "3f159529a71f1e4c44c57132ad219a99"; // Cole a chave gerada no site do ImgBB
-    const url = `https://api.imgbb.com/1/upload?key=${API_KEY}`;
-    
-    const formData = new FormData();
-    formData.append("image", file); // O ImgBB exige que o campo se chame "image"
+const camadas = {
+    "Subestações":
+        L.layerGroup().addTo(
+            map
+        ),
 
-    const response = await fetch(url, {
-        method: "POST",
-        body: formData
-    });
+    "Bases Operacionais":
+        L.layerGroup().addTo(
+            map
+        ),
 
-    const data = await response.json();
-    if (data.success) {
-        return data.data.url; // Retorna o link público e seguro da foto pronta
-    } else {
-        throw new Error("Erro ao fazer upload da imagem no ImgBB");
-    }
-}
+    "Sedes Administrativas":
+        L.layerGroup().addTo(
+            map
+        ),
 
-window.registrarServico = async function(baseId, nomeBase) {
-    const empresaId = document.getElementById(`empresa-${baseId}`).value;
-    const statusServico = document.getElementById(`status-${baseId}`).value;
-    const numeroChamado = document.getElementById(`chamado-${baseId}`).value;
-    const dataServico = document.getElementById(`data-${baseId}`).value;
-    const descricao = document.getElementById(`desc-${baseId}`).value;
-    const inputArquivo = document.getElementById(`evidencia-${baseId}`);
-    const arquivo = (inputArquivo && inputArquivo.files) ? inputArquivo.files[0] : null;
+    "Agências de Atendimento":
+        L.layerGroup().addTo(
+            map
+        ),
 
-    if (!empresaId || !numeroChamado.trim() || !dataServico || !descricao.trim()) {
-        return alert("Por favor, preencha todos os campos obrigatórios.");
-    }
-
-    const btn = event.target;
-    const textoOriginal = btn.innerText;
-    btn.innerText = "Enviando foto e salvando...";
-    btn.disabled = true;
-
-    let urlFoto = null;
-
-    // Se houver arquivo, envia para o Cloudinary primeiro
-    if (arquivo) {
-        try {
-            urlFoto = await enviarFotoImgBB(arquivo);
-        } catch (e) {
-            console.error(e);
-            alert("Erro ao enviar a foto. Verifique a chave de API.");
-            btn.innerText = textoOriginal;
-            btn.disabled = false;
-            return;
-        }
-    }
-
-    // Salva tudo no Firebase (Texto + Link do Cloudinary)
-    const empresa = dadosTerceirizados.find(e => e.id === empresaId);
-    if(empresa) {
-        empresa.servicos.push({
-            id: 'sv-' + Date.now(),
-            chamado: numeroChamado,
-            statusAtual: statusServico,
-            localId: baseId,
-            local: nomeBase,
-            desc: descricao,
-            foto: urlFoto, // Salva o link do Cloudinary!
-            historico: [ { status: statusServico, data: dataServico } ]
-        });
-
-        window.salvarDadosGlobais(); // Manda o JSON para o Firestore
-        window.verificarEAtualizarMarcador(baseId, nomeBase);
-        alert(`Serviço #${numeroChamado} registrado com sucesso!`);
-        window.renderizarTerceirizados();
-    }
-    
-    btn.innerText = textoOriginal;
-    btn.disabled = false;
+    "Almoxarifados":
+        L.layerGroup().addTo(
+            map
+        )
 };
 
-    const empresa = dadosTerceirizados.find(e => e.id === empresaId);
+const mapTypeToLayer = {
+    "Subestação":
+        camadas[
+            "Subestações"
+        ],
 
-    if(empresa) {
-        empresa.servicos.push({
-            id: 'sv-' + Date.now(),
-            chamado: numeroChamado,
-            statusAtual: statusServico,
-            localId: baseId,
-            local: nomeBase,
-            desc: descricao,
-            historico: [ { status: statusServico, data: dataServico } ]
-        });
+    "Base Operacional":
+        camadas[
+            "Bases Operacionais"
+        ],
 
-        window.verificarEAtualizarMarcador(baseId, nomeBase);
+    "Sede Administrativa":
+        camadas[
+            "Sedes Administrativas"
+        ],
 
-        document.getElementById(`empresa-${baseId}`).value = "";
-        document.getElementById(`status-${baseId}`).value = "andamento";
-        document.getElementById(`chamado-${baseId}`).value = "";
-        document.getElementById(`data-${baseId}`).value = "";
-        document.getElementById(`desc-${baseId}`).value = "";
+    "Agência de Atendimento":
+        camadas[
+            "Agências de Atendimento"
+        ],
 
-        alert(`Serviço (Chamado: ${numeroChamado}) registrado com sucesso para a empresa ${empresa.nome}!`);
+    "Almoxarifado":
+        camadas[
+            "Almoxarifados"
+        ]
+};
 
-        window.renderizarTerceirizados();
-        document.getElementById('lista-terceirizados').classList.add('mostrar');
-        document.getElementById('btn-terceirizados').classList.add('ativo');
-        setTimeout(() => window.toggleTerceirizado(empresaId), 100);
+window.marcadoresGlobais = {};
+// =====================================================================
+// 8. CONFIGURAÇÕES DE SLA
+// =====================================================================
+
+
+
+const LABEL_PRIORIDADE = {
+    baixa: "Baixa",
+    media: "Média",
+    alta: "Alta",
+    critica: "Crítica"
+};
+
+const LABEL_STATUS = {
+    andamento: "Em Andamento",
+    aguardando: "Aguardando",
+    realizado: "Realizado",
+    cancelado: "Cancelado"
+};
+
+
+// =====================================================================
+// 9. FUNÇÕES DE SLA
+// =====================================================================
+
+
+
+
+function prioridadeEhValida(prioridade) {
+    const prioridadesValidas = [
+        "baixa",
+        "media",
+        "alta",
+        "critica"
+    ];
+
+    return prioridadesValidas.includes(
+        prioridade
+    );
+}
+
+
+function obterLabelPrioridade(
+    prioridade
+) {
+    return (
+        LABEL_PRIORIDADE[prioridade] ??
+        "Não definida"
+    );
+}
+
+
+function obterLabelStatus(
+    status
+) {
+    return (
+        LABEL_STATUS[status] ??
+        status ??
+        "Não informado"
+    );
+}
+
+
+function obterInfoSLA(
+    servico
+) {
+    // Chamados antigos podem não ter SLA
+    if (!servico.prazoSla) {
+        return {
+            classe: "sla-sem-info",
+            texto: "SLA não definido"
+        };
     }
-    window.deletarServico = function(empresaId, servicoId) {
-        if (!confirm("Tem certeza que deseja excluir este chamado? Esta ação não pode ser desfeita.")) {
-            return;
-        }
-    
-        const empresa = dadosTerceirizados.find(e => e.id === empresaId);
-        if (empresa) {
-            // Encontra o serviço antes de remover para saber qual marcador atualizar
-            const servico = empresa.servicos.find(s => s.id === servicoId);
-            const baseId = servico ? servico.localId : null;
-            const nomeBase = servico ? servico.local : null;
-    
-            // Filtra removendo o serviço selecionado
-            empresa.servicos = empresa.servicos.filter(s => s.id !== servicoId);
-    
-            // Atualiza o banco e a interface
-            window.salvarDadosGlobais();
-            if (baseId && nomeBase) {
-                window.verificarEAtualizarMarcador(baseId, nomeBase);
-            }
-    
-            alert("Chamado excluído com sucesso!");
-            window.renderizarTerceirizados();
-        }
+
+    // Chamado encerrado
+    if (
+        servico.statusAtual === "realizado" ||
+        servico.statusAtual === "cancelado"
+    ) {
+        return {
+            classe: "sla-finalizado",
+            texto: "Chamado encerrado"
+        };
+    }
+
+    const prazo =
+        new Date(
+            servico.prazoSla
+        );
+
+    if (
+        Number.isNaN(
+            prazo.getTime()
+        )
+    ) {
+        return {
+            classe: "sla-sem-info",
+            texto: "SLA não definido"
+        };
+    }
+
+    const diferencaMs =
+        prazo.getTime() -
+        Date.now();
+
+    const diferencaAbsoluta =
+        Math.abs(
+            diferencaMs
+        );
+
+    const minutosTotais =
+        Math.floor(
+            diferencaAbsoluta /
+            (1000 * 60)
+        );
+
+    const dias =
+        Math.floor(
+            minutosTotais /
+            (60 * 24)
+        );
+
+    const horas =
+        Math.floor(
+            (
+                minutosTotais %
+                (60 * 24)
+            ) /
+            60
+        );
+
+    const minutos =
+        minutosTotais % 60;
+
+    let tempoTexto = "";
+
+    if (dias > 0) {
+        tempoTexto =
+            `${dias}d ${horas}h`;
+    } else if (horas > 0) {
+        tempoTexto =
+            `${horas}h ${minutos}min`;
+    } else {
+        tempoTexto =
+            `${minutos}min`;
+    }
+
+    // SLA vencido
+    if (
+        diferencaMs < 0
+    ) {
+        return {
+            classe: "sla-vencido",
+            texto:
+                `Prazo vencido há ${tempoTexto}`
+        };
+    }
+
+    // Menos de 4 horas restantes
+    if (
+        diferencaMs <=
+        (
+            4 *
+            60 *
+            60 *
+            1000
+        )
+    ) {
+        return {
+            classe: "sla-alerta",
+            texto:
+                `Vence em ${tempoTexto}`
+        };
+    }
+
+    return {
+        classe: "sla-ok",
+        texto:
+            `Prazo: ${tempoTexto} restantes`
     };
+}
 
-window.mudarStatusServico = function(empresaId, servicoId) {
-    const novoStatus = document.getElementById(`select-status-${servicoId}`).value;
-    const novaData = document.getElementById(`input-data-${servicoId}`).value;
 
-    if (!novaData) return alert("Por favor, selecione a data dessa etapa.");
+// =====================================================================
+// 10. UTILITÁRIOS DE DATA
+// =====================================================================
 
-    const empresa = dadosTerceirizados.find(e => e.id === empresaId);
-    if(empresa) {
-        const servico = empresa.servicos.find(s => s.id === servicoId);
-        if(servico) {
-            servico.statusAtual = novoStatus;
-            servico.historico.push({ status: novoStatus, data: novaData });
+function formatarDataBR(
+    dataString
+) {
+    if (!dataString) {
+        return "--/--/----";
+    }
 
-            // Atualiza o pin no mapa para parar (ou não) de piscar.
-            // Alguns serviços antigos (mock) não têm "localId" salvo, então
-            // buscamos o ID da base pelo nome do local como alternativa.
-            let baseIdParaAtualizar = servico.localId;
-            if (!baseIdParaAtualizar) {
-                const baseEncontrada = todasBasesFisicas.find(b => b.nome === servico.local);
-                if (baseEncontrada) baseIdParaAtualizar = baseEncontrada.id;
+    // Datas vindas de input type="date"
+    if (
+        /^\d{4}-\d{2}-\d{2}$/.test(
+            dataString
+        )
+    ) {
+        const [
+            ano,
+            mes,
+            dia
+        ] =
+            dataString.split("-");
+
+        return (
+            `${dia}/${mes}/${ano}`
+        );
+    }
+
+    const data =
+        new Date(
+            dataString
+        );
+
+    if (
+        Number.isNaN(
+            data.getTime()
+        )
+    ) {
+        return dataString;
+    }
+
+    return data.toLocaleDateString(
+        "pt-BR"
+    );
+}
+
+
+function formatarDataHoraBR(
+    dataString
+) {
+    if (!dataString) {
+        return "-";
+    }
+
+    const data =
+        new Date(
+            dataString
+        );
+
+    if (
+        Number.isNaN(
+            data.getTime()
+        )
+    ) {
+        return "-";
+    }
+
+    return data.toLocaleString(
+        "pt-BR",
+        {
+            dateStyle:
+                "short",
+
+            timeStyle:
+                "short"
+        }
+    );
+}
+
+
+// =====================================================================
+// 11. PROTEÇÃO DE TEXTO
+// =====================================================================
+
+function escapeHtml(
+    valor
+) {
+    return String(
+        valor ?? ""
+    )
+        .replaceAll(
+            "&",
+            "&amp;"
+        )
+        .replaceAll(
+            "<",
+            "&lt;"
+        )
+        .replaceAll(
+            ">",
+            "&gt;"
+        )
+        .replaceAll(
+            '"',
+            "&quot;"
+        )
+        .replaceAll(
+            "'",
+            "&#039;"
+        );
+}
+
+
+// =====================================================================
+// 12. LOCALIZAR BASE DE UM CHAMADO
+// =====================================================================
+
+function obterBaseDoServico(
+    servico
+) {
+    if (
+        servico.localId
+    ) {
+        return (
+            todasBasesFisicas.find(
+                base =>
+                    base.id ===
+                    servico.localId
+            ) ?? null
+        );
+    }
+
+    return (
+        todasBasesFisicas.find(
+            base =>
+                base.nome ===
+                servico.local
+        ) ?? null
+    );
+}
+
+
+// =====================================================================
+// 13. SITUAÇÃO DO CHAMADO
+// =====================================================================
+
+function chamadoEstaAtivo(
+    servico
+) {
+    return ![
+        "realizado",
+        "cancelado"
+    ].includes(
+        servico.statusAtual
+    );
+}
+
+
+function chamadoEstaAtrasado(
+    servico
+) {
+    if (
+        !chamadoEstaAtivo(
+            servico
+        ) ||
+        !servico.prazoSla
+    ) {
+        return false;
+    }
+
+    const prazo =
+        new Date(
+            servico.prazoSla
+        );
+
+    return (
+        !Number.isNaN(
+            prazo.getTime()
+        ) &&
+        prazo.getTime() <
+        Date.now()
+    );
+}
+
+
+// =====================================================================
+// 14. ESTADO VISUAL DOS MARCADORES
+// =====================================================================
+
+window.verificarEAtualizarMarcador =
+function (
+    baseId,
+    nomeBase
+) {
+    const marcador =
+        window.marcadoresGlobais[
+            baseId
+        ];
+
+    if (
+        !marcador ||
+        !marcador._icon
+    ) {
+        return;
+    }
+
+    let temAndamento =
+        false;
+
+    let temAguardando =
+        false;
+
+    let temAtrasado =
+        false;
+
+    dadosTerceirizados.forEach(
+        empresa => {
+
+            (
+                empresa.servicos ??
+                []
+            ).forEach(
+                servico => {
+
+                    const pertenceAoLocal =
+                        servico.localId ===
+                        baseId ||
+                        servico.local ===
+                        nomeBase;
+
+                    if (
+                        !pertenceAoLocal
+                    ) {
+                        return;
+                    }
+
+                    if (
+                        chamadoEstaAtrasado(
+                            servico
+                        )
+                    ) {
+                        temAtrasado =
+                            true;
+                    }
+
+                    if (
+                        servico.statusAtual ===
+                        "andamento"
+                    ) {
+                        temAndamento =
+                            true;
+                    }
+
+                    if (
+                        servico.statusAtual ===
+                        "aguardando"
+                    ) {
+                        temAguardando =
+                            true;
+                    }
+                }
+            );
+        }
+    );
+
+    marcador._icon.classList.remove(
+        "icone-em-andamento",
+        "icone-atrasado",
+        "icone-aguardando"
+    );
+
+    // Ordem de prioridade visual:
+    // atrasado > andamento > aguardando
+
+    if (
+        temAtrasado
+    ) {
+        marcador._icon.classList.add(
+            "icone-atrasado"
+        );
+    } else if (
+        temAndamento
+    ) {
+        marcador._icon.classList.add(
+            "icone-em-andamento"
+        );
+    } else if (
+        temAguardando
+    ) {
+        marcador._icon.classList.add(
+            "icone-aguardando"
+        );
+    }
+};
+
+
+// =====================================================================
+// 15. CÁLCULO DE DISTÂNCIA - HAVERSINE
+// =====================================================================
+
+function calcularDistanciaHaversine(
+    lat1,
+    lon1,
+    lat2,
+    lon2
+) {
+    const R =
+        6371;
+
+    const dLat =
+        (
+            lat2 - lat1
+        ) *
+        (
+            Math.PI /
+            180
+        );
+
+    const dLon =
+        (
+            lon2 - lon1
+        ) *
+        (
+            Math.PI /
+            180
+        );
+
+    const a =
+        Math.sin(
+            dLat / 2
+        ) ** 2 +
+
+        Math.cos(
+            lat1 *
+            (
+                Math.PI /
+                180
+            )
+        ) *
+
+        Math.cos(
+            lat2 *
+            (
+                Math.PI /
+                180
+            )
+        ) *
+
+        Math.sin(
+            dLon / 2
+        ) ** 2;
+
+    const c =
+        2 *
+        Math.atan2(
+            Math.sqrt(a),
+            Math.sqrt(
+                1 - a
+            )
+        );
+
+    return (
+        R * c
+    );
+}
+
+
+// =====================================================================
+// 16. DISTÂNCIA RODOVIÁRIA
+// =====================================================================
+
+async function calcularDistanciaRodoviaria(
+    origem,
+    destino
+) {
+    const url =
+        "https://router.project-osrm.org/route/v1/driving/" +
+        `${origem.lng},${origem.lat};` +
+        `${destino.lng},${destino.lat}` +
+        "?overview=false";
+
+    try {
+        const resposta =
+            await fetch(
+                url
+            );
+
+        if (
+            !resposta.ok
+        ) {
+            throw new Error(
+                `OSRM retornou HTTP ${resposta.status}`
+            );
+        }
+
+        const dados =
+            await resposta.json();
+
+        if (
+            dados.code ===
+            "Ok" &&
+            dados.routes?.[0]
+        ) {
+            return (
+                dados.routes[0]
+                    .distance /
+                1000
+            );
+        }
+    } catch (erro) {
+        console.warn(
+            "Não foi possível calcular a rota real. Usando distância em linha reta.",
+            erro
+        );
+    }
+
+    // fallback
+    return calcularDistanciaHaversine(
+        origem.lat,
+        origem.lng,
+        destino.lat,
+        destino.lng
+    );
+}
+// =====================================================================
+// 17. CRIAÇÃO DOS MARCADORES COM DISTÂNCIA RODOVIÁRIA
+// =====================================================================
+
+async function criarMarcadoresComDistanciaReal() {
+    const distancias =
+        await Promise.all(
+            todasBasesFisicas.map(
+                base =>
+                    calcularDistanciaRodoviaria(
+                        COORD_SEDE,
+                        {
+                            lat: base.lat,
+                            lng: base.lng
+                        }
+                    )
+            )
+        );
+
+    todasBasesFisicas.forEach(
+        (base, indice) => {
+            const iconeCorreto =
+                mapIconTypes[
+                    base.tipo
+                ] ||
+                new L.Icon.Default();
+
+            const distanciaKm =
+                Number(
+                    distancias[
+                        indice
+                    ]
+                ).toFixed(1);
+
+            const marker =
+                L.marker(
+                    [
+                        base.lat,
+                        base.lng
+                    ],
+                    {
+                        icon:
+                            iconeCorreto
+                    }
+                );
+
+            marker.on(
+                "add",
+                () => {
+                    window.verificarEAtualizarMarcador(
+                        base.id,
+                        base.nome
+                    );
+                }
+            );
+
+            window.marcadoresGlobais[
+                base.id
+            ] = marker;
+
+            const optionsEmpresas =
+                dadosTerceirizados
+                    .map(
+                        empresa =>
+                            `
+                                <option value="${escapeHtml(empresa.id)}">
+                                    ${escapeHtml(empresa.nome)}
+                                </option>
+                            `
+                    )
+                    .join("");
+
+            const popupContent = `
+            <div class="modern-popup">
+
+            <!-- TIPO DA UNIDADE -->
+            <span class="tag">
+                ${escapeHtml(base.tipo)}
+            </span>
+    
+    
+            <!-- NOME DA UNIDADE -->
+            <h3>
+                ${escapeHtml(base.nome)}
+            </h3>
+    
+    
+            <!-- DISTÂNCIA -->
+            <div class="info-row">
+                <strong>
+                    Distância:
+                </strong>
+    
+                <span>
+                    ${distanciaKm} km da sede (por rodovia)
+                </span>
+            </div>
+    
+    
+            <!-- ENDEREÇO -->
+            <div class="info-row">
+                <strong>
+                    Endereço:
+                </strong>
+    
+                <span>
+                    ${escapeHtml(base.endereco)}
+                </span>
+            </div>
+    
+    
+            <hr>
+    
+    
+            <!-- TÍTULO DO FORMULÁRIO -->
+            <label
+                style="
+                    font-size:.78rem;
+                    color:#004b6b;
+                    font-weight:800;
+                    display:block;
+                    margin-bottom:8px;
+                "
+            >
+                Vincular Serviço / Ocorrência
+            </label>
+    
+    
+            <!-- EMPRESA -->
+            <select
+                id="empresa-${base.id}"
+                class="popup-select"
+            >
+                <option
+                    value=""
+                    disabled
+                    selected
+                >
+                    Selecione a Empresa Parceira
+                </option>
+    
+                ${optionsEmpresas}
+            </select>
+            <!-- TIPO DE SERVIÇO -->
+            <label>
+                Tipo de Serviço
+            </label>
+            
+            <select
+                id="tipo-servico-${base.id}"
+                class="popup-select"
+                onchange="atualizarChecklist('${base.id}')"
+            >
+                <option
+                    value=""
+                    disabled
+                    selected
+                >
+                    Selecione o tipo de serviço
+                </option>
+            
+                <option value="civil">
+                    Reforma Civil / Predial
+                </option>
+            
+                <option value="climatizacao">
+                    Ar-Condicionado / PMOC
+                </option>
+            
+                <option value="eletrica">
+                    Manutenção Elétrica / Subestação
+                </option>
+            </select>
+            
+            
+            <!-- CHECKLIST DINÂMICO -->
+            <div
+                id="checklist-container-${base.id}"
+                style="
+                    display:none;
+                    margin-bottom:10px;
+                    font-size:.85em;
+                    background:#f1f5f9;
+                    padding:10px;
+                    border-radius:6px;
+                    border:1px solid #e2e8f0;
+                    color:#334155;
+                "
+            ></div>
+            
+            
+            <!-- PRIORIDADE -->
+            <label>
+                Prioridade
+            </label>
+            
+            <select
+                id="prioridade-${base.id}"
+                class="popup-select"
+            >
+                <option value="baixa">
+                    🟢 Prioridade Baixa
+                </option>
+            
+                <option
+                    value="media"
+                    selected
+                >
+                    🟡 Prioridade Média
+                </option>
+            
+                <option value="alta">
+                    🟠 Prioridade Alta
+                </option>
+            
+                <option value="critica">
+                    🔴 Prioridade Crítica
+                </option>
+            </select>
+             <select
+            id="status-${base.id}"
+            class="popup-select"
+        >
+            <option value="andamento">
+                Em Andamento
+            </option>
+        
+            <option value="aguardando">
+                Aguardando Peça/Aprovação
+            </option>
+        
+            <option value="realizado">
+                Realizado
+            </option>
+        
+            <option value="cancelado">
+                Cancelado
+            </option>
+        </select>
+        
+        
+        <label
+            style="
+                font-size:.75em;
+                color:#475569;
+                display:block;
+                margin-bottom:4px;
+            "
+        >
+            Nº do Chamado
+        </label>
+        
+        <input
+            type="text"
+            id="chamado-${base.id}"
+            class="popup-select"
+            placeholder="Ex: 123456"
+        >
+        
+        
+        <label
+            style="
+                font-size:.75em;
+                color:#475569;
+                display:block;
+                margin-bottom:4px;
+            "
+        >
+            Data do chamado
+        </label>
+        
+        <input
+            type="date"
+            id="data-${base.id}"
+            class="popup-select"
+            style="
+                margin-bottom:10px;
+                cursor:pointer;
+            "
+        >
+        
+        
+        <label
+            style="
+                font-size:.75em;
+                color:#475569;
+                display:block;
+                margin-bottom:4px;
+            "
+        >
+            Prazo / vencimento do chamado
+        </label>
+        
+        <input
+            type="datetime-local"
+            id="prazo-${base.id}"
+            class="popup-select"
+            style="
+                margin-bottom:10px;
+                cursor:pointer;
+            "
+        >
+        
+        
+        <label
+            style="
+                font-size:.75em;
+                color:#475569;
+                display:block;
+                margin-bottom:4px;
+            "
+        >
+            Descrição
+        </label>
+        
+        <textarea
+            id="desc-${base.id}"
+            placeholder="Descrição do serviço..."
+        ></textarea>
+
+                    <label
+                        style="
+                            font-size:.8em;
+                            color:#555;
+                            display:block;
+                            margin-top:5px;
+                            margin-bottom:2px;
+                        "
+                    >
+                        <b>
+                            Anexar Evidência (Foto):
+                        </b>
+                    </label>
+
+                    <input
+                        type="file"
+                        id="evidencia-${base.id}"
+                        accept="image/*"
+                        style="
+                            width:100%;
+                            font-size:.8em;
+                            margin-bottom:12px;
+                        "
+                    >
+
+                    <button
+    type="button"
+    onclick="registrarServico(
+        event,
+        '${base.id}',
+        decodeURIComponent('${encodeURIComponent(base.nome)}')
+    )"
+                        class="btn-link"
+                        style="
+                            background-color:#f26522;
+                            color:white;
+                            border:none;
+                            width:100%;
+                            padding:10px;
+                            border-radius:4px;
+                            cursor:pointer;
+                            font-weight:bold;
+                        "
+                    >
+                        Registrar Serviço
+                    </button>
+
+                </div>
+            `;
+
+            marker.bindPopup(
+                popupContent
+            );
+
+            marker.addTo(
+                mapTypeToLayer[
+                    base.tipo
+                ] ||
+                camadas[
+                    "Agências de Atendimento"
+                ]
+            );
+        }
+    );
+
+    L.control.layers(
+        null,
+        camadas,
+        {
+            position:
+                "topright",
+
+            collapsed:
+                false
+        }
+    ).addTo(map);
+}
+
+
+// =====================================================================
+// 18. CHECKLIST DINÂMICO
+// =====================================================================
+
+window.atualizarChecklist =
+function (baseId) {
+    const select =
+        document.getElementById(
+            `tipo-servico-${baseId}`
+        );
+
+    const container =
+        document.getElementById(
+            `checklist-container-${baseId}`
+        );
+
+    if (
+        !select ||
+        !container
+    ) {
+        return;
+    }
+
+    const tipo =
+        select.value;
+
+    let html = "";
+
+    if (
+        tipo ===
+        "civil"
+    ) {
+        html = `
+            <strong
+                style="
+                    display:block;
+                    margin-bottom:8px;
+                    color:#004b6b;
+                "
+            >
+                Checklist de Segurança (Obrigatório):
+            </strong>
+
+            <label
+                style="
+                    display:flex;
+                    gap:8px;
+                    margin-bottom:4px;
+                "
+            >
+                <input
+                    type="checkbox"
+                    class="chk-${baseId}"
+                >
+
+                Isolamento da área realizado
+            </label>
+
+            <label
+                style="
+                    display:flex;
+                    gap:8px;
+                    margin-bottom:4px;
+                "
+            >
+                <input
+                    type="checkbox"
+                    class="chk-${baseId}"
+                >
+
+                EPIs completos utilizados
+            </label>
+
+            <label
+                style="
+                    display:flex;
+                    gap:8px;
+                    margin-bottom:4px;
+                "
+            >
+                <input
+                    type="checkbox"
+                    class="chk-${baseId}"
+                >
+
+                Entulho recolhido/descartado corretamente
+            </label>
+        `;
+    }
+
+    if (
+        tipo ===
+        "climatizacao"
+    ) {
+        html = `
+            <strong
+                style="
+                    display:block;
+                    margin-bottom:8px;
+                    color:#004b6b;
+                "
+            >
+                Checklist Operacional (Obrigatório):
+            </strong>
+
+            <label
+                style="
+                    display:flex;
+                    gap:8px;
+                    margin-bottom:4px;
+                "
+            >
+                <input
+                    type="checkbox"
+                    class="chk-${baseId}"
+                >
+
+                Limpeza de filtros realizada
+            </label>
+
+            <label
+                style="
+                    display:flex;
+                    gap:8px;
+                    margin-bottom:4px;
+                "
+            >
+                <input
+                    type="checkbox"
+                    class="chk-${baseId}"
+                >
+
+                Verificação de gás refrigerante (Pressão OK)
+            </label>
+
+            <label
+                style="
+                    display:flex;
+                    gap:8px;
+                    margin-bottom:4px;
+                "
+            >
+                <input
+                    type="checkbox"
+                    class="chk-${baseId}"
+                >
+
+                Teste de dreno desobstruído concluído
+            </label>
+        `;
+    }
+
+    if (
+        tipo ===
+        "eletrica"
+    ) {
+        html = `
+            <strong
+                style="
+                    display:block;
+                    margin-bottom:8px;
+                    color:#004b6b;
+                "
+            >
+                Regras de Ouro (Obrigatório):
+            </strong>
+
+            <label
+                style="
+                    display:flex;
+                    gap:8px;
+                    margin-bottom:4px;
+                "
+            >
+                <input
+                    type="checkbox"
+                    class="chk-${baseId}"
+                >
+
+                Desenergização / Seccionamento confirmado
+            </label>
+
+            <label
+                style="
+                    display:flex;
+                    gap:8px;
+                    margin-bottom:4px;
+                "
+            >
+                <input
+                    type="checkbox"
+                    class="chk-${baseId}"
+                >
+
+                Travamento e bloqueio aplicados (LOTO)
+            </label>
+
+            <label
+                style="
+                    display:flex;
+                    gap:8px;
+                    margin-bottom:4px;
+                "
+            >
+                <input
+                    type="checkbox"
+                    class="chk-${baseId}"
+                >
+
+                Teste de ausência de tensão realizado
+            </label>
+        `;
+    }
+
+    if (
+        html
+    ) {
+        container.innerHTML =
+            html;
+
+        container.style.display =
+            "block";
+    } else {
+        container.innerHTML =
+            "";
+
+        container.style.display =
+            "none";
+    }
+};
+
+
+// =====================================================================
+// 19. UPLOAD DE EVIDÊNCIA
+// =====================================================================
+
+async function enviarFotoImgBB(
+    file
+) {
+    // IMPORTANTE:
+    // A chave continua no frontend para manter
+    // compatibilidade com a versão atual.
+    // Em produção, o ideal é mover isso para
+    // backend ou Firebase Storage.
+
+    const API_KEY =
+        "3f159529a71f1e4c44c57132ad219a99";
+
+    const url =
+        `https://api.imgbb.com/1/upload?key=${API_KEY}`;
+
+    const formData =
+        new FormData();
+
+    formData.append(
+        "image",
+        file
+    );
+
+    const response =
+        await fetch(
+            url,
+            {
+                method:
+                    "POST",
+
+                body:
+                    formData
             }
-            window.verificarEAtualizarMarcador(baseIdParaAtualizar, servico.local);
+        );
 
-            alert("Status atualizado e registrado no histórico!");
-            window.renderizarTerceirizados();
+    if (
+        !response.ok
+    ) {
+        throw new Error(
+            `Falha no upload da imagem (HTTP ${response.status}).`
+        );
+    }
+
+    const data =
+        await response.json();
+
+    if (
+        !data.success ||
+        !data.data?.url
+    ) {
+        throw new Error(
+            "Erro ao fazer upload da imagem no ImgBB."
+        );
+    }
+
+    return data.data.url;
+}
+// =====================================================================
+// 20. REGISTRAR CHAMADO
+// =====================================================================
+
+window.registrarServico =
+async function (
+    event,
+    baseId,
+    nomeBase
+) {
+    const empresaId =
+        document.getElementById(
+            `empresa-${baseId}`
+        )?.value;
+
+    const tipoServico =
+        document.getElementById(
+            `tipo-servico-${baseId}`
+        )?.value;
+
+    const prioridade =
+        document.getElementById(
+            `prioridade-${baseId}`
+        )?.value ??
+        "media";
+
+    const statusServico =
+        document.getElementById(
+            `status-${baseId}`
+        )?.value ??
+        "andamento";
+
+    const numeroChamado =
+        document.getElementById(
+            `chamado-${baseId}`
+        )?.value.trim();
+
+    const dataServico =
+        document.getElementById(
+            `data-${baseId}`
+        )?.value;
+
+        const prazoInformado =
+        document.getElementById(
+            `prazo-${baseId}`
+        )?.value;
+
+    const descricao =
+        document.getElementById(
+            `desc-${baseId}`
+        )?.value.trim();
+
+    const inputArquivo =
+        document.getElementById(
+            `evidencia-${baseId}`
+        );
+
+    const arquivo =
+        inputArquivo?.files?.[0] ??
+        null;
+
+
+    // ================================================================
+    // VALIDAÇÕES BÁSICAS
+    // ================================================================
+
+    if (
+        !empresaId ||
+        !tipoServico ||
+        !numeroChamado ||
+        !dataServico ||
+        !descricao
+        
+    ) {
+        alert(
+            "Preencha todos os campos obrigatórios."
+        );
+
+        return;
+    }
+
+
+    if (
+        !prioridadeEhValida(
+            prioridade
+        )
+    ) {
+        alert(
+            "Selecione uma prioridade válida."
+        );
+
+        return;
+    }
+
+
+    // ================================================================
+    // CHECKLIST OBRIGATÓRIO
+    // ================================================================
+
+    const checkboxes =
+        [
+            ...document.querySelectorAll(
+                `.chk-${baseId}`
+            )
+        ];
+
+    if (
+        checkboxes.length > 0 &&
+        !checkboxes.every(
+            checkbox =>
+                checkbox.checked
+        )
+    ) {
+        alert(
+            "Conclua todos os itens do checklist antes de registrar o chamado."
+        );
+
+        return;
+    }
+
+
+    // ================================================================
+    // EVITA CHAMADO DUPLICADO
+    // ================================================================
+
+    const numeroNormalizado =
+        numeroChamado
+            .trim()
+            .toLowerCase();
+
+    const chamadoDuplicado =
+        dadosTerceirizados.some(
+            empresa =>
+                (
+                    empresa.servicos ??
+                    []
+                ).some(
+                    servico =>
+                        String(
+                            servico.chamado ??
+                            ""
+                        )
+                            .trim()
+                            .toLowerCase() ===
+                        numeroNormalizado
+                )
+        );
+
+    if (
+        chamadoDuplicado
+    ) {
+        alert(
+            `Já existe um chamado com o número #${numeroChamado}.`
+        );
+
+        return;
+    }
+
+
+    // ================================================================
+    // ESTADO DO BOTÃO
+    // ================================================================
+
+    const btn =
+        event?.currentTarget ??
+        null;
+
+    const textoOriginal =
+        btn?.innerHTML ??
+        "Registrar Serviço";
+
+    if (
+        btn
+    ) {
+        btn.innerHTML =
+            `
+                <i class="fa-solid fa-spinner fa-spin"></i>
+                Salvando...
+            `;
+
+        btn.disabled =
+            true;
+    }
+
+
+    try {
+
+        // ============================================================
+        // UPLOAD DA FOTO
+        // ============================================================
+
+        let urlFoto =
+            null;
+
+        if (
+            arquivo
+        ) {
+            if (
+                !arquivo.type.startsWith(
+                    "image/"
+                )
+            ) {
+                throw new Error(
+                    "O arquivo selecionado não é uma imagem."
+                );
+            }
+
+            const tamanhoMaximo =
+                8 *
+                1024 *
+                1024;
+
+            if (
+                arquivo.size >
+                tamanhoMaximo
+            ) {
+                throw new Error(
+                    "A imagem deve ter no máximo 8 MB."
+                );
+            }
+
+            urlFoto =
+                await enviarFotoImgBB(
+                    arquivo
+                );
+        }
+
+
+        // ============================================================
+        // LOCALIZAR EMPRESA
+        // ============================================================
+
+        const empresa =
+            dadosTerceirizados.find(
+                item =>
+                    item.id ===
+                    empresaId
+            );
+
+        if (
+            !empresa
+        ) {
+            throw new Error(
+                "Empresa não encontrada."
+            );
+        }
+
+        if (
+            !Array.isArray(
+                empresa.servicos
+            )
+        ) {
+            empresa.servicos =
+                [];
+        }
+
+
+        // ============================================================
+        // CALCULAR SLA
+        // ============================================================
+
+        const criadoEm =
+            new Date().toISOString();
+            const prazoSla =
+            new Date(
+                prazoInformado
+            ).toISOString();
+        // ============================================================
+        // NOVO CHAMADO
+        // ============================================================
+
+        const novoServico = {
+            id:
+                `sv-${Date.now()}-` +
+                Math.random()
+                    .toString(36)
+                    .slice(
+                        2,
+                        7
+                    ),
+
+            chamado:
+                numeroChamado,
+
+            tipoServico:
+                tipoServico,
+
+            prioridade:
+                prioridade,
+
+            statusAtual:
+                statusServico,
+
+            localId:
+                baseId,
+
+            local:
+                nomeBase,
+
+            desc:
+                descricao,
+
+            foto:
+                urlFoto,
+
+            criadoEm:
+                criadoEm,
+
+            prazoSla:
+                prazoSla,
+
+            historico: [
+                {
+                    status:
+                        statusServico,
+
+                    data:
+                        dataServico,
+
+                    registradoEm:
+                        criadoEm
+                }
+            ]
+        };
+
+
+        // ============================================================
+        // ADICIONAR LOCALMENTE
+        // ============================================================
+
+        empresa.servicos.push(
+            novoServico
+        );
+
+
+        // ============================================================
+        // SALVAR NO FIRESTORE
+        // ============================================================
+
+        try {
+            await window.salvarDadosGlobais();
+        } catch (
+            erroSalvar
+        ) {
+            // Se o Firestore falhar,
+            // desfaz a inclusão local.
+
+            empresa.servicos =
+                empresa.servicos.filter(
+                    item =>
+                        item.id !==
+                        novoServico.id
+                );
+
+            throw erroSalvar;
+        }
+
+
+        // ============================================================
+        // ATUALIZAR MARCADOR
+        // ============================================================
+
+        window.verificarEAtualizarMarcador(
+            baseId,
+            nomeBase
+        );
+
+
+        // ============================================================
+        // LIMPAR CAMPOS
+        // ============================================================
+
+        const idsParaLimpar = [
+            `empresa-${baseId}`,
+            `tipo-servico-${baseId}`,
+            `chamado-${baseId}`,
+            `data-${baseId}`,
+            `prazo-${baseId}`,
+            `desc-${baseId}`
+         
+        ];
+
+        idsParaLimpar.forEach(
+            id => {
+                const elemento =
+                    document.getElementById(
+                        id
+                    );
+
+                if (
+                    elemento
+                ) {
+                    elemento.value =
+                        "";
+                }
+            }
+        );
+
+
+        // ============================================================
+        // RESTAURAR PRIORIDADE PADRÃO
+        // ============================================================
+
+        const prioridadeEl =
+            document.getElementById(
+                `prioridade-${baseId}`
+            );
+
+        if (
+            prioridadeEl
+        ) {
+            prioridadeEl.value =
+                "media";
+        }
+
+
+        // ============================================================
+        // RESTAURAR STATUS PADRÃO
+        // ============================================================
+
+        const statusEl =
+            document.getElementById(
+                `status-${baseId}`
+            );
+
+        if (
+            statusEl
+        ) {
+            statusEl.value =
+                "andamento";
+        }
+
+
+        // ============================================================
+        // LIMPAR ARQUIVO
+        // ============================================================
+
+        if (
+            inputArquivo
+        ) {
+            inputArquivo.value =
+                "";
+        }
+
+
+        // ============================================================
+        // LIMPAR CHECKLIST
+        // ============================================================
+
+        const checklist =
+            document.getElementById(
+                `checklist-container-${baseId}`
+            );
+
+        if (
+            checklist
+        ) {
+            checklist.innerHTML =
+                "";
+
+            checklist.style.display =
+                "none";
+        }
+
+
+        // ============================================================
+        // ATUALIZAR BARRA LATERAL
+        // ============================================================
+
+        window.renderizarTerceirizados();
+
+
+        // ============================================================
+        // ABRIR ÁREA DAS EMPRESAS
+        // ============================================================
+
+        const lista =
+            document.getElementById(
+                "lista-terceirizados"
+            );
+
+        const botaoLista =
+            document.getElementById(
+                "btn-terceirizados"
+            );
+
+        lista?.classList.add(
+            "mostrar"
+        );
+
+        botaoLista?.classList.add(
+            "ativo"
+        );
+
+
+        // Abre automaticamente a empresa
+        // do chamado recém-criado.
+
+        setTimeout(
+            () =>
+                window.toggleTerceirizado(
+                    empresaId
+                ),
+            100
+        );
+
+
+        // ============================================================
+        // CONFIRMAÇÃO
+        // ============================================================
+
+        alert(
+            `Chamado #${numeroChamado} registrado com sucesso!`
+        );
+
+    } catch (
+        erro
+    ) {
+        console.error(
+            "Erro ao registrar chamado:",
+            erro
+        );
+
+        alert(
+            erro.message ||
+            "Não foi possível registrar o chamado."
+        );
+
+    } finally {
+
+        if (
+            btn
+        ) {
+            btn.innerHTML =
+                textoOriginal;
+
+            btn.disabled =
+                false;
         }
     }
 };
 
-window.focarNoMapa = function(localId) {
-    const marker = window.marcadoresGlobais[localId];
-    if (marker) {
-        map.flyTo(marker.getLatLng(), 16, { duration: 1.5 });
-        setTimeout(() => marker.openPopup(), 1500);
-    } else {
-        console.warn("Local não encontrado pelo ID. Verifique o ID do serviço.");
+
+// =====================================================================
+// 21. EXCLUIR CHAMADO
+// =====================================================================
+
+window.deletarServico =
+async function (
+    empresaId,
+    servicoId
+) {
+    const empresa =
+        dadosTerceirizados.find(
+            item =>
+                item.id ===
+                empresaId
+        );
+
+    if (!empresa) {
+        alert(
+            "Empresa não encontrada."
+        );
+
+        return;
+    }
+
+    const servico =
+        (
+            empresa.servicos ??
+            []
+        ).find(
+            item =>
+                item.id ===
+                servicoId
+        );
+
+    if (!servico) {
+        alert(
+            "Chamado não encontrado."
+        );
+
+        return;
+    }
+
+    const confirmar =
+        confirm(
+            `Excluir o chamado #${servico.chamado}?\n\n` +
+            `${servico.local}\n\n` +
+            "Esta ação não poderá ser desfeita."
+        );
+
+    if (
+        !confirmar
+    ) {
+        return;
+    }
+
+    // Backup local para restaurar
+    // caso o Firestore falhe.
+
+    const backup =
+        [
+            ...empresa.servicos
+        ];
+
+    try {
+
+        empresa.servicos =
+            empresa.servicos.filter(
+                item =>
+                    item.id !==
+                    servicoId
+            );
+
+        await window.salvarDadosGlobais();
+
+
+        // ============================================================
+        // ATUALIZAR MARCADOR
+        // ============================================================
+
+        const base =
+            obterBaseDoServico(
+                servico
+            );
+
+        if (
+            base
+        ) {
+            window.verificarEAtualizarMarcador(
+                base.id,
+                base.nome
+            );
+        }
+
+
+        // ============================================================
+        // ATUALIZAR INTERFACE
+        // ============================================================
+
+        window.renderizarTerceirizados();
+
+
+        alert(
+            `Chamado #${servico.chamado} excluído com sucesso.`
+        );
+
+    } catch (
+        erro
+    ) {
+
+        // Se der erro, restaura
+        // o conteúdo original.
+
+        empresa.servicos =
+            backup;
+
+        console.error(
+            "Erro ao excluir chamado:",
+            erro
+        );
+
+        alert(
+            "Não foi possível excluir o chamado. Nenhum dado foi removido."
+        );
     }
 };
 
-window.toggleTerceirizado = function(id) {
-    const body = document.getElementById(`body-${id}`);
-    const header = document.getElementById(`header-${id}`);
-    if (body.classList.contains('mostrar')) {
-        body.classList.remove('mostrar');
-        header.classList.remove('aberto');
-    } else {
-        document.querySelectorAll('.terceirizado-body').forEach(el => el.classList.remove('mostrar'));
-        document.querySelectorAll('.terceirizado-header').forEach(el => el.classList.remove('aberto'));
-        body.classList.add('mostrar');
-        header.classList.add('aberto');
+
+// =====================================================================
+// 22. ALTERAR STATUS DO CHAMADO
+// =====================================================================
+
+// =====================================================================
+// ALTERAR STATUS DO CHAMADO
+// =====================================================================
+
+window.mudarStatusServico =
+async function (
+    empresaId,
+    servicoId
+) {
+
+    const select =
+        document.getElementById(
+            `select-status-${servicoId}`
+        );
+
+    const inputData =
+        document.getElementById(
+            `input-data-${servicoId}`
+        );
+
+    const botao =
+        document.getElementById(
+            `btn-status-${servicoId}`
+        );
+
+
+    // ================================================================
+    // VERIFICAR ELEMENTOS
+    // ================================================================
+
+    if (!select) {
+
+        console.error(
+            "Select de status não encontrado:",
+            servicoId
+        );
+
+        alert(
+            "Erro ao localizar o campo de status."
+        );
+
+        return;
+    }
+
+
+    if (!inputData) {
+
+        console.error(
+            "Campo de data não encontrado:",
+            servicoId
+        );
+
+        alert(
+            "Erro ao localizar o campo de data."
+        );
+
+        return;
+    }
+
+
+    const novoStatus =
+        select.value;
+
+    const novaData =
+        inputData.value;
+
+
+    // ================================================================
+    // VALIDAÇÃO
+    // ================================================================
+
+    if (!novaData) {
+
+        alert(
+            "Selecione a data dessa alteração."
+        );
+
+        return;
+    }
+
+
+    // ================================================================
+    // LOCALIZAR EMPRESA
+    // ================================================================
+
+    const empresa =
+        dadosTerceirizados.find(
+            item =>
+                item.id === empresaId
+        );
+
+    if (!empresa) {
+
+        alert(
+            "Empresa não encontrada."
+        );
+
+        return;
+    }
+
+
+    // ================================================================
+    // LOCALIZAR CHAMADO
+    // ================================================================
+
+    const servico =
+        (
+            empresa.servicos || []
+        ).find(
+            item =>
+                item.id === servicoId
+        );
+
+    if (!servico) {
+
+        alert(
+            "Chamado não encontrado."
+        );
+
+        return;
+    }
+
+
+    // ================================================================
+    // NÃO FAZER ALTERAÇÃO REPETIDA
+    // ================================================================
+
+    if (
+        servico.statusAtual === novoStatus
+    ) {
+
+        alert(
+            "O chamado já está com esse status."
+        );
+
+        return;
+    }
+
+
+    // ================================================================
+    // BACKUP
+    // ================================================================
+
+    const statusAnterior =
+        servico.statusAtual;
+
+    const historicoAnterior =
+        [
+            ...(servico.historico || [])
+        ];
+
+
+    // ================================================================
+    // BOTÃO CARREGANDO
+    // ================================================================
+
+    const textoOriginal =
+        botao?.innerHTML;
+
+    if (botao) {
+
+        botao.disabled =
+            true;
+
+        botao.innerHTML = `
+            <i class="fa-solid fa-spinner fa-spin"></i>
+            Salvando...
+        `;
+    }
+
+
+    try {
+
+        // ============================================================
+        // ALTERAR STATUS
+        // ============================================================
+
+        servico.statusAtual =
+            novoStatus;
+
+
+        if (
+            !Array.isArray(
+                servico.historico
+            )
+        ) {
+
+            servico.historico =
+                [];
+        }
+
+
+        // ============================================================
+        // HISTÓRICO
+        // ============================================================
+
+        servico.historico.push({
+
+            status:
+                novoStatus,
+
+            data:
+                novaData,
+
+            registradoEm:
+                new Date().toISOString()
+
+        });
+
+
+        // ============================================================
+        // SALVAR FIREBASE
+        // ============================================================
+
+        await window.salvarDadosGlobais();
+
+
+        // ============================================================
+        // ATUALIZAR MARCADOR
+        // ============================================================
+
+        const base =
+            obterBaseDoServico(
+                servico
+            );
+
+        if (base) {
+
+            window.verificarEAtualizarMarcador(
+                base.id,
+                base.nome
+            );
+        }
+
+
+        // ============================================================
+        // FEEDBACK SEM ALERT
+        // ============================================================
+
+        if (botao) {
+
+            botao.innerHTML = `
+                <i class="fa-solid fa-check"></i>
+                Atualizado
+            `;
+
+            botao.style.background =
+                "#16a34a";
+        }
+
+
+        // Pequeno atraso para permitir
+        // que o usuário veja o feedback.
+
+        setTimeout(
+            () => {
+
+                window.renderizarTerceirizados();
+
+            },
+            800
+        );
+
+
+    } catch (erro) {
+
+        // ============================================================
+        // RESTAURAR CASO FIREBASE FALHE
+        // ============================================================
+
+        servico.statusAtual =
+            statusAnterior;
+
+        servico.historico =
+            historicoAnterior;
+
+
+        console.error(
+            "Erro ao atualizar status:",
+            erro
+        );
+
+
+        if (botao) {
+
+            botao.innerHTML =
+                textoOriginal;
+
+            botao.disabled =
+                false;
+
+            botao.style.background =
+                "";
+        }
+
+
+        alert(
+            "Não foi possível atualizar o status."
+        );
     }
 };
 
-window.renderizarTerceirizados = function() {
-    
-    const listaTerceirizados = document.getElementById('lista-terceirizados');
-    if(!listaTerceirizados) return;
+// =====================================================================
+// 23. ABRIR EVIDÊNCIA EM NOVA GUIA
+// =====================================================================
 
-    let htmlCards = '';
-    dadosTerceirizados.forEach(empresa => {
-        let htmlServicos = empresa.servicos.map(s => {
-            const labelStatusAtual = s.statusAtual === 'andamento' ? 'Em Andamento' : 'Realizado';
+window.abrirEvidencia =
+function (
+    urlCodificada
+) {
+    if (
+        !urlCodificada
+    ) {
+        return;
+    }
 
-            const htmlHistorico = s.historico.map(h => {
-                const badgeTxt = h.status === 'andamento' ? 'Iniciado:' : 'Concluído:';
-                return `<div style="font-size: 0.75em; color: #666; margin-top: 3px;">
-                            <strong>${badgeTxt}</strong> ${formatarDataBR(h.data)}
-                        </div>`;
-            }).join('');
+    try {
 
-            // ---  FOTO NA LATERAL ---
-            const htmlFoto = s.foto ? `
-                <div style="margin: 8px 0; text-align: center;">
-                    <a href="${s.foto}" target="_blank" title="Clique para abrir imagem completa">
-                        <img src="${s.foto}" alt="Evidência do chamado" 
-                             style="width: 100%; max-height: 120px; border-radius: 6px; border: 1px solid #ccc; object-fit: cover;">
-                    </a>
-                </div>
-            ` : '';
+        const url =
+            decodeURIComponent(
+                urlCodificada
+            );
 
-            let htmlMudarStatus = '';
-            if (s.statusAtual === 'andamento') {
-                htmlMudarStatus = `
-                    <div class="mudar-status-box" onclick="event.stopPropagation()" style="margin-top: 12px; padding-top: 10px; border-top: 1px dashed #ddd;">
-                        <label style="font-size: 0.75em; font-weight: bold; color: #444; display: block; margin-bottom: 6px;">Registrar Conclusão:</label>
-                        <div style="display: flex; gap: 6px; margin-bottom: 6px;">
-                            <select id="select-status-${s.id}" style="padding: 4px; font-size: 0.8em; flex: 1; border: 1px solid #ccc; border-radius: 4px; outline: none;">
-                                <option value="realizado">Realizado</option>
-                            </select>
-                            <input type="date" id="input-data-${s.id}" style="padding: 4px; font-size: 0.8em; flex: 1; border: 1px solid #ccc; border-radius: 4px; outline: none;">
-                        </div>
-                        <button onclick="mudarStatusServico('${empresa.id}', '${s.id}')" style="width: 100%; font-size: 0.8em; padding: 6px; cursor: pointer; background: #ed7523; color: white; border: none; border-radius: 4px; font-weight: bold;">Salvar</button>
+        const novaAba =
+            window.open(
+                url,
+                "_blank",
+                "noopener,noreferrer"
+            );
+
+        if (
+            !novaAba
+        ) {
+            alert(
+                "O navegador bloqueou a nova guia. Permita pop-ups para abrir a evidência."
+            );
+        }
+
+    } catch (
+        erro
+    ) {
+        console.error(
+            "Erro ao abrir evidência:",
+            erro
+        );
+
+        alert(
+            "Não foi possível abrir a evidência."
+        );
+    }
+};
+
+
+// =====================================================================
+// 24. FOCAR LOCAL NO MAPA
+// =====================================================================
+
+window.focarNoMapa =
+function (
+    localId
+) {
+    if (
+        !localId
+    ) {
+        return;
+    }
+
+    const marker =
+        window.marcadoresGlobais[
+            localId
+        ];
+
+    if (
+        !marker
+    ) {
+        console.warn(
+            "Local não encontrado pelo ID:",
+            localId
+        );
+
+        return;
+    }
+
+    map.flyTo(
+        marker.getLatLng(),
+        16,
+        {
+            duration:
+                1.5
+        }
+    );
+
+    setTimeout(
+        () =>
+            marker.openPopup(),
+        1500
+    );
+};
+
+
+// =====================================================================
+// 25. ABRIR / FECHAR EMPRESA NA BARRA LATERAL
+// =====================================================================
+
+window.toggleTerceirizado =
+function (
+    id
+) {
+    const body =
+        document.getElementById(
+            `body-${id}`
+        );
+
+    const header =
+        document.getElementById(
+            `header-${id}`
+        );
+
+    if (
+        !body ||
+        !header
+    ) {
+        return;
+    }
+
+
+    // Se já estiver aberto,
+    // apenas fecha.
+
+    if (
+        body.classList.contains(
+            "mostrar"
+        )
+    ) {
+        body.classList.remove(
+            "mostrar"
+        );
+
+        header.classList.remove(
+            "aberto"
+        );
+
+        return;
+    }
+
+
+    // Fecha todos os demais
+
+    document
+        .querySelectorAll(
+            ".terceirizado-body"
+        )
+        .forEach(
+            elemento =>
+                elemento.classList.remove(
+                    "mostrar"
+                )
+        );
+
+
+    document
+        .querySelectorAll(
+            ".terceirizado-header"
+        )
+        .forEach(
+            elemento =>
+                elemento.classList.remove(
+                    "aberto"
+                )
+        );
+
+
+    // Abre o escolhido
+
+    body.classList.add(
+        "mostrar"
+    );
+
+    header.classList.add(
+        "aberto"
+    );
+};
+// =====================================================================
+// 26. RENDERIZAÇÃO DOS CHAMADOS
+// =====================================================================
+
+// =====================================================================
+// RENDERIZAÇÃO DOS CHAMADOS
+// =====================================================================
+
+window.renderizarTerceirizados = function () {
+
+    const listaTerceirizados =
+        document.getElementById(
+            "lista-terceirizados"
+        );
+
+    if (!listaTerceirizados) {
+        return;
+    }
+
+    let htmlCards = "";
+
+
+    // ================================================================
+    // PERCORRER EMPRESAS
+    // ================================================================
+
+    dadosTerceirizados.forEach(
+        empresa => {
+
+            const todosServicos =
+                Array.isArray(
+                    empresa.servicos
+                )
+                    ? empresa.servicos
+                    : [];
+
+
+            // ========================================================
+            // FILTRO DE BUSCA
+            // ========================================================
+
+            const servicos =
+                termoBuscaChamado
+
+                    ? todosServicos.filter(
+                        servico => {
+
+                            const numero =
+                                String(
+                                    servico.chamado || ""
+                                )
+                                    .toLowerCase();
+
+                            const local =
+                                String(
+                                    servico.local || ""
+                                )
+                                    .toLowerCase();
+
+                            const descricao =
+                                String(
+                                    servico.desc || ""
+                                )
+                                    .toLowerCase();
+
+                            return (
+                                numero.includes(
+                                    termoBuscaChamado
+                                ) ||
+
+                                local.includes(
+                                    termoBuscaChamado
+                                ) ||
+
+                                descricao.includes(
+                                    termoBuscaChamado
+                                )
+                            );
+                        }
+                    )
+
+                    : todosServicos;
+
+
+            // ========================================================
+            // DURANTE BUSCA, ESCONDE EMPRESA SEM RESULTADOS
+            // ========================================================
+
+            if (
+                termoBuscaChamado &&
+                servicos.length === 0
+            ) {
+                return;
+            }
+
+
+            // ========================================================
+            // MONTAR CHAMADOS
+            // ========================================================
+
+            let htmlServicos =
+                servicos
+                    .map(
+                        servico => {
+
+                            // =========================================
+                            // STATUS
+                            // =========================================
+
+                            const labelStatusAtual =
+                                obterLabelStatus(
+                                    servico.statusAtual
+                                );
+
+
+                            // =========================================
+                            // PRIORIDADE
+                            // =========================================
+
+                            const prioridade =
+                                servico.prioridade ||
+                                "nao-definida";
+
+                            const labelPrioridade =
+                                obterLabelPrioridade(
+                                    servico.prioridade
+                                );
+
+
+                            // =========================================
+                            // HISTÓRICO
+                            // =========================================
+
+                            const historico =
+                                Array.isArray(
+                                    servico.historico
+                                )
+                                    ? servico.historico
+                                    : [];
+
+
+                            const htmlHistorico =
+                                historico
+                                    .map(
+                                        item => `
+                                            <div class="historico-item">
+
+                                                <i class="fa-regular fa-clock"></i>
+
+                                                <strong>
+                                                    ${escapeHtml(
+                                                        obterLabelStatus(
+                                                            item.status
+                                                        )
+                                                    )}
+                                                </strong>
+
+                                                <span>
+                                                    ${escapeHtml(
+                                                        formatarDataBR(
+                                                            item.data
+                                                        )
+                                                    )}
+                                                </span>
+
+                                            </div>
+                                        `
+                                    )
+                                    .join("");
+
+
+                            // =========================================
+                            // PRAZO
+                            // =========================================
+
+                            const infoSLA =
+                                obterInfoSLA(
+                                    servico
+                                );
+
+
+                            const htmlSLA = `
+                                <div
+                                    class="
+                                        sla-box
+                                        ${infoSLA.classe}
+                                    "
+                                >
+
+                                    <i class="fa-regular fa-clock"></i>
+
+                                    <span>
+                                        ${escapeHtml(
+                                            infoSLA.texto
+                                        )}
+                                    </span>
+
+                                </div>
+                            `;
+
+
+                            const htmlPrazo =
+                                servico.prazoSla
+
+                                    ? `
+                                        <div class="prazo-sla">
+
+                                            Prazo:
+
+                                            <strong>
+                                                ${escapeHtml(
+                                                    formatarDataHoraBR(
+                                                        servico.prazoSla
+                                                    )
+                                                )}
+                                            </strong>
+
+                                        </div>
+                                    `
+
+                                    : "";
+
+
+                            // =========================================
+                            // EVIDÊNCIA
+                            // =========================================
+
+                            let htmlEvidencia = "";
+
+
+                            if (servico.foto) {
+
+                                const urlCodificada =
+                                    encodeURIComponent(
+                                        servico.foto
+                                    );
+
+
+                                htmlEvidencia = `
+                                    <button
+                                        type="button"
+                                        class="
+                                            btn-servico
+                                            btn-evidencia
+                                        "
+                                        onclick="
+                                            event.stopPropagation();
+
+                                            abrirEvidencia(
+                                                '${urlCodificada}'
+                                            );
+                                        "
+                                    >
+
+                                        <i class="fa-solid fa-camera"></i>
+
+                                        Ver evidência
+
+                                    </button>
+                                `;
+                            }
+
+
+                            // =========================================
+                            // CHAMADO ENCERRADO?
+                            // =========================================
+
+                            const chamadoEncerrado =
+                                [
+                                    "realizado",
+                                    "cancelado"
+                                ].includes(
+                                    servico.statusAtual
+                                );
+
+
+                            // =========================================
+                            // ALTERAÇÃO DE STATUS
+                            // =========================================
+
+                            let htmlMudarStatus = "";
+
+
+                            if (!chamadoEncerrado) {
+
+                                htmlMudarStatus = `
+                                    <div
+                                        class="mudar-status-box"
+                                        onclick="
+                                            event.stopPropagation()
+                                        "
+                                    >
+
+                                        <label>
+                                            Atualizar chamado
+                                        </label>
+
+
+                                        <select
+                                            id="select-status-${servico.id}"
+                                            class="select-status-servico"
+                                        >
+
+                                            <option
+                                                value="andamento"
+                                                ${
+                                                    servico.statusAtual ===
+                                                    "andamento"
+                                                        ? "selected"
+                                                        : ""
+                                                }
+                                            >
+                                                Em Andamento
+                                            </option>
+
+
+                                            <option
+                                                value="aguardando"
+                                                ${
+                                                    servico.statusAtual ===
+                                                    "aguardando"
+                                                        ? "selected"
+                                                        : ""
+                                                }
+                                            >
+                                                Aguardando Peça/Aprovação
+                                            </option>
+
+
+                                            <option
+                                                value="realizado"
+                                                ${
+                                                    servico.statusAtual ===
+                                                    "realizado"
+                                                        ? "selected"
+                                                        : ""
+                                                }
+                                            >
+                                                Realizado
+                                            </option>
+
+
+                                            <option
+                                                value="cancelado"
+                                                ${
+                                                    servico.statusAtual ===
+                                                    "cancelado"
+                                                        ? "selected"
+                                                        : ""
+                                                }
+                                            >
+                                                Cancelado
+                                            </option>
+
+                                        </select>
+
+
+                                        <input
+                                            type="date"
+                                            id="input-data-${servico.id}"
+                                            class="input-data-servico"
+                                        >
+
+
+                                        <button
+                                            type="button"
+                                            class="btn-atualizar-status"
+                                            id="btn-status-${servico.id}"
+
+                                            onclick="
+                                                event.stopPropagation();
+
+                                                mudarStatusServico(
+                                                    '${empresa.id}',
+                                                    '${servico.id}'
+                                                );
+                                            "
+                                        >
+
+                                            <i class="fa-solid fa-floppy-disk"></i>
+
+                                            Salvar status
+
+                                        </button>
+
+                                    </div>
+                                `;
+                            }
+
+
+                            // =========================================
+                            // LOCALIZAÇÃO NO MAPA
+                            // =========================================
+
+                            const base =
+                                obterBaseDoServico(
+                                    servico
+                                );
+
+
+                            const localId =
+                                base?.id ??
+                                servico.localId ??
+                                "";
+
+
+                            // =========================================
+                            // CARD
+                            // =========================================
+
+                            return `
+                                <div
+                                    class="
+                                        servico-item
+                                        ${escapeHtml(
+                                            servico.statusAtual || ""
+                                        )}
+                                        prioridade-${escapeHtml(
+                                            prioridade
+                                        )}
+                                    "
+
+                                    onclick="
+                                        focarNoMapa(
+                                            '${escapeHtml(localId)}'
+                                        )
+                                    "
+                                >
+
+                                    <div class="servico-topo">
+
+                                        <div>
+
+                                            <div class="servico-local">
+                                                ${escapeHtml(
+                                                    servico.local ||
+                                                    "Local não informado"
+                                                )}
+                                            </div>
+
+
+                                            <div class="numero-chamado">
+
+                                                Chamado:
+                                                #${escapeHtml(
+                                                    servico.chamado ||
+                                                    "-"
+                                                )}
+
+                                            </div>
+
+                                        </div>
+
+
+                                        <span
+                                            class="
+                                                prioridade-badge
+                                                prioridade-${escapeHtml(
+                                                    prioridade
+                                                )}
+                                            "
+                                        >
+
+                                            ${escapeHtml(
+                                                labelPrioridade
+                                            )}
+
+                                        </span>
+
+                                    </div>
+
+
+                                    <div class="servico-desc">
+
+                                        ${escapeHtml(
+                                            servico.desc ||
+                                            "Sem descrição."
+                                        )}
+
+                                    </div>
+
+
+                                    ${htmlSLA}
+
+                                    ${htmlPrazo}
+
+
+                                    ${
+                                        htmlHistorico
+
+                                            ? `
+                                                <div class="historico-box">
+
+                                                    <div class="historico-titulo">
+
+                                                        <i class="fa-solid fa-clock-rotate-left"></i>
+
+                                                        Histórico
+
+                                                    </div>
+
+                                                    ${htmlHistorico}
+
+                                                </div>
+                                            `
+
+                                            : ""
+                                    }
+
+
+                                    <div class="servico-status-row">
+
+                                        <span
+                                            class="
+                                                badge-status
+                                                ${escapeHtml(
+                                                    servico.statusAtual ||
+                                                    ""
+                                                )}
+                                            "
+                                        >
+
+                                            ${escapeHtml(
+                                                labelStatusAtual
+                                            )}
+
+                                        </span>
+
+                                    </div>
+
+
+                                    ${htmlMudarStatus}
+
+
+                                    <div
+                                        class="servico-acoes"
+
+                                        onclick="
+                                            event.stopPropagation()
+                                        "
+                                    >
+
+                                        ${htmlEvidencia}
+
+
+                                        <button
+                                            type="button"
+
+                                            class="
+                                                btn-servico
+                                                btn-excluir
+                                            "
+
+                                            onclick="
+                                                event.stopPropagation();
+
+                                                deletarServico(
+                                                    '${empresa.id}',
+                                                    '${servico.id}'
+                                                );
+                                            "
+                                        >
+
+                                            <i class="fa-solid fa-trash-can"></i>
+
+                                            Excluir
+
+                                        </button>
+
+                                    </div>
+
+                                </div>
+                            `;
+                        }
+                    )
+                    .join("");
+
+
+            // ========================================================
+            // EMPRESA SEM CHAMADOS
+            // ========================================================
+
+            if (servicos.length === 0) {
+
+                htmlServicos = `
+                    <div class="sem-servicos">
+
+                        <i class="fa-regular fa-folder-open"></i>
+
+                        <span>
+                            Nenhum chamado registrado.
+                        </span>
+
                     </div>
                 `;
             }
 
-            const paramFocoMapa = s.localId ? `'${s.localId}'` : `Object.keys(window.marcadoresGlobais).find(k => window.marcadoresGlobais[k].getPopup().getContent().includes('${s.local}'))`;
 
-            return `
-                <div class="servico-item ${s.statusAtual}" onclick="focarNoMapa(${paramFocoMapa})">
-                    <div class="servico-local">${s.local}</div>
-                    <div style="font-size: 0.75em; font-weight: bold; color: #004b6b; margin-top: 4px;">Chamado: #${s.chamado}</div>
-                    <div style="margin-bottom: 8px;">${htmlHistorico}</div>
-                    <div class="servico-desc">${s.desc}</div>
-                    
-                    <!-- INSERÇÃO DA FOTO AQUI -->
-                    ${htmlFoto}
+            // ========================================================
+            // CONTADOR
+            // ========================================================
 
-                    <span class="badge-status ${s.statusAtual}">${labelStatusAtual}</span>
-                    ${htmlMudarStatus}
+            const ativos =
+                todosServicos.filter(
+                    chamadoEstaAtivo
+                ).length;
+
+
+            // ========================================================
+            // CARD DA EMPRESA
+            // ========================================================
+
+            htmlCards += `
+                <div class="terceirizado-card">
+
+                    <div
+                        class="terceirizado-header"
+
+                        id="header-${empresa.id}"
+
+                        onclick="
+                            toggleTerceirizado(
+                                '${empresa.id}'
+                            )
+                        "
+                    >
+
+                        <div class="empresa-info">
+
+                            <div>
+
+                                <span>
+                                    ${escapeHtml(
+                                        empresa.nome
+                                    )}
+                                </span>
+
+
+                                <div class="empresa-contador">
+
+                                    ${todosServicos.length}
+                                    chamado(s)
+
+                                    ${
+                                        ativos > 0
+                                            ? ` • ${ativos} ativo(s)`
+                                            : ""
+                                    }
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+                        <a
+                            href="https://wa.me/${encodeURIComponent(
+                                empresa.telefone || ""
+                            )}"
+
+                            target="_blank"
+
+                            rel="noopener noreferrer"
+
+                            class="btn-whatsapp"
+
+                            onclick="
+                                event.stopPropagation()
+                            "
+                        >
+
+                            <i class="fa-brands fa-whatsapp"></i>
+
+                            WhatsApp
+
+                        </a>
+
+                    </div>
+
+
+                    <div
+                        class="terceirizado-body"
+
+                        id="body-${empresa.id}"
+                    >
+
+                        ${htmlServicos}
+
+                    </div>
+
                 </div>
             `;
-        }).join('');
+        }
+    );
 
-        if(empresa.servicos.length === 0) htmlServicos = `<div class="servico-desc" style="text-align:center;">Nenhum serviço registrado.</div>`;
 
-        htmlCards += `
-            <div class="terceirizado-card">
-                <div class="terceirizado-header" id="header-${empresa.id}" onclick="toggleTerceirizado('${empresa.id}')">
-                    <div class="empresa-info"><span>${empresa.nome}</span></div>
-                    <a href="https://wa.me/${empresa.telefone}" target="_blank" class="btn-whatsapp" onclick="event.stopPropagation()">WhatsApp</a>
-                </div>
-                <div class="terceirizado-body" id="body-${empresa.id}">
-                    ${htmlServicos}
-                </div>
-            </div>
-        `;
-    });
-    listaTerceirizados.innerHTML = htmlCards;
+    // ================================================================
+    // INSERIR NA BARRA LATERAL
+    // ================================================================
+
+    listaTerceirizados.innerHTML =
+        htmlCards;
+};
+// =====================================================================
+// 27. FILTROS DO MAPA
+// =====================================================================
+
+window.aplicarFiltros =
+function () {
+    const filtroStatus =
+        document.getElementById(
+            "filtro-status"
+        )?.value ??
+        "todos";
+
+    const filtroTipo =
+        document.getElementById(
+            "filtro-tipo"
+        )?.value ??
+        "todos";
+
+    todasBasesFisicas.forEach(
+        base => {
+            const marker =
+                window.marcadoresGlobais[
+                    base.id
+                ];
+
+            if (!marker) {
+                return;
+            }
+
+            // =========================================================
+            // FILTRO POR TIPO
+            // =========================================================
+
+            const mostrarPorTipo =
+                filtroTipo === "todos" ||
+                base.tipo === filtroTipo;
+
+
+            // =========================================================
+            // FILTRO POR STATUS
+            // =========================================================
+
+            let mostrarPorStatus =
+                true;
+
+            if (
+                filtroStatus !==
+                "todos"
+            ) {
+                let statusBase =
+                    "nenhum";
+
+                const servicosDoLocal =
+                    dadosTerceirizados.flatMap(
+                        empresa =>
+                            (
+                                empresa.servicos ??
+                                []
+                            ).filter(
+                                servico =>
+                                    servico.localId ===
+                                        base.id ||
+                                    servico.local ===
+                                        base.nome
+                            )
+                    );
+
+
+                const temAtrasado =
+                    servicosDoLocal.some(
+                        chamadoEstaAtrasado
+                    );
+
+
+                const temAndamento =
+                    servicosDoLocal.some(
+                        servico =>
+                            servico.statusAtual ===
+                            "andamento"
+                    );
+
+
+                const temAguardando =
+                    servicosDoLocal.some(
+                        servico =>
+                            servico.statusAtual ===
+                            "aguardando"
+                    );
+
+
+                if (
+                    filtroStatus ===
+                    "atrasado"
+                ) {
+                    mostrarPorStatus =
+                        temAtrasado;
+                } else {
+
+                    if (
+                        temAndamento
+                    ) {
+                        statusBase =
+                            "andamento";
+                    } else if (
+                        temAguardando
+                    ) {
+                        statusBase =
+                            "aguardando";
+                    }
+
+
+                    mostrarPorStatus =
+                        filtroStatus ===
+                        statusBase;
+                }
+            }
+
+
+            // =========================================================
+            // CAMADA CORRETA
+            // =========================================================
+
+            const camadaCorreta =
+                mapTypeToLayer[
+                    base.tipo
+                ] ||
+                camadas[
+                    "Agências de Atendimento"
+                ];
+
+
+            // =========================================================
+            // EXIBIR OU OCULTAR MARCADOR
+            // =========================================================
+
+            if (
+                mostrarPorTipo &&
+                mostrarPorStatus
+            ) {
+                if (
+                    !camadaCorreta.hasLayer(
+                        marker
+                    )
+                ) {
+                    camadaCorreta.addLayer(
+                        marker
+                    );
+                }
+            } else {
+
+                if (
+                    camadaCorreta.hasLayer(
+                        marker
+                    )
+                ) {
+                    camadaCorreta.removeLayer(
+                        marker
+                    );
+                }
+            }
+        }
+    );
 };
 
-document.addEventListener('DOMContentLoaded', () => {
-    const btn = document.getElementById('btn-terceirizados');
-    const lista = document.getElementById('lista-terceirizados');
 
-    if (btn && lista) {
-        btn.addEventListener('click', (e) => {
-            e.preventDefault();
-            lista.classList.toggle('mostrar');
-            btn.classList.toggle('ativo');
-        });
+// =====================================================================
+// 28. INICIALIZAÇÃO DO GEOFACILITIES
+// =====================================================================
+
+async function inicializarGeoFacilities() {
+    try {
+
+        // =============================================================
+        // 1. CARREGAR FIREBASE PRIMEIRO
+        // =============================================================
+
+        await window.carregarDadosDaNuvem();
+
+
+        // =============================================================
+        // 2. CRIAR MARCADORES
+        // =============================================================
+
+        await criarMarcadoresComDistanciaReal();
+
+
+        // =============================================================
+        // 3. RENDERIZAR CHAMADOS
+        // =============================================================
+
         window.renderizarTerceirizados();
+
+
+        // =============================================================
+        // 4. ATUALIZAR CORES DOS MARCADORES
+        // =============================================================
+
+        todasBasesFisicas.forEach(
+            base => {
+                window.verificarEAtualizarMarcador(
+                    base.id,
+                    base.nome
+                );
+            }
+        );
+
+    } catch (
+        erro
+    ) {
+        console.error(
+            "Erro ao inicializar o GeoFacilities:",
+            erro
+        );
     }
-});
+}
+
 
 // =====================================================================
-// LÓGICA DE FILTROS NO MAPA
+// 29. EVENTOS DA INTERFACE
 // =====================================================================
-window.aplicarFiltros = function() {
-    const filtroStatus = document.getElementById('filtro-status').value;
-    const filtroTipo = document.getElementById('filtro-tipo').value;
 
-    todasBasesFisicas.forEach(base => {
-        const marker = window.marcadoresGlobais[base.id];
-        if (!marker) return;
+document.addEventListener(
+    "DOMContentLoaded",
+    () => {
 
-        // 1. Verifica filtro de Tipo
-        let mostrarPorTipo = (filtroTipo === 'todos' || base.tipo === filtroTipo);
-        
-        // 2. Verifica filtro de Status
-        let mostrarPorStatus = true;
-        if (filtroStatus !== 'todos') {
-            let statusBase = 'nenhum';
-            let temAndamento = false, temAguardando = false;
+        // =============================================================
+        // BOTÃO DAS EMPRESAS / CHAMADOS
+        // =============================================================
 
-            dadosTerceirizados.forEach(empresa => {
-                if (empresa.servicos) {
-                    empresa.servicos.forEach(servico => {
-                        if (servico.local === base.nome) {
-                            if (servico.statusAtual === 'andamento') {
-                                temAndamento = true;
-                            } else if (servico.statusAtual === 'aguardando') {
-                                temAguardando = true;
-                            }
-                        }
-                    });
+        const btn =
+            document.getElementById(
+                "btn-terceirizados"
+            );
+
+        const lista =
+            document.getElementById(
+                "lista-terceirizados"
+            );
+
+        if (
+            btn &&
+            lista
+        ) {
+            btn.addEventListener(
+                "click",
+                event => {
+                    event.preventDefault();
+
+                    lista.classList.toggle(
+                        "mostrar"
+                    );
+
+                    btn.classList.toggle(
+                        "ativo"
+                    );
                 }
-            });
-
-            if (temAndamento) statusBase = 'andamento';
-            else if (temAguardando) statusBase = 'aguardando';
-
-            mostrarPorStatus = (filtroStatus === statusBase);
+            );
         }
 
-        // 3. Aplica o filtro
-        const camadaCorreta = mapTypeToLayer[base.tipo] || camadas["Agências de Atendimento"];
 
-        if (mostrarPorTipo && mostrarPorStatus) {
-            if (!camadaCorreta.hasLayer(marker)) {
-                camadaCorreta.addLayer(marker);
-            }
-        } else {
-            if (camadaCorreta.hasLayer(marker)) {
-                camadaCorreta.removeLayer(marker);
-            }
+        // =============================================================
+        // FILTRO DE STATUS
+        // =============================================================
+
+        const filtroStatus =
+            document.getElementById(
+                "filtro-status"
+            );
+
+        if (
+            filtroStatus
+        ) {
+            filtroStatus.addEventListener(
+                "change",
+                () => {
+                    window.aplicarFiltros();
+                }
+            );
         }
-    });
+
+
+        // =============================================================
+        // FILTRO DE TIPO
+        // =============================================================
+
+        const filtroTipo =
+            document.getElementById(
+                "filtro-tipo"
+            );
+
+        if (
+            filtroTipo
+        ) {
+            filtroTipo.addEventListener(
+                "change",
+                () => {
+                    window.aplicarFiltros();
+                }
+            );
+        }
+
+
+        // =============================================================
+        // INICIALIZAR SISTEMA
+        // =============================================================
+// =============================================================
+// BUSCA DE CHAMADOS
+// =============================================================
+
+const inputBuscaChamado =
+    document.getElementById(
+        "busca-chamado"
+    );
+
+const btnLimparBusca =
+    document.getElementById(
+        "limpar-busca-chamado"
+    );
+
+
+if (inputBuscaChamado) {
+
+    inputBuscaChamado.addEventListener(
+        "input",
+        event => {
+
+            window.filtrarChamados(
+                event.target.value
+            );
+
+        }
+    );
+
+}
+
+
+if (btnLimparBusca) {
+
+    btnLimparBusca.addEventListener(
+        "click",
+        () => {
+
+            if (
+                inputBuscaChamado
+            ) {
+                inputBuscaChamado.value =
+                    "";
+            }
+
+            window.filtrarChamados(
+                ""
+            );
+
+            inputBuscaChamado?.focus();
+
+        }
+    );
+
+}
+        inicializarGeoFacilities();
+    }
+);
+// =====================================================================
+// CADASTRAR EMPRESA TERCEIRIZADA
+// =====================================================================
+
+window.cadastrarTerceirizado =
+async function () {
+
+    const nomeInput =
+        document.getElementById(
+            "nova-empresa-nome"
+        );
+
+    const telefoneInput =
+        document.getElementById(
+            "nova-empresa-telefone"
+        );
+
+    const nome =
+        nomeInput?.value.trim();
+
+    let telefone =
+        telefoneInput?.value
+            .replace(/\D/g, "");
+
+    if (!nome) {
+        alert(
+            "Informe o nome da empresa."
+        );
+
+        return;
+    }
+
+    if (!telefone) {
+        alert(
+            "Informe o WhatsApp da empresa."
+        );
+
+        return;
+    }
+
+    // Se usuário digitar apenas:
+    // 79999999999
+    // adiciona o código do Brasil.
+
+    if (
+        telefone.length === 11
+    ) {
+        telefone =
+            `55${telefone}`;
+    }
+
+    const nomeNormalizado =
+        nome
+            .trim()
+            .toLowerCase();
+
+    const empresaExiste =
+        dadosTerceirizados.some(
+            empresa =>
+                String(
+                    empresa.nome
+                )
+                    .trim()
+                    .toLowerCase() ===
+                nomeNormalizado
+        );
+
+    if (
+        empresaExiste
+    ) {
+        alert(
+            "Essa empresa já está cadastrada."
+        );
+
+        return;
+    }
+
+    const novaEmpresa = {
+
+        id:
+            `empresa-${Date.now()}-` +
+            Math.random()
+                .toString(36)
+                .slice(2, 6),
+
+        nome:
+            nome,
+
+        telefone:
+            telefone,
+
+        servicos:
+            []
+    };
+
+    dadosTerceirizados.push(
+        novaEmpresa
+    );
+
+    try {
+
+        await window.salvarDadosGlobais();
+
+        window.renderizarTerceirizados();
+        window.atualizarSelectsEmpresas();
+        nomeInput.value =
+            "";
+
+        telefoneInput.value =
+            "";
+
+        fecharCadastroTerceirizado();
+
+    } catch (erro) {
+
+        // Remove novamente caso
+        // Firebase falhe.
+
+        dadosTerceirizados =
+            dadosTerceirizados.filter(
+                empresa =>
+                    empresa.id !==
+                    novaEmpresa.id
+            );
+
+        console.error(
+            "Erro ao cadastrar empresa:",
+            erro
+        );
+
+        alert(
+            "Não foi possível cadastrar a empresa."
+        );
+    }
+};
+window.abrirCadastroTerceirizado =
+function () {
+
+    const box =
+        document.getElementById(
+            "cadastro-terceirizado"
+        );
+
+    if (box) {
+        box.classList.add(
+            "mostrar"
+        );
+    }
+};
+
+
+window.fecharCadastroTerceirizado =
+function () {
+
+    const box =
+        document.getElementById(
+            "cadastro-terceirizado"
+        );
+
+    if (box) {
+        box.classList.remove(
+            "mostrar"
+        );
+    }
+};
+
+// =====================================================================
+// BUSCAR CHAMADO
+// =====================================================================
+
+let termoBuscaChamado = "";
+
+
+window.filtrarChamados =
+function (
+    termo
+) {
+
+    termoBuscaChamado =
+        String(
+            termo || ""
+        )
+            .trim()
+            .toLowerCase();
+
+    window.renderizarTerceirizados();
 };

@@ -515,3 +515,1708 @@ body {
 .filtro-select:hover, .filtro-select:focus {
     border-color: #ed7523;
 }
+
+/* =====================================================================
+   GEO FACILITIES 1.1
+   CHAMADOS / PRIORIDADE / SLA / AÇÕES
+   ===================================================================== */
+
+
+/* =====================================================================
+   CARD DO CHAMADO
+   ===================================================================== */
+
+   .servico-item {
+    position: relative;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-left: 4px solid #cbd5e1;
+
+    padding: 14px;
+
+    border-radius: 10px;
+
+    margin-bottom: 12px;
+
+    cursor: pointer;
+
+    transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease,
+        border-color 0.2s ease;
+}
+
+
+.servico-item:hover {
+    transform: translateX(3px);
+
+    box-shadow:
+        0 5px 16px
+        rgba(0, 0, 0, 0.07);
+}
+
+
+/* =====================================================================
+   BORDA POR STATUS
+   ===================================================================== */
+
+.servico-item.andamento {
+    border-left-color: #ed7523;
+}
+
+
+.servico-item.aguardando {
+    border-left-color: #eab308;
+}
+
+
+.servico-item.realizado {
+    border-left-color: #22c55e;
+}
+
+
+.servico-item.cancelado {
+    border-left-color: #94a3b8;
+}
+
+
+/* =====================================================================
+   TOPO DO CHAMADO
+   ===================================================================== */
+
+.servico-topo {
+    display: flex;
+
+    align-items: flex-start;
+
+    justify-content: space-between;
+
+    gap: 8px;
+
+    margin-bottom: 9px;
+}
+
+
+.servico-local {
+    color: #004b6b;
+
+    font-size: 0.86rem;
+
+    font-weight: 700;
+
+    line-height: 1.3;
+}
+
+
+.numero-chamado {
+    color: #64748b;
+
+    font-size: 0.72rem;
+
+    font-weight: 700;
+
+    margin-top: 3px;
+}
+
+
+/* =====================================================================
+   DESCRIÇÃO
+   ===================================================================== */
+
+.servico-desc {
+    color: #475569;
+
+    font-size: 0.79rem;
+
+    line-height: 1.5;
+
+    margin:
+        8px
+        0
+        10px;
+}
+
+
+/* =====================================================================
+   BADGE DE PRIORIDADE
+   ===================================================================== */
+
+.prioridade-badge {
+    flex-shrink: 0;
+
+    padding:
+        4px
+        7px;
+
+    border-radius: 20px;
+
+    font-size: 0.64rem;
+
+    font-weight: 800;
+
+    text-transform: uppercase;
+
+    letter-spacing: 0.02em;
+}
+
+
+/* BAIXA */
+
+.prioridade-badge.prioridade-baixa {
+    background: #dcfce7;
+
+    color: #166534;
+}
+
+
+/* MÉDIA */
+
+.prioridade-badge.prioridade-media {
+    background: #fef9c3;
+
+    color: #854d0e;
+}
+
+
+/* ALTA */
+
+.prioridade-badge.prioridade-alta {
+    background: #ffedd5;
+
+    color: #c2410c;
+}
+
+
+/* CRÍTICA */
+
+.prioridade-badge.prioridade-critica {
+    background: #fee2e2;
+
+    color: #b91c1c;
+}
+
+
+/* CHAMADO ANTIGO */
+
+.prioridade-badge.prioridade-nao-definida {
+    background: #f1f5f9;
+
+    color: #64748b;
+}
+
+
+/* =====================================================================
+   SLA
+   ===================================================================== */
+
+.sla-box {
+    display: flex;
+
+    align-items: center;
+
+    gap: 7px;
+
+    padding:
+        7px
+        9px;
+
+    margin:
+        8px
+        0
+        4px;
+
+    border-radius: 7px;
+
+    font-size: 0.72rem;
+
+    font-weight: 700;
+}
+
+
+/* SLA NORMAL */
+
+.sla-ok {
+    background: #ecfdf5;
+
+    color: #047857;
+
+    border:
+        1px solid
+        #a7f3d0;
+}
+
+
+/* SLA PERTO DO VENCIMENTO */
+
+.sla-alerta {
+    background: #fff7ed;
+
+    color: #c2410c;
+
+    border:
+        1px solid
+        #fed7aa;
+}
+
+
+/* SLA VENCIDO */
+
+.sla-vencido {
+    background: #fef2f2;
+
+    color: #b91c1c;
+
+    border:
+        1px solid
+        #fecaca;
+
+    animation:
+        slaPulse
+        2s
+        infinite;
+}
+
+
+/* SLA FINALIZADO */
+
+.sla-finalizado {
+    background: #f0fdf4;
+
+    color: #15803d;
+
+    border:
+        1px solid
+        #bbf7d0;
+}
+
+
+/* CHAMADOS ANTIGOS */
+
+.sla-sem-info {
+    background: #f8fafc;
+
+    color: #64748b;
+
+    border:
+        1px solid
+        #e2e8f0;
+}
+
+
+/* ANIMAÇÃO PARA SLA VENCIDO */
+
+@keyframes slaPulse {
+
+    0% {
+        box-shadow:
+            0
+            0
+            0
+            0
+            rgba(
+                220,
+                38,
+                38,
+                0.12
+            );
+    }
+
+
+    70% {
+        box-shadow:
+            0
+            0
+            0
+            5px
+            rgba(
+                220,
+                38,
+                38,
+                0
+            );
+    }
+
+
+    100% {
+        box-shadow:
+            0
+            0
+            0
+            0
+            rgba(
+                220,
+                38,
+                38,
+                0
+            );
+    }
+}
+
+
+/* PRAZO */
+
+.prazo-sla {
+    color: #64748b;
+
+    font-size: 0.68rem;
+
+    margin:
+        4px
+        0
+        9px;
+}
+
+
+/* =====================================================================
+   HISTÓRICO
+   ===================================================================== */
+
+.historico-box {
+    background: #f8fafc;
+
+    border-radius: 7px;
+
+    padding: 8px;
+
+    margin:
+        9px
+        0;
+}
+
+
+.historico-titulo {
+    color: #334155;
+
+    font-size: 0.7rem;
+
+    font-weight: 800;
+
+    margin-bottom: 5px;
+}
+
+
+.historico-item {
+    display: flex;
+
+    align-items: center;
+
+    flex-wrap: wrap;
+
+    gap: 5px;
+
+    color: #64748b;
+
+    font-size: 0.67rem;
+
+    margin-top: 4px;
+}
+
+
+.historico-item strong {
+    color: #475569;
+}
+
+
+/* =====================================================================
+   STATUS
+   ===================================================================== */
+
+.servico-status-row {
+    margin:
+        9px
+        0;
+}
+
+
+.badge-status {
+    display: inline-block;
+
+    padding:
+        4px
+        8px;
+
+    border-radius: 20px;
+
+    font-size: 0.65rem;
+
+    font-weight: 800;
+
+    text-transform: uppercase;
+}
+
+
+/* ANDAMENTO */
+
+.badge-status.andamento {
+    background: #ffedd5;
+
+    color: #c2410c;
+}
+
+
+/* AGUARDANDO */
+
+.badge-status.aguardando {
+    background: #fef9c3;
+
+    color: #854d0e;
+}
+
+
+/* REALIZADO */
+
+.badge-status.realizado {
+    background: #dcfce7;
+
+    color: #166534;
+}
+
+
+/* CANCELADO */
+
+.badge-status.cancelado {
+    background: #f1f5f9;
+
+    color: #64748b;
+}
+
+
+/* =====================================================================
+   ÁREA DE ALTERAÇÃO DE STATUS
+   ===================================================================== */
+
+.mudar-status-box {
+    margin-top: 11px;
+
+    padding-top: 10px;
+
+    border-top:
+        1px dashed
+        #cbd5e1;
+}
+
+
+.mudar-status-box label {
+    display: block;
+
+    color: #475569;
+
+    font-size: 0.7rem;
+
+    font-weight: 700;
+
+    margin-bottom: 6px;
+}
+
+
+/* SELECT E DATA */
+
+.select-status-servico,
+.input-data-servico {
+    width: 100%;
+
+    box-sizing: border-box;
+
+    padding:
+        7px
+        8px;
+
+    margin-bottom: 6px;
+
+    border:
+        1px solid
+        #cbd5e1;
+
+    border-radius: 6px;
+
+    background: #ffffff;
+
+    color: #334155;
+
+    font-family:
+        "Inter",
+        sans-serif;
+
+    font-size: 0.72rem;
+
+    outline: none;
+}
+
+
+.select-status-servico:focus,
+.input-data-servico:focus {
+    border-color: #ed7523;
+
+    box-shadow:
+        0
+        0
+        0
+        2px
+        rgba(
+            237,
+            117,
+            35,
+            0.1
+        );
+}
+
+
+/* BOTÃO SALVAR STATUS */
+
+.btn-atualizar-status {
+    width: 100%;
+
+    padding: 8px;
+
+    border: 0;
+
+    border-radius: 6px;
+
+    background: #ed7523;
+
+    color: #ffffff;
+
+    cursor: pointer;
+
+    font-family:
+        "Inter",
+        sans-serif;
+
+    font-size: 0.72rem;
+
+    font-weight: 700;
+
+    transition:
+        background
+        0.2s ease,
+        transform
+        0.2s ease;
+}
+
+
+.btn-atualizar-status:hover {
+    background: #d86214;
+
+    transform: translateY(-1px);
+}
+
+
+/* =====================================================================
+   AÇÕES DO CHAMADO
+   ===================================================================== */
+
+.servico-acoes {
+    display: flex;
+
+    gap: 7px;
+
+    margin-top: 11px;
+}
+
+
+.btn-servico {
+    flex: 1;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    gap: 6px;
+
+    padding: 8px;
+
+    border: 0;
+
+    border-radius: 7px;
+
+    cursor: pointer;
+
+    font-family:
+        "Inter",
+        sans-serif;
+
+    font-size: 0.7rem;
+
+    font-weight: 700;
+
+    transition:
+        transform
+        0.15s ease,
+        background
+        0.15s ease;
+}
+
+
+.btn-servico:hover {
+    transform:
+        translateY(-1px);
+}
+
+
+/* =====================================================================
+   BOTÃO DE EVIDÊNCIA
+   ===================================================================== */
+
+.btn-evidencia {
+    background: #e0f2fe;
+
+    color: #0369a1;
+}
+
+
+.btn-evidencia:hover {
+    background: #bae6fd;
+}
+
+
+/* =====================================================================
+   BOTÃO EXCLUIR
+   ===================================================================== */
+
+.btn-excluir {
+    background: #fef2f2;
+
+    color: #dc2626;
+}
+
+
+.btn-excluir:hover {
+    background: #fee2e2;
+}
+
+
+/* =====================================================================
+   EMPRESA
+   ===================================================================== */
+
+.empresa-contador {
+    margin-top: 2px;
+
+    color: #94a3b8;
+
+    font-size: 0.65rem;
+
+    font-weight: 500;
+}
+
+
+/* =====================================================================
+   LISTA SEM CHAMADOS
+   ===================================================================== */
+
+.sem-servicos {
+    display: flex;
+
+    flex-direction: column;
+
+    align-items: center;
+
+    justify-content: center;
+
+    gap: 6px;
+
+    padding:
+        18px
+        10px;
+
+    color: #94a3b8;
+
+    font-size: 0.75rem;
+
+    text-align: center;
+}
+
+
+.sem-servicos i {
+    font-size: 1.2rem;
+}
+
+
+/* =====================================================================
+   MARCADORES COM CHAMADOS
+   ===================================================================== */
+
+/*
+   Importante:
+   o JavaScript adiciona essas classes
+   diretamente no elemento do marcador.
+*/
+
+
+.icone-em-andamento {
+    filter:
+        drop-shadow(
+            0
+            0
+            7px
+            rgba(
+                237,
+                117,
+                35,
+                0.95
+            )
+        );
+}
+
+
+.icone-aguardando {
+    filter:
+        drop-shadow(
+            0
+            0
+            7px
+            rgba(
+                234,
+                179,
+                8,
+                0.95
+            )
+        );
+}
+
+
+.icone-atrasado {
+    filter:
+        drop-shadow(
+            0
+            0
+            9px
+            rgba(
+                220,
+                38,
+                38,
+                1
+            )
+        );
+
+    animation:
+        marcadorAtrasadoPulse
+        1.6s
+        infinite;
+}
+
+
+@keyframes marcadorAtrasadoPulse {
+
+    0% {
+        transform:
+            scale(1);
+    }
+
+
+    50% {
+        transform:
+            scale(1.1);
+    }
+
+
+    100% {
+        transform:
+            scale(1);
+    }
+}
+
+
+/* =====================================================================
+   POPUP DO MAPA
+   ===================================================================== */
+
+.modern-popup {
+    width: 270px;
+
+    max-width: 100%;
+
+    font-family:
+        "Inter",
+        Arial,
+        sans-serif;
+}
+
+
+.modern-popup h3 {
+    color: #004b6b;
+
+    font-size: 1rem;
+
+    line-height: 1.3;
+
+    margin:
+        8px
+        0
+        10px;
+}
+
+
+.modern-popup .tag {
+    display: inline-block;
+
+    background: #e0f2fe;
+
+    color: #0369a1;
+
+    padding:
+        4px
+        8px;
+
+    border-radius: 20px;
+
+    font-size: 0.65rem;
+
+    font-weight: 800;
+
+    text-transform: uppercase;
+}
+
+
+.modern-popup .info-row {
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 2px;
+
+    margin-bottom: 7px;
+
+    color: #475569;
+
+    font-size: 0.76rem;
+}
+
+
+.modern-popup .info-row strong {
+    color: #334155;
+}
+
+
+.modern-popup hr {
+    border: 0;
+
+    border-top:
+        1px solid
+        #e2e8f0;
+
+    margin:
+        12px
+        0;
+}
+
+
+.modern-popup > label {
+    display: block;
+
+    color: #334155;
+
+    font-size: 0.75rem;
+
+    font-weight: 700;
+
+    margin-bottom: 6px;
+}
+
+
+/* =====================================================================
+   CAMPOS DO POPUP
+   ===================================================================== */
+
+.popup-select,
+.modern-popup textarea,
+.modern-popup input[type="text"],
+.modern-popup input[type="date"] {
+    width: 100%;
+
+    box-sizing: border-box;
+
+    padding:
+        9px
+        10px;
+
+    margin-bottom: 8px;
+
+    border:
+        1px solid
+        #cbd5e1;
+
+    border-radius: 6px;
+
+    background: #ffffff;
+
+    color: #334155;
+
+    font-family:
+        "Inter",
+        Arial,
+        sans-serif;
+
+    font-size: 0.76rem;
+
+    outline: none;
+}
+
+
+.modern-popup textarea {
+    min-height: 75px;
+
+    resize: vertical;
+}
+
+
+.popup-select:focus,
+.modern-popup textarea:focus,
+.modern-popup input[type="text"]:focus,
+.modern-popup input[type="date"]:focus {
+    border-color: #ed7523;
+
+    box-shadow:
+        0
+        0
+        0
+        2px
+        rgba(
+            237,
+            117,
+            35,
+            0.12
+        );
+}
+
+
+/* =====================================================================
+   BOTÃO PRINCIPAL DO POPUP
+   ===================================================================== */
+
+.modern-popup .btn-link {
+    transition:
+        background
+        0.2s ease,
+        transform
+        0.2s ease;
+}
+
+
+.modern-popup .btn-link:hover {
+    background:
+        #d86214 !important;
+
+    transform:
+        translateY(-1px);
+}
+
+
+.modern-popup .btn-link:disabled {
+    opacity: 0.65;
+
+    cursor: not-allowed;
+
+    transform: none;
+}
+
+
+/* =====================================================================
+   FILE INPUT
+   ===================================================================== */
+
+.modern-popup input[type="file"] {
+    color: #475569;
+}
+
+
+.modern-popup input[type="file"]::file-selector-button {
+    background: #f1f5f9;
+
+    color: #334155;
+
+    border:
+        1px solid
+        #cbd5e1;
+
+    border-radius: 5px;
+
+    padding:
+        6px
+        8px;
+
+    margin-right: 6px;
+
+    cursor: pointer;
+
+    font-weight: 600;
+}
+
+
+.modern-popup input[type="file"]::file-selector-button:hover {
+    background: #e2e8f0;
+}
+
+
+/* =====================================================================
+   BOTÃO WHATSAPP
+   ===================================================================== */
+
+.btn-whatsapp {
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    gap: 5px;
+
+    text-decoration: none;
+}
+
+
+/* =====================================================================
+   RESPONSIVIDADE
+   ===================================================================== */
+
+@media (
+    max-width: 600px
+) {
+
+    .servico-topo {
+        flex-direction: column;
+    }
+
+
+    .prioridade-badge {
+        align-self: flex-start;
+    }
+
+
+    .servico-acoes {
+        flex-direction: column;
+    }
+
+
+    .btn-servico {
+        width: 100%;
+    }
+
+
+    .modern-popup {
+        width: 240px;
+    }
+}
+/* =====================================================================
+   CADASTRO DE TERCEIRIZADOS
+   ===================================================================== */
+
+
+/* BOTÃO NOVA EMPRESA */
+
+.btn-nova-empresa {
+    width: 100%;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    gap: 7px;
+
+    padding: 10px 12px;
+
+    margin-bottom: 12px;
+
+    border: none;
+
+    border-radius: 8px;
+
+    background: #004b6b;
+
+    color: #ffffff;
+
+    font-family: "Inter", Arial, sans-serif;
+
+    font-size: 0.78rem;
+
+    font-weight: 700;
+
+    cursor: pointer;
+
+    transition:
+        background 0.2s ease,
+        transform 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+
+.btn-nova-empresa:hover {
+    background: #00384f;
+
+    transform: translateY(-1px);
+
+    box-shadow:
+        0 4px 10px
+        rgba(0, 75, 107, 0.18);
+}
+
+
+/* =====================================================================
+   FUNDO DO MODAL
+   ===================================================================== */
+
+.cadastro-terceirizado {
+    position: fixed;
+
+    inset: 0;
+
+    z-index: 99999;
+
+    display: none;
+
+    align-items: center;
+
+    justify-content: center;
+
+    padding: 20px;
+
+    background:
+        rgba(15, 23, 42, 0.55);
+
+    backdrop-filter:
+        blur(3px);
+}
+
+
+.cadastro-terceirizado.mostrar {
+    display: flex;
+}
+
+
+/* =====================================================================
+   CAIXA DO CADASTRO
+   ===================================================================== */
+
+.cadastro-terceirizado-box {
+    width: 100%;
+
+    max-width: 420px;
+
+    background: #ffffff;
+
+    border-radius: 14px;
+
+    padding: 22px;
+
+    box-shadow:
+        0 20px 50px
+        rgba(15, 23, 42, 0.25);
+
+    animation:
+        abrirCadastroTerceirizado
+        0.22s ease;
+}
+
+
+@keyframes abrirCadastroTerceirizado {
+
+    from {
+        opacity: 0;
+
+        transform:
+            translateY(12px)
+            scale(0.98);
+    }
+
+    to {
+        opacity: 1;
+
+        transform:
+            translateY(0)
+            scale(1);
+    }
+}
+
+
+/* =====================================================================
+   TÍTULO
+   ===================================================================== */
+
+.cadastro-terceirizado-box h3 {
+    margin:
+        0
+        0
+        18px;
+
+    color: #004b6b;
+
+    font-size: 1rem;
+
+    font-weight: 800;
+}
+
+
+/* =====================================================================
+   LABELS
+   ===================================================================== */
+
+.cadastro-terceirizado-box label {
+    display: block;
+
+    margin-bottom: 5px;
+
+    color: #475569;
+
+    font-size: 0.72rem;
+
+    font-weight: 700;
+}
+
+
+/* =====================================================================
+   CAMPOS
+   ===================================================================== */
+
+.cadastro-terceirizado-box input {
+    width: 100%;
+
+    box-sizing: border-box;
+
+    padding: 10px 11px;
+
+    margin-bottom: 14px;
+
+    border:
+        1px solid
+        #cbd5e1;
+
+    border-radius: 7px;
+
+    background: #ffffff;
+
+    color: #334155;
+
+    font-family: "Inter", Arial, sans-serif;
+
+    font-size: 0.8rem;
+
+    outline: none;
+
+    transition:
+        border-color 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+
+.cadastro-terceirizado-box input:focus {
+    border-color: #ed7523;
+
+    box-shadow:
+        0 0 0 3px
+        rgba(237, 117, 35, 0.12);
+}
+
+
+.cadastro-terceirizado-box input::placeholder {
+    color: #94a3b8;
+}
+
+
+/* =====================================================================
+   ÁREA DOS BOTÕES
+   ===================================================================== */
+
+.cadastro-terceirizado-acoes {
+    display: flex;
+
+    justify-content: flex-end;
+
+    gap: 8px;
+
+    margin-top: 6px;
+}
+
+
+/* =====================================================================
+   BOTÃO CANCELAR
+   ===================================================================== */
+
+.btn-cancelar-empresa {
+    padding: 9px 14px;
+
+    border:
+        1px solid
+        #cbd5e1;
+
+    border-radius: 7px;
+
+    background: #f8fafc;
+
+    color: #475569;
+
+    font-family: "Inter", Arial, sans-serif;
+
+    font-size: 0.75rem;
+
+    font-weight: 700;
+
+    cursor: pointer;
+
+    transition:
+        background 0.2s ease,
+        border-color 0.2s ease;
+}
+
+
+.btn-cancelar-empresa:hover {
+    background: #f1f5f9;
+
+    border-color: #94a3b8;
+}
+
+
+/* =====================================================================
+   BOTÃO CADASTRAR
+   ===================================================================== */
+
+.btn-salvar-empresa {
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    gap: 6px;
+
+    padding: 9px 15px;
+
+    border: none;
+
+    border-radius: 7px;
+
+    background: #ed7523;
+
+    color: #ffffff;
+
+    font-family: "Inter", Arial, sans-serif;
+
+    font-size: 0.75rem;
+
+    font-weight: 700;
+
+    cursor: pointer;
+
+    transition:
+        background 0.2s ease,
+        transform 0.2s ease;
+}
+
+
+.btn-salvar-empresa:hover {
+    background: #d86214;
+
+    transform:
+        translateY(-1px);
+}
+
+
+/* =====================================================================
+   RESPONSIVO
+   ===================================================================== */
+
+@media (max-width: 600px) {
+
+    .cadastro-terceirizado {
+        padding: 14px;
+    }
+
+
+    .cadastro-terceirizado-box {
+        padding: 18px;
+    }
+
+
+    .cadastro-terceirizado-acoes {
+        flex-direction: column-reverse;
+    }
+
+
+    .btn-cancelar-empresa,
+    .btn-salvar-empresa {
+        width: 100%;
+    }
+}
+
+/* =====================================================================
+   BUSCA DE CHAMADOS
+   ===================================================================== */
+
+   .busca-chamados {
+    display: flex;
+
+    align-items: center;
+
+    gap: 7px;
+
+    margin-bottom: 12px;
+
+    padding: 8px 10px;
+
+    background: #ffffff;
+
+    border: 1px solid #dbe3ea;
+
+    border-radius: 9px;
+
+    transition:
+        border-color 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+
+.busca-chamados:focus-within {
+    border-color: #ed7523;
+
+    box-shadow:
+        0 0 0 3px
+        rgba(237, 117, 35, 0.1);
+}
+
+
+.busca-chamados > i {
+    color: #64748b;
+
+    font-size: 0.8rem;
+}
+
+
+.busca-chamados input {
+    flex: 1;
+
+    min-width: 0;
+
+    border: 0;
+
+    outline: 0;
+
+    background: transparent;
+
+    color: #334155;
+
+    font-family: "Inter", sans-serif;
+
+    font-size: 0.76rem;
+}
+
+
+.busca-chamados input::placeholder {
+    color: #94a3b8;
+}
+
+
+.busca-chamados button {
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    width: 26px;
+
+    height: 26px;
+
+    border: none;
+
+    border-radius: 6px;
+
+    background: transparent;
+
+    color: #94a3b8;
+
+    cursor: pointer;
+
+    transition:
+        background 0.2s ease,
+        color 0.2s ease;
+}
+
+
+.busca-chamados button:hover {
+    background: #f1f5f9;
+
+    color: #475569;
+}
+
+/* =====================================================================
+   CORREÇÃO FINAL DO POPUP DE CHAMADOS
+   ===================================================================== */
+
+/* aumenta a largura útil do popup */
+.leaflet-popup-content {
+    width: 320px !important;
+    max-width: 320px !important;
+    margin: 14px !important;
+}
+
+
+/* container interno */
+.modern-popup {
+    width: 100% !important;
+    max-width: none !important;
+
+    box-sizing: border-box;
+}
+
+
+/* labels */
+.modern-popup label {
+    display: block;
+
+    margin-top: 9px;
+    margin-bottom: 5px;
+
+    color: #475569;
+
+    font-size: 0.73rem;
+    font-weight: 700;
+}
+
+
+/* todos os campos */
+.modern-popup select,
+.modern-popup input[type="text"],
+.modern-popup input[type="date"],
+.modern-popup input[type="datetime-local"],
+.modern-popup textarea {
+    display: block;
+
+    width: 100% !important;
+
+    box-sizing: border-box;
+
+    padding: 10px 11px;
+
+    margin: 0 0 10px 0;
+
+    border: 1px solid #cbd5e1;
+
+    border-radius: 7px;
+
+    background: #ffffff;
+
+    color: #334155;
+
+    font-family:
+        "Inter",
+        Arial,
+        sans-serif;
+
+    font-size: 0.78rem;
+
+    outline: none;
+
+    transition:
+        border-color 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+
+/* foco */
+.modern-popup select:focus,
+.modern-popup input:focus,
+.modern-popup textarea:focus {
+    border-color: #ed7523;
+
+    box-shadow:
+        0 0 0 3px
+        rgba(237, 117, 35, 0.12);
+}
+
+
+/* descrição */
+.modern-popup textarea {
+    min-height: 90px !important;
+
+    height: 90px;
+
+    resize: vertical;
+
+    line-height: 1.4;
+}
+
+
+/* campo de arquivo */
+.modern-popup input[type="file"] {
+    display: block;
+
+    width: 100%;
+
+    box-sizing: border-box;
+
+    margin-top: 3px;
+    margin-bottom: 14px;
+
+    color: #64748b;
+
+    font-size: 0.7rem;
+}
+
+
+/* botão escolher arquivo */
+.modern-popup input[type="file"]::file-selector-button {
+    padding: 7px 9px;
+
+    margin-right: 7px;
+
+    border: 1px solid #cbd5e1;
+
+    border-radius: 6px;
+
+    background: #f1f5f9;
+
+    color: #334155;
+
+    cursor: pointer;
+
+    font-weight: 600;
+}
+
+
+/* botão principal */
+.modern-popup .btn-link {
+    display: block;
+
+    width: 100% !important;
+
+    box-sizing: border-box;
+
+    margin-top: 4px;
+
+    padding: 11px 12px !important;
+
+    border: none;
+
+    border-radius: 7px !important;
+
+    background: #ed7523 !important;
+
+    color: #ffffff;
+
+    font-size: 0.82rem;
+
+    font-weight: 700;
+
+    cursor: pointer;
+}
+
+
+/* botão hover */
+.modern-popup .btn-link:hover {
+    background: #d86214 !important;
+}
+
+
+/* popup Leaflet */
+.leaflet-popup-content-wrapper {
+    border-radius: 14px;
+}
+
+
+/* evita estouro horizontal */
+.leaflet-popup-content {
+    overflow-x: hidden;
+}

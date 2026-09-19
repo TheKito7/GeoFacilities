@@ -30,6 +30,7 @@
 
 <!-- NOVA SEÇÃO: FILTROS DO MAPA -->
 <div class="sidebar-section">
+
     <h2>Filtros no Mapa</h2>
     <select id="filtro-status" class="filtro-select" onchange="aplicarFiltros()">
         <option value="todos">Todos os Status</option>
@@ -70,6 +71,26 @@
                 <h2>Contratos/Parceiros</h2>
                 <a href="#" class="btn-link"><i class="fa-solid fa-file-contract"></i> Contratos</a>
                 
+                <div class="busca-chamados">
+
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                
+                    <input
+                        type="text"
+                        id="busca-chamado"
+                        placeholder="Buscar nº do chamado..."
+                        autocomplete="off"
+                    >
+                
+                    <button
+                        type="button"
+                        id="limpar-busca-chamado"
+                        title="Limpar busca"
+                    >
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                
+                </div>
                 <!-- Botão que abre a lista -->
                 <button class="btn-link btn-dropdown" id="btn-terceirizados">
                     <div style="display: flex; align-items: center;">
@@ -77,6 +98,70 @@
                     </div>
                     <i class="fa-solid fa-chevron-down seta-direita"></i>
                 </button>
+                <button
+    type="button"
+    class="btn-nova-empresa"
+    onclick="abrirCadastroTerceirizado()"
+>
+    <i class="fa-solid fa-plus"></i>
+    Nova empresa
+</button>
+
+<div
+    id="cadastro-terceirizado"
+    class="cadastro-terceirizado"
+>
+
+    <div class="cadastro-terceirizado-box">
+
+        <h3>
+            Nova empresa terceirizada
+        </h3>
+
+        <label>
+            Nome da empresa
+        </label>
+
+        <input
+            type="text"
+            id="nova-empresa-nome"
+            placeholder="Ex: ABC Engenharia"
+        >
+
+        <label>
+            WhatsApp
+        </label>
+
+        <input
+            type="tel"
+            id="nova-empresa-telefone"
+            placeholder="Ex: (79) 99999-9999"
+        >
+
+        <div class="cadastro-terceirizado-acoes">
+
+            <button
+                type="button"
+                class="btn-cancelar-empresa"
+                onclick="fecharCadastroTerceirizado()"
+            >
+                Cancelar
+            </button>
+
+            <button
+                type="button"
+                class="btn-salvar-empresa"
+                onclick="cadastrarTerceirizado()"
+            >
+                <i class="fa-solid fa-check"></i>
+                Cadastrar
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
                 
                 <!-- Lista de Contatos Oculta -->
                 <div class="lista-contatos" id="lista-terceirizados">

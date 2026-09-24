@@ -1,7 +1,9 @@
 // =====================================================================
-// GEO FACILITIES 1.1
-// app.js completo
+// GEO FACILITIES 3.0 - APP PRINCIPAL
 // =====================================================================
+
+console.log("### GeoFacilities app.js 3.0 carregado ###");
+
 
 // =====================================================================
 // 1. FIREBASE
@@ -686,373 +688,429 @@ fetch(
 // 6. DADOS DAS UNIDADES
 // =====================================================================
 
-const dadosAgencias = [
-    {
-        id: "ag-amparo",
-        agencia:
-            "Energisa - Amparo do São Francisco",
-        endereco:
-            "R. General Teixeira, Lote 9, Amparo",
-        latitude:
-            -10.2185,
-        longitude:
-            -36.8335
-    },
-    {
-        id: "ag-aquidaba",
-        agencia:
-            "Energisa - Aquidabã",
-        endereco:
-            "Av. Parag, 2179 - Centro",
-        latitude:
-            -10.2806,
-        longitude:
-            -37.0189
-    },
-    {
-        id: "ag-aracaju",
-        agencia:
-            "Energisa - Aracaju",
-        endereco:
-            "R. Carlos Correia, 398 - Siqueira Campos",
-        latitude:
-            -10.9261,
-        longitude:
-            -37.0678
-    },
-    {
-        id: "ag-barradoscoqueiros",
-        agencia:
-            "Energisa - Barra dos Coqueiros",
-        endereco:
-            "Barra dos Coqueiros - SE",
-        latitude:
-            -10.9091,
-        longitude:
-            -37.0396
-    },
-    {
-        id: "ag-caninde",
-        agencia:
-            "Energisa - Canindé de São Francisco",
-        endereco:
-            "Canindé de São Francisco - SE",
-        latitude:
-            -9.6457,
-        longitude:
-            -37.7892
-    },
-    {
-        id: "ag-capela",
-        agencia:
-            "Energisa - Capela",
-        endereco:
-            "Capela - SE",
-        latitude:
-            -10.505,
-        longitude:
-            -37.052
-    },
-    {
-        id: "ag-carmopolis",
-        agencia:
-            "Energisa - Carmópolis",
-        endereco:
-            "Carmópolis - SE",
-        latitude:
-            -10.648,
-        longitude:
-            -36.988
-    },
-    {
-        id: "ag-itabaiana",
-        agencia:
-            "Energisa - Itabaiana",
-        endereco:
-            "Itabaiana - SE",
-        latitude:
-            -10.685,
-        longitude:
-            -37.425
-    },
-    {
-        id: "ag-lagarto",
-        agencia:
-            "Energisa - Lagarto",
-        endereco:
-            "Lagarto - SE",
-        latitude:
-            -10.917,
-        longitude:
-            -37.665
-    },
-    {
-        id: "ag-laranjeiras",
-        agencia:
-            "Energisa - Laranjeiras",
-        endereco:
-            "Laranjeiras - SE",
-        latitude:
-            -10.803,
-        longitude:
-            -37.172
-    },
-    {
-        id: "ag-nossasenhoradagloria",
-        agencia:
-            "Energisa - Nossa Senhora da Glória",
-        endereco:
-            "Nossa Senhora da Glória - SE",
-        latitude:
-            -10.218,
-        longitude:
-            -37.42
-    },
-    {
-        id: "ag-socorro",
-        agencia:
-            "Energisa - Nossa Senhora do Socorro",
-        endereco:
-            "Nossa Senhora do Socorro - SE",
-        latitude:
-            -10.854,
-        longitude:
-            -37.126
-    },
-    {
-        id: "ag-propria",
-        agencia:
-            "Energisa - Propriá",
-        endereco:
-            "Propriá - SE",
-        latitude:
-            -10.21,
-        longitude:
-            -36.84
-    },
-    {
-        id: "ag-saocristovao",
-        agencia:
-            "Energisa - São Cristóvão",
-        endereco:
-            "São Cristóvão - SE",
-        latitude:
-            -11.014,
-        longitude:
-            -37.206
-    },
-    {
-        id: "ag-simaodias",
-        agencia:
-            "Energisa - Simão Dias",
-        endereco:
-            "Simão Dias - SE",
-        latitude:
-            -10.738,
-        longitude:
-            -37.81
+// =====================================================================
+// 6. DADOS DAS UNIDADES
+// =====================================================================
+
+let todasBasesFisicas = [];
+
+
+// =====================================================================
+// CARREGAR IMÓVEIS DO JSON
+// =====================================================================
+
+async function carregarImoveis() {
+
+    try {
+
+        const resposta =
+            await fetch("./imoveis.json");
+
+        if (!resposta.ok) {
+
+            throw new Error(
+                `Erro HTTP ${resposta.status} ao carregar imoveis.json`
+            );
+
+        }
+
+        const imoveis =
+            await resposta.json();
+
+
+        // =============================================================
+        // VALIDAR FORMATO
+        // =============================================================
+
+        if (!Array.isArray(imoveis)) {
+
+            throw new Error(
+                "imoveis.json não contém um array."
+            );
+
+        }
+
+
+        // =============================================================
+        // CONVERTER PARA O FORMATO UTILIZADO PELO MAPA
+        // =============================================================
+
+        todasBasesFisicas =
+            imoveis
+
+                .filter(
+                    imovel =>
+
+                        imovel.status === "ATIVO" &&
+
+                        Number.isFinite(
+                            Number(imovel.latitude)
+                        ) &&
+
+                        Number.isFinite(
+                            Number(imovel.longitude)
+                        )
+                )
+
+                .map(
+                    imovel => {
+
+                        const categorias =
+                            Array.isArray(
+                                imovel.categorias
+                            )
+                                ? imovel.categorias
+                                : [];
+
+
+                        return {
+
+                            // -------------------------------------------------
+                            // IDENTIFICAÇÃO
+                            // -------------------------------------------------
+
+                            id:
+                                imovel.id,
+
+                            nome:
+                                obterNomeImovel(
+                                    imovel
+                                ),
+
+
+                            // -------------------------------------------------
+                            // LOCALIZAÇÃO
+                            // -------------------------------------------------
+
+                            endereco:
+                                imovel.endereco ||
+                                `${imovel.municipio || ""} - ${imovel.uf || ""}`,
+
+                            lat:
+                                Number(
+                                    imovel.latitude
+                                ),
+
+                            lng:
+                                Number(
+                                    imovel.longitude
+                                ),
+
+
+                            // -------------------------------------------------
+                            // INFORMAÇÕES DO IMÓVEL
+                            // -------------------------------------------------
+
+                            municipio:
+                                imovel.municipio || "",
+
+                            propriedade:
+                                imovel.propriedade || "",
+
+                            tipoUtilizacao:
+                                imovel.tipoUtilizacao || "",
+
+                            categorias:
+                                categorias,
+
+                            agencia:
+                                imovel.agencia || "",
+
+                            coordenadaAproximada:
+                                imovel.coordenadaAproximada === true,
+
+
+                            // -------------------------------------------------
+                            // MANTER DADOS ORIGINAIS
+                            // -------------------------------------------------
+
+                            dadosOriginais:
+                                imovel
+
+                        };
+
+                    }
+                );
+
+
+        console.log(
+            "Imóveis carregados do JSON:",
+            todasBasesFisicas.length
+        );
+
+
+        console.log(
+            "Unidades:",
+            todasBasesFisicas
+        );
+
+
+        return todasBasesFisicas;
+
+
+    } catch (erro) {
+
+        console.error(
+            "Erro ao carregar imoveis.json:",
+            erro
+        );
+
+        throw erro;
+
     }
-];
 
-const subestacoesEnergisa = [
-    {
-        id: "sub-arj",
-        agencia:
-            "Subestação - Aracaju (ARJ)",
-        endereco:
-            "Av. Chanceler Osvaldo Aranha",
-        latitude:
-            -10.925,
-        longitude:
-            -37.076
-    },
-    {
-        id: "sub-atl",
-        agencia:
-            "Subestação - Atalaia (ATL)",
-        endereco:
-            "Atalaia, Aracaju",
-        latitude:
-            -10.985,
-        longitude:
-            -37.049
-    },
-    {
-        id: "sub-cbt",
-        agencia:
-            "Subestação - Cabrita (CBT)",
-        endereco:
-            "Zona Rural, São Cristóvão",
-        latitude:
-            -10.97,
-        longitude:
-            -37.21
-    },
-    {
-        id: "sub-cme",
-        agencia:
-            "Subestação - Coroa do Meio (CME)",
-        endereco:
-            "Coroa do Meio, Aracaju",
-        latitude:
-            -10.963,
-        longitude:
-            -37.043
-    },
-    {
-        id: "sub-din",
-        agencia:
-            "Subestação - Distrito Industrial (DIN)",
-        endereco:
-            "Distrito Industrial, Aracaju",
-        latitude:
-            -10.93,
-        longitude:
-            -37.085
-    },
-    {
-        id: "sub-edg",
-        agencia:
-            "Subestação - Eduardo Gomes (EDG)",
-        endereco:
-            "Eduardo Gomes",
-        latitude:
-            -10.9,
-        longitude:
-            -37.1
-    },
-    {
-        id: "sub-itb",
-        agencia:
-            "Subestação - Itabaiana (ITB)",
-        endereco:
-            "Itabaiana - SE",
-        latitude:
-            -10.68,
-        longitude:
-            -37.42
-    },
-    {
-        id: "sub-lag",
-        agencia:
-            "Subestação - Lagarto (LAG)",
-        endereco:
-            "Lagarto - SE",
-        latitude:
-            -10.91,
-        longitude:
-            -37.66
+}
+
+
+// =====================================================================
+// NOME DO IMÓVEL
+// =====================================================================
+
+function obterNomeImovel(
+    imovel
+) {
+
+    const complemento =
+        String(
+            imovel.complemento || ""
+        ).trim();
+
+
+    const municipio =
+        String(
+            imovel.municipio || ""
+        ).trim();
+
+
+    // -------------------------------------------------------------
+    // Se tiver complemento útil
+    // -------------------------------------------------------------
+
+    if (
+        complemento &&
+        complemento !== "-" &&
+        complemento.toUpperCase() !== "N/A"
+    ) {
+
+        return (
+            `${complemento} - ${municipio}`
+        );
+
     }
-];
 
-const basesFisicasEnergisa =
-    dadosAgencias.map(
-        item => ({
-            id:
-                item.id,
 
-            nome:
-                item.agencia,
+    // -------------------------------------------------------------
+    // Caso contrário
+    // -------------------------------------------------------------
 
-            endereco:
-                item.endereco,
-
-            lat:
-                item.latitude,
-
-            lng:
-                item.longitude,
-
-            tipo:
-                "Agência de Atendimento"
-        })
+    return (
+        `${imovel.tipoUtilizacao || "Imóvel"} - ${municipio}`
     );
 
-const basesSubestacoes =
-    subestacoesEnergisa.map(
-        item => ({
-            id:
-                item.id,
+}
 
-            nome:
-                item.agencia,
-
-            endereco:
-                item.endereco,
-
-            lat:
-                item.latitude,
-
-            lng:
-                item.longitude,
-
-            tipo:
-                "Subestação"
-        })
-    );
-
-const todasBasesFisicas = [
-    ...basesFisicasEnergisa,
-    ...basesSubestacoes
-];
 
 // =====================================================================
 // 7. CAMADAS DO MAPA
 // =====================================================================
 
+
+// =====================================================================
+// CAMADAS DO MAPA
+// =====================================================================
+
 const camadas = {
+
     "Subestações":
-        L.layerGroup().addTo(
-            map
-        ),
+        L.layerGroup().addTo(map),
 
     "Bases Operacionais":
-        L.layerGroup().addTo(
-            map
-        ),
+        L.layerGroup().addTo(map),
 
     "Sedes Administrativas":
-        L.layerGroup().addTo(
-            map
-        ),
+        L.layerGroup().addTo(map),
 
     "Agências de Atendimento":
-        L.layerGroup().addTo(
-            map
-        ),
+        L.layerGroup().addTo(map),
 
     "Almoxarifados":
-        L.layerGroup().addTo(
-            map
+        L.layerGroup().addTo(map)
+
+};
+
+// =====================================================================
+// RELAÇÃO ENTRE CATEGORIA DO JSON E CAMADA
+// =====================================================================
+
+const categoriaParaCamada = {
+
+    "SUBESTACAO":
+        "Subestações",
+
+    "BASE_OPERACIONAL":
+        "Bases Operacionais",
+
+    "AGENCIA":
+        "Agências de Atendimento",
+
+    "ADMINISTRATIVO":
+        "Sedes Administrativas",
+
+    "ALMOXARIFADO":
+        "Almoxarifados",
+
+    "REPETIDORA":
+        "Sedes Administrativas",
+
+    "GARAGEM":
+        "Bases Operacionais",
+
+    "SECCIONADORA":
+        "Subestações",
+
+    "CENTRO_CULTURAL":
+        "Sedes Administrativas"
+
+};
+
+
+// =====================================================================
+// CAMADAS DE CADA IMÓVEL
+// =====================================================================
+
+function obterCamadasDoImovel(
+    imovel
+) {
+
+    const resultado =
+        new Set();
+
+
+    const categorias =
+        Array.isArray(
+            imovel.categorias
         )
-};
+            ? imovel.categorias
+            : [];
 
-const mapTypeToLayer = {
-    "Subestação":
-        camadas[
-            "Subestações"
-        ],
 
-    "Base Operacional":
-        camadas[
-            "Bases Operacionais"
-        ],
+    categorias.forEach(
+        categoria => {
 
-    "Sede Administrativa":
-        camadas[
-            "Sedes Administrativas"
-        ],
+            const camada =
+                categoriaParaCamada[
+                    categoria
+                ];
 
-    "Agência de Atendimento":
-        camadas[
-            "Agências de Atendimento"
-        ],
 
-    "Almoxarifado":
-        camadas[
-            "Almoxarifados"
-        ]
-};
+            if (camada) {
+
+                resultado.add(
+                    camada
+                );
+
+            }
+
+        }
+    );
+
+
+    return [
+        ...resultado
+    ];
+
+}
+
+
+// =====================================================================
+// MARCADORES
+// =====================================================================
+
+window.marcadoresGlobais = {};
+
+
+// =====================================================================
+// TIPO PRINCIPAL DO IMÓVEL
+// =====================================================================
+
+function obterTipoPrincipal(
+    imovel
+) {
+
+    const categorias =
+        Array.isArray(
+            imovel.categorias
+        )
+            ? imovel.categorias
+            : [];
+
+
+    // -------------------------------------------------------------
+    // Prioridade visual
+    // -------------------------------------------------------------
+
+    if (
+        categorias.includes(
+            "SUBESTACAO"
+        )
+    ) {
+
+        return "Subestação";
+
+    }
+
+
+    if (
+        categorias.includes(
+            "ALMOXARIFADO"
+        )
+    ) {
+
+        return "Almoxarifado";
+
+    }
+
+
+    if (
+        categorias.includes(
+            "BASE_OPERACIONAL"
+        )
+    ) {
+
+        return "Base Operacional";
+
+    }
+
+
+    if (
+        categorias.includes(
+            "ADMINISTRATIVO"
+        )
+    ) {
+
+        return "Sede Administrativa";
+
+    }
+
+
+    if (
+        categorias.includes(
+            "AGENCIA"
+        )
+    ) {
+
+        return "Agência de Atendimento";
+
+    }
+
+
+    return "Agência de Atendimento";
+
+}
+
+// =====================================================================
+// MARCADORES GLOBAIS
+// =====================================================================
 
 window.marcadoresGlobais = {};
 // =====================================================================
@@ -1668,322 +1726,832 @@ async function calcularDistanciaRodoviaria(
 // =====================================================================
 
 async function criarMarcadoresComDistanciaReal() {
+
+    console.log(
+        "Criando marcadores dos imóveis..."
+    );
+
+
+    // ================================================================
+    // 1. CALCULAR DISTÂNCIAS
+    // ================================================================
+
     const distancias =
         await Promise.all(
+
             todasBasesFisicas.map(
+
                 base =>
+
                     calcularDistanciaRodoviaria(
+
                         COORD_SEDE,
+
                         {
-                            lat: base.lat,
-                            lng: base.lng
+                            lat:
+                                base.lat,
+
+                            lng:
+                                base.lng
                         }
+
                     )
+
             )
+
         );
 
+
+    // ================================================================
+    // 2. LIMPAR MARCADORES ANTERIORES
+    // ================================================================
+
+    if (
+        window.marcadoresGlobais
+    ) {
+
+        Object.values(
+            window.marcadoresGlobais
+        ).forEach(
+
+            marker => {
+
+                if (
+                    marker &&
+                    map.hasLayer(marker)
+                ) {
+
+                    map.removeLayer(
+                        marker
+                    );
+
+                }
+
+            }
+
+        );
+
+    }
+
+
+    window.marcadoresGlobais = {};
+
+
+    // ================================================================
+    // 3. CRIAR MARCADORES
+    // ================================================================
+
     todasBasesFisicas.forEach(
+
         (base, indice) => {
+
+
+            // ========================================================
+            // TIPO PRINCIPAL
+            // ========================================================
+
+            const tipoPrincipal =
+                obterTipoPrincipal(
+                    base
+                );
+
+
+            // ========================================================
+            // CATEGORIAS
+            // ========================================================
+
+            const categorias =
+                Array.isArray(
+                    base.categorias
+                )
+                    ? base.categorias
+                    : [];
+
+
+            // ========================================================
+            // ÍCONE
+            // ========================================================
+
             const iconeCorreto =
+
                 mapIconTypes[
-                    base.tipo
+                    tipoPrincipal
                 ] ||
+
                 new L.Icon.Default();
 
+
+            // ========================================================
+            // DISTÂNCIA
+            // ========================================================
+
             const distanciaKm =
+
                 Number(
                     distancias[
                         indice
                     ]
                 ).toFixed(1);
 
+
+            // ========================================================
+            // MARCADOR
+            // ========================================================
+
             const marker =
+
                 L.marker(
+
                     [
                         base.lat,
                         base.lng
                     ],
+
                     {
                         icon:
                             iconeCorreto
                     }
+
                 );
 
+
+            // ========================================================
+            // GUARDAR DADOS NO MARCADOR
+            // ========================================================
+
+            marker.geoFacilitiesData = {
+
+                id:
+                    base.id,
+
+                categorias:
+                    categorias,
+
+                tipo:
+                    tipoPrincipal,
+
+                municipio:
+                    base.municipio,
+
+                status:
+                    base.dadosOriginais?.status ||
+                    "ATIVO"
+
+            };
+
+
+            // ========================================================
+            // ATUALIZAR STATUS DO MARCADOR
+            // ========================================================
+
             marker.on(
+
                 "add",
+
                 () => {
+
                     window.verificarEAtualizarMarcador(
+
                         base.id,
+
                         base.nome
+
                     );
+
                 }
+
             );
+
+
+            // ========================================================
+            // REGISTRAR MARCADOR
+            // ========================================================
 
             window.marcadoresGlobais[
                 base.id
             ] = marker;
 
+
+            // ========================================================
+            // EMPRESAS
+            // ========================================================
+
             const optionsEmpresas =
+
                 dadosTerceirizados
+
                     .map(
+
                         empresa =>
+
                             `
-                                <option value="${escapeHtml(empresa.id)}">
-                                    ${escapeHtml(empresa.nome)}
-                                </option>
+                            <option value="${escapeHtml(empresa.id)}">
+
+                                ${escapeHtml(empresa.nome)}
+
+                            </option>
                             `
+
                     )
+
                     .join("");
 
-            const popupContent = `
-            <div class="modern-popup">
 
-            <!-- TIPO DA UNIDADE -->
-            <span class="tag">
-                ${escapeHtml(base.tipo)}
-            </span>
-    
-    
-            <!-- NOME DA UNIDADE -->
-            <h3>
-                ${escapeHtml(base.nome)}
-            </h3>
-    
-    
-            <!-- DISTÂNCIA -->
-            <div class="info-row">
-                <strong>
-                    Distância:
-                </strong>
-    
-                <span>
-                    ${distanciaKm} km da sede (por rodovia)
-                </span>
-            </div>
-    
-    
-            <!-- ENDEREÇO -->
-            <div class="info-row">
-                <strong>
-                    Endereço:
-                </strong>
-    
-                <span>
-                    ${escapeHtml(base.endereco)}
-                </span>
-            </div>
-    
-    
-            <hr>
-    
-    
-            <!-- TÍTULO DO FORMULÁRIO -->
-            <label
-                style="
-                    font-size:.78rem;
-                    color:#004b6b;
-                    font-weight:800;
-                    display:block;
-                    margin-bottom:8px;
-                "
-            >
-                Vincular Serviço / Ocorrência
-            </label>
-    
-    
-            <!-- EMPRESA -->
-            <select
-                id="empresa-${base.id}"
-                class="popup-select"
-            >
-                <option
-                    value=""
-                    disabled
-                    selected
-                >
-                    Selecione a Empresa Parceira
-                </option>
-    
-                ${optionsEmpresas}
-            </select>
-            <!-- TIPO DE SERVIÇO -->
-            <label>
-                Tipo de Serviço
-            </label>
-            
-            <select
-                id="tipo-servico-${base.id}"
-                class="popup-select"
-                onchange="atualizarChecklist('${base.id}')"
-            >
-                <option
-                    value=""
-                    disabled
-                    selected
-                >
-                    Selecione o tipo de serviço
-                </option>
-            
-                <option value="civil">
-                    Reforma Civil / Predial
-                </option>
-            
-                <option value="climatizacao">
-                    Ar-Condicionado / PMOC
-                </option>
-            
-                <option value="eletrica">
-                    Manutenção Elétrica / Subestação
-                </option>
-            </select>
-            
-            
-            <!-- CHECKLIST DINÂMICO -->
-            <div
-                id="checklist-container-${base.id}"
-                style="
-                    display:none;
-                    margin-bottom:10px;
-                    font-size:.85em;
-                    background:#f1f5f9;
-                    padding:10px;
-                    border-radius:6px;
-                    border:1px solid #e2e8f0;
-                    color:#334155;
-                "
-            ></div>
-            
-            
-            <!-- PRIORIDADE -->
-            <label>
-                Prioridade
-            </label>
-            
-            <select
-                id="prioridade-${base.id}"
-                class="popup-select"
-            >
-                <option value="baixa">
-                    🟢 Prioridade Baixa
-                </option>
-            
-                <option
-                    value="media"
-                    selected
-                >
-                    🟡 Prioridade Média
-                </option>
-            
-                <option value="alta">
-                    🟠 Prioridade Alta
-                </option>
-            
-                <option value="critica">
-                    🔴 Prioridade Crítica
-                </option>
-            </select>
-             <select
-            id="status-${base.id}"
-            class="popup-select"
-        >
-            <option value="andamento">
-                Em Andamento
-            </option>
-        
-            <option value="aguardando">
-                Aguardando Peça/Aprovação
-            </option>
-        
-            <option value="realizado">
-                Realizado
-            </option>
-        
-            <option value="cancelado">
-                Cancelado
-            </option>
-        </select>
-        
-        
-        <label
-            style="
-                font-size:.75em;
-                color:#475569;
-                display:block;
-                margin-bottom:4px;
-            "
-        >
-            Nº do Chamado
-        </label>
-        
-        <input
-            type="text"
-            id="chamado-${base.id}"
-            class="popup-select"
-            placeholder="Ex: 123456"
-        >
-        
-        
-        <label
-            style="
-                font-size:.75em;
-                color:#475569;
-                display:block;
-                margin-bottom:4px;
-            "
-        >
-            Data do chamado
-        </label>
-        
-        <input
-            type="date"
-            id="data-${base.id}"
-            class="popup-select"
-            style="
-                margin-bottom:10px;
-                cursor:pointer;
-            "
-        >
-        
-        
-        <label
-            style="
-                font-size:.75em;
-                color:#475569;
-                display:block;
-                margin-bottom:4px;
-            "
-        >
-            Prazo / vencimento do chamado
-        </label>
-        
-        <input
-            type="datetime-local"
-            id="prazo-${base.id}"
-            class="popup-select"
-            style="
-                margin-bottom:10px;
-                cursor:pointer;
-            "
-        >
-        
-        
-        <label
-            style="
-                font-size:.75em;
-                color:#475569;
-                display:block;
-                margin-bottom:4px;
-            "
-        >
-            Descrição
-        </label>
-        
-        <textarea
-            id="desc-${base.id}"
-            placeholder="Descrição do serviço..."
-        ></textarea>
+            // ========================================================
+            // CATEGORIAS FORMATADAS
+            // ========================================================
+
+            const categoriasTexto =
+
+                categorias.length
+
+                    ? categorias
+                        .map(
+
+                            categoria => {
+
+                                const nomes = {
+
+                                    "AGENCIA":
+                                        "Agência",
+
+                                    "BASE_OPERACIONAL":
+                                        "Base Operacional",
+
+                                    "SUBESTACAO":
+                                        "Subestação",
+
+                                    "ADMINISTRATIVO":
+                                        "Administrativo",
+
+                                    "ALMOXARIFADO":
+                                        "Almoxarifado",
+
+                                    "REPETIDORA":
+                                        "Repetidora",
+
+                                    "GARAGEM":
+                                        "Garagem",
+
+                                    "SECCIONADORA":
+                                        "Seccionadora",
+
+                                    "CENTRO_CULTURAL":
+                                        "Centro Cultural",
+
+                                    "FAIXA_SERVIDAO":
+                                        "Faixa de Servidão"
+
+                                };
+
+
+                                return (
+
+                                    nomes[
+                                        categoria
+                                    ] ||
+
+                                    categoria
+
+                                );
+
+                            }
+
+                        )
+                        .join(" • ")
+
+                    : tipoPrincipal;
+
+
+            // ========================================================
+            // POPUP
+            // ========================================================
+
+            const popupContent = `
+
+                <div class="modern-popup">
+
+
+                    <!-- TIPO -->
+
+                    <span class="tag">
+
+                        ${escapeHtml(
+                            categoriasTexto
+                        )}
+
+                    </span>
+
+
+                    <!-- NOME -->
+
+                    <h3>
+
+                        ${escapeHtml(
+                            base.nome
+                        )}
+
+                    </h3>
+
+
+                    <!-- MUNICÍPIO -->
+
+                    <div class="info-row">
+
+                        <strong>
+                            Município:
+                        </strong>
+
+                        <span>
+
+                            ${escapeHtml(
+                                base.municipio || "-"
+                            )}
+
+                        </span>
+
+                    </div>
+
+
+                    <!-- DISTÂNCIA -->
+
+                    <div class="info-row">
+
+                        <strong>
+                            Distância:
+                        </strong>
+
+                        <span>
+
+                            ${distanciaKm}
+                            km da sede
+                            (por rodovia)
+
+                        </span>
+
+                    </div>
+
+
+                    <!-- ENDEREÇO -->
+
+                    <div class="info-row">
+
+                        <strong>
+                            Endereço:
+                        </strong>
+
+                        <span>
+
+                            ${escapeHtml(
+                                base.endereco || "-"
+                            )}
+
+                        </span>
+
+                    </div>
+
+
+                    <!-- PROPRIEDADE -->
+
+                    <div class="info-row">
+
+                        <strong>
+                            Propriedade:
+                        </strong>
+
+                        <span>
+
+                            ${escapeHtml(
+                                base.propriedade || "-"
+                            )}
+
+                        </span>
+
+                    </div>
+
+
+                    <!-- TIPO DE UTILIZAÇÃO -->
+
+                    <div class="info-row">
+
+                        <strong>
+                            Utilização:
+                        </strong>
+
+                        <span>
+
+                            ${escapeHtml(
+                                base.tipoUtilizacao || "-"
+                            )}
+
+                        </span>
+
+                    </div>
+
+
+                    <!-- COORDENADAS -->
+
+                    <div class="info-row">
+
+                        <strong>
+                            Coordenadas:
+                        </strong>
+
+                        <span>
+
+                            ${Number(
+                                base.lat
+                            ).toFixed(5)},
+
+                            ${Number(
+                                base.lng
+                            ).toFixed(5)}
+
+                        </span>
+
+                    </div>
+
+
+                    ${
+                        base.coordenadaAproximada
+
+                            ? `
+
+                                <div
+                                    style="
+                                        margin-top:8px;
+                                        padding:7px;
+                                        background:#fff7ed;
+                                        border-radius:6px;
+                                        color:#9a3412;
+                                        font-size:.75rem;
+                                    "
+                                >
+
+                                    ⚠️
+                                    Coordenada aproximada
+                                    pela localização
+                                    municipal.
+
+                                </div>
+
+                            `
+
+                            : ""
+                    }
+
+
+                    <hr>
+
+
+                    <!-- FORMULÁRIO -->
 
                     <label
+                        style="
+                            font-size:.78rem;
+                            color:#004b6b;
+                            font-weight:800;
+                            display:block;
+                            margin-bottom:8px;
+                        "
+                    >
+
+                        Vincular Serviço / Ocorrência
+
+                    </label>
+
+
+                    <!-- EMPRESA -->
+
+                    <select
+
+                        id="empresa-${base.id}"
+
+                        class="popup-select"
+
+                    >
+
+                        <option
+
+                            value=""
+                            disabled
+                            selected
+
+                        >
+
+                            Selecione a Empresa Parceira
+
+                        </option>
+
+
+                        ${optionsEmpresas}
+
+                    </select>
+
+
+                    <!-- TIPO DE SERVIÇO -->
+
+                    <label>
+
+                        Tipo de Serviço
+
+                    </label>
+
+
+                    <select
+
+                        id="tipo-servico-${base.id}"
+
+                        class="popup-select"
+
+                        onchange="
+                            atualizarChecklist(
+                                '${base.id}'
+                            )
+                        "
+
+                    >
+
+                        <option
+
+                            value=""
+                            disabled
+                            selected
+
+                        >
+
+                            Selecione o tipo de serviço
+
+                        </option>
+
+
+                        <option value="civil">
+
+                            Reforma Civil / Predial
+
+                        </option>
+
+
+                        <option value="climatizacao">
+
+                            Ar-Condicionado / PMOC
+
+                        </option>
+
+
+                        <option value="eletrica">
+
+                            Manutenção Elétrica / Subestação
+
+                        </option>
+
+                    </select>
+
+
+                    <!-- CHECKLIST -->
+
+                    <div
+
+                        id="
+                            checklist-container-${base.id}
+                        "
+
+                        style="
+                            display:none;
+                            margin-bottom:10px;
+                            font-size:.85em;
+                            background:#f1f5f9;
+                            padding:10px;
+                            border-radius:6px;
+                            border:1px solid #e2e8f0;
+                            color:#334155;
+                        "
+
+                    ></div>
+
+
+                    <!-- PRIORIDADE -->
+
+                    <label>
+
+                        Prioridade
+
+                    </label>
+
+
+                    <select
+
+                        id="prioridade-${base.id}"
+
+                        class="popup-select"
+
+                    >
+
+                        <option value="baixa">
+
+                            🟢 Prioridade Baixa
+
+                        </option>
+
+
+                        <option
+
+                            value="media"
+                            selected
+
+                        >
+
+                            🟡 Prioridade Média
+
+                        </option>
+
+
+                        <option value="alta">
+
+                            🟠 Prioridade Alta
+
+                        </option>
+
+
+                        <option value="critica">
+
+                            🔴 Prioridade Crítica
+
+                        </option>
+
+                    </select>
+
+
+                    <!-- STATUS -->
+
+                    <select
+
+                        id="status-${base.id}"
+
+                        class="popup-select"
+
+                    >
+
+                        <option value="andamento">
+
+                            Em Andamento
+
+                        </option>
+
+
+                        <option value="aguardando">
+
+                            Aguardando Peça/Aprovação
+
+                        </option>
+
+
+                        <option value="realizado">
+
+                            Realizado
+
+                        </option>
+
+
+                        <option value="cancelado">
+
+                            Cancelado
+
+                        </option>
+
+                    </select>
+
+
+                    <!-- CHAMADO -->
+
+                    <label
+
+                        style="
+                            font-size:.75em;
+                            color:#475569;
+                            display:block;
+                            margin-bottom:4px;
+                        "
+
+                    >
+
+                        Nº do Chamado
+
+                    </label>
+
+
+                    <input
+
+                        type="text"
+
+                        id="chamado-${base.id}"
+
+                        class="popup-select"
+
+                        placeholder="Ex: 123456"
+
+                    >
+
+
+                    <!-- DATA -->
+
+                    <label
+
+                        style="
+                            font-size:.75em;
+                            color:#475569;
+                            display:block;
+                            margin-bottom:4px;
+                        "
+
+                    >
+
+                        Data do chamado
+
+                    </label>
+
+
+                    <input
+
+                        type="date"
+
+                        id="data-${base.id}"
+
+                        class="popup-select"
+
+                        style="
+                            margin-bottom:10px;
+                            cursor:pointer;
+                        "
+
+                    >
+
+
+                    <!-- PRAZO -->
+
+                    <label
+
+                        style="
+                            font-size:.75em;
+                            color:#475569;
+                            display:block;
+                            margin-bottom:4px;
+                        "
+
+                    >
+
+                        Prazo / vencimento do chamado
+
+                    </label>
+
+
+                    <input
+
+                        type="datetime-local"
+
+                        id="prazo-${base.id}"
+
+                        class="popup-select"
+
+                        style="
+                            margin-bottom:10px;
+                            cursor:pointer;
+                        "
+
+                    >
+
+
+                    <!-- DESCRIÇÃO -->
+
+                    <label
+
+                        style="
+                            font-size:.75em;
+                            color:#475569;
+                            display:block;
+                            margin-bottom:4px;
+                        "
+
+                    >
+
+                        Descrição
+
+                    </label>
+
+
+                    <textarea
+
+                        id="desc-${base.id}"
+
+                        placeholder="Descrição do serviço..."
+
+                    ></textarea>
+
+
+                    <!-- EVIDÊNCIA -->
+
+                    <label
+
                         style="
                             font-size:.8em;
                             color:#555;
@@ -1991,31 +2559,53 @@ async function criarMarcadoresComDistanciaReal() {
                             margin-top:5px;
                             margin-bottom:2px;
                         "
+
                     >
+
                         <b>
+
                             Anexar Evidência (Foto):
+
                         </b>
+
                     </label>
 
+
                     <input
+
                         type="file"
+
                         id="evidencia-${base.id}"
+
                         accept="image/*"
+
                         style="
                             width:100%;
                             font-size:.8em;
                             margin-bottom:12px;
                         "
+
                     >
 
+
+                    <!-- BOTÃO -->
+
                     <button
-    type="button"
-    onclick="registrarServico(
-        event,
-        '${base.id}',
-        decodeURIComponent('${encodeURIComponent(base.nome)}')
-    )"
+
+                        type="button"
+
+                        onclick="
+                            registrarServico(
+                                event,
+                                '${base.id}',
+                                decodeURIComponent(
+                                    '${encodeURIComponent(base.nome)}'
+                                )
+                            )
+                        "
+
                         class="btn-link"
+
                         style="
                             background-color:#f26522;
                             color:white;
@@ -2026,39 +2616,57 @@ async function criarMarcadoresComDistanciaReal() {
                             cursor:pointer;
                             font-weight:bold;
                         "
+
                     >
+
                         Registrar Serviço
+
                     </button>
 
+
                 </div>
+
             `;
+
+
+            // ========================================================
+            // VINCULAR POPUP
+            // ========================================================
 
             marker.bindPopup(
                 popupContent
             );
 
+
+            // ========================================================
+            // ADICIONAR AO MAPA
+            //
+            // IMPORTANTE:
+            // Um mesmo marker NÃO será colocado em várias
+            // LayerGroups, pois isso causa conflito no Leaflet
+            // quando uma camada é ocultada.
+            //
+            // A categoria será armazenada no marker e os
+            // filtros poderão trabalhar sobre ela.
+            // ========================================================
+
             marker.addTo(
-                mapTypeToLayer[
-                    base.tipo
-                ] ||
-                camadas[
-                    "Agências de Atendimento"
-                ]
+                map
             );
+
+
         }
+
     );
 
-    L.control.layers(
-        null,
-        camadas,
-        {
-            position:
-                "topright",
 
-            collapsed:
-                false
-        }
-    ).addTo(map);
+    console.log(
+        "Marcadores criados:",
+        Object.keys(
+            window.marcadoresGlobais
+        ).length
+    );
+
 }
 
 
@@ -3246,6 +3854,70 @@ async function (
         await window.salvarDadosGlobais();
 
 
+        console.log(
+            "Status salvo no Firebase:",
+            novoStatus
+        );
+
+
+        // ============================================================
+        // ENVIAR E-MAIL
+        // SOMENTE QUANDO O STATUS FOR REALIZADO
+        // ============================================================
+
+        if (
+            novoStatus === "realizado"
+        ) {
+
+            console.log(
+                "Status é REALIZADO. Vou chamar o EmailJS."
+            );
+
+
+            try {
+
+                const resultadoEmail =
+                    await window.enviarEmailChamadoRealizado(
+                        empresa,
+                        servico
+                    );
+
+
+                console.log(
+                    "Resultado do envio:",
+                    resultadoEmail
+                );
+
+
+                if (!resultadoEmail) {
+
+                    console.warn(
+                        "O chamado foi salvo, mas o e-mail não foi enviado."
+                    );
+
+                }
+
+            } catch (erroEmail) {
+
+                console.error(
+                    "Erro no envio do e-mail:",
+                    erroEmail
+                );
+
+                /*
+                 * IMPORTANTE:
+                 *
+                 * Não vamos desfazer o status do chamado
+                 * caso apenas o e-mail falhe.
+                 *
+                 * O Firebase já salvou corretamente.
+                 */
+
+            }
+
+        }
+
+
         // ============================================================
         // ATUALIZAR MARCADOR
         // ============================================================
@@ -3261,6 +3933,7 @@ async function (
                 base.id,
                 base.nome
             );
+
         }
 
 
@@ -3277,11 +3950,13 @@ async function (
 
             botao.style.background =
                 "#16a34a";
+
         }
 
 
-        // Pequeno atraso para permitir
-        // que o usuário veja o feedback.
+        // ============================================================
+        // ATUALIZAR INTERFACE
+        // ============================================================
 
         setTimeout(
             () => {
@@ -3322,13 +3997,16 @@ async function (
 
             botao.style.background =
                 "";
+
         }
 
 
         alert(
             "Não foi possível atualizar o status."
         );
+
     }
+
 };
 
 // =====================================================================
@@ -4221,11 +4899,21 @@ window.renderizarTerceirizados = function () {
 
 window.aplicarFiltros =
 function () {
+
+    // ================================================================
+    // FILTRO DE STATUS
+    // ================================================================
+
     const filtroStatus =
         document.getElementById(
             "filtro-status"
         )?.value ??
         "todos";
+
+
+    // ================================================================
+    // FILTRO DE TIPO
+    // ================================================================
 
     const filtroTipo =
         document.getElementById(
@@ -4233,150 +4921,257 @@ function () {
         )?.value ??
         "todos";
 
+
+    // ================================================================
+    // PERCORRER TODOS OS IMÓVEIS
+    // ================================================================
+
     todasBasesFisicas.forEach(
+
         base => {
+
             const marker =
                 window.marcadoresGlobais[
                     base.id
                 ];
 
+
             if (!marker) {
                 return;
             }
 
-            // =========================================================
+
+            // ========================================================
+            // CATEGORIAS DO IMÓVEL
+            // ========================================================
+
+            const categorias =
+                Array.isArray(
+                    base.categorias
+                )
+                    ? base.categorias
+                    : [];
+
+
+            // ========================================================
             // FILTRO POR TIPO
-            // =========================================================
+            // ========================================================
 
-            const mostrarPorTipo =
-                filtroTipo === "todos" ||
-                base.tipo === filtroTipo;
+            let mostrarPorTipo =
+                true;
 
 
-            // =========================================================
+            if (
+                filtroTipo !==
+                "todos"
+            ) {
+
+                mostrarPorTipo =
+                    categorias.includes(
+                        filtroTipo
+                    );
+
+            }
+
+
+            // ========================================================
             // FILTRO POR STATUS
-            // =========================================================
+            // ========================================================
 
             let mostrarPorStatus =
                 true;
+
 
             if (
                 filtroStatus !==
                 "todos"
             ) {
+
+                // ----------------------------------------------------
+                // Status padrão
+                // ----------------------------------------------------
+
                 let statusBase =
                     "nenhum";
 
+
+                // ----------------------------------------------------
+                // Serviços vinculados ao imóvel
+                // ----------------------------------------------------
+
                 const servicosDoLocal =
+
                     dadosTerceirizados.flatMap(
+
                         empresa =>
+
                             (
                                 empresa.servicos ??
                                 []
                             ).filter(
+
                                 servico =>
+
                                     servico.localId ===
                                         base.id ||
+
                                     servico.local ===
                                         base.nome
+
                             )
+
                     );
 
+
+                // ----------------------------------------------------
+                // Verificar atrasados
+                // ----------------------------------------------------
 
                 const temAtrasado =
+
                     servicosDoLocal.some(
+
                         chamadoEstaAtrasado
+
                     );
 
+
+                // ----------------------------------------------------
+                // Verificar em andamento
+                // ----------------------------------------------------
 
                 const temAndamento =
+
                     servicosDoLocal.some(
+
                         servico =>
+
                             servico.statusAtual ===
                             "andamento"
+
                     );
 
+
+                // ----------------------------------------------------
+                // Verificar aguardando
+                // ----------------------------------------------------
 
                 const temAguardando =
+
                     servicosDoLocal.some(
+
                         servico =>
+
                             servico.statusAtual ===
                             "aguardando"
+
                     );
 
 
+                // ----------------------------------------------------
+                // FILTRO ATRASADO
+                // ----------------------------------------------------
+
                 if (
+
                     filtroStatus ===
                     "atrasado"
+
                 ) {
+
                     mostrarPorStatus =
                         temAtrasado;
-                } else {
+
+                }
+
+
+                // ----------------------------------------------------
+                // DEMAIS STATUS
+                // ----------------------------------------------------
+
+                else {
 
                     if (
                         temAndamento
                     ) {
+
                         statusBase =
                             "andamento";
-                    } else if (
+
+                    }
+
+                    else if (
                         temAguardando
                     ) {
+
                         statusBase =
                             "aguardando";
+
                     }
 
 
                     mostrarPorStatus =
+
                         filtroStatus ===
                         statusBase;
+
                 }
+
             }
 
 
-            // =========================================================
-            // CAMADA CORRETA
-            // =========================================================
+            // ========================================================
+            // RESULTADO FINAL
+            // ========================================================
 
-            const camadaCorreta =
-                mapTypeToLayer[
-                    base.tipo
-                ] ||
-                camadas[
-                    "Agências de Atendimento"
-                ];
+            const deveMostrar =
+
+                mostrarPorTipo &&
+                mostrarPorStatus;
 
 
-            // =========================================================
-            // EXIBIR OU OCULTAR MARCADOR
-            // =========================================================
+            // ========================================================
+            // ADICIONAR / REMOVER DO MAPA
+            // ========================================================
 
             if (
-                mostrarPorTipo &&
-                mostrarPorStatus
+                deveMostrar
             ) {
-                if (
-                    !camadaCorreta.hasLayer(
-                        marker
-                    )
-                ) {
-                    camadaCorreta.addLayer(
-                        marker
-                    );
-                }
-            } else {
 
                 if (
-                    camadaCorreta.hasLayer(
+                    !map.hasLayer(
                         marker
                     )
                 ) {
-                    camadaCorreta.removeLayer(
+
+                    marker.addTo(
+                        map
+                    );
+
+                }
+
+            }
+
+            else {
+
+                if (
+                    map.hasLayer(
+                        marker
+                    )
+                ) {
+
+                    map.removeLayer(
                         marker
                     );
+
                 }
+
             }
+
         }
+
     );
+
 };
 
 
@@ -4385,50 +5180,81 @@ function () {
 // =====================================================================
 
 async function inicializarGeoFacilities() {
+
     try {
 
         // =============================================================
-        // 1. CARREGAR FIREBASE PRIMEIRO
+        // 1. CARREGAR IMÓVEIS DO JSON
+        // =============================================================
+
+        await carregarImoveis();
+
+
+        // =============================================================
+        // 2. CARREGAR DADOS DO FIREBASE
         // =============================================================
 
         await window.carregarDadosDaNuvem();
 
 
         // =============================================================
-        // 2. CRIAR MARCADORES
+        // 3. CRIAR MARCADORES DOS IMÓVEIS
         // =============================================================
 
         await criarMarcadoresComDistanciaReal();
 
 
         // =============================================================
-        // 3. RENDERIZAR CHAMADOS
+        // 4. RENDERIZAR CHAMADOS / TERCEIRIZADOS
         // =============================================================
 
         window.renderizarTerceirizados();
 
 
         // =============================================================
-        // 4. ATUALIZAR CORES DOS MARCADORES
+        // 5. ATUALIZAR CORES DOS MARCADORES
         // =============================================================
 
         todasBasesFisicas.forEach(
+
             base => {
+
                 window.verificarEAtualizarMarcador(
+
                     base.id,
+
                     base.nome
+
                 );
+
             }
+
         );
 
-    } catch (
-        erro
-    ) {
+
+        // =============================================================
+        // 6. LOG DE CONFIRMAÇÃO
+        // =============================================================
+
+        console.log(
+            "GeoFacilities iniciado com sucesso."
+        );
+
+        console.log(
+            "Total de imóveis:",
+            todasBasesFisicas.length
+        );
+
+
+    } catch (erro) {
+
         console.error(
             "Erro ao inicializar o GeoFacilities:",
             erro
         );
+
     }
+
 }
 
 

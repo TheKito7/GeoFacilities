@@ -37,12 +37,48 @@
         <option value="andamento">🟠 Em Andamento</option>
         <option value="aguardando">🟡 Aguardando Peça</option>
     </select>
-    <select id="filtro-tipo" class="filtro-select" onchange="aplicarFiltros()">
-        <option value="todos">Todos os Tipos de Base</option>
-        <option value="Subestação"> Subestações</option>
-        <option value="Base Operacional"> Bases Operacionais</option>
-        <option value="Agência de Atendimento"> Agências</option>
-    </select>
+    <select
+    id="filtro-tipo"
+    class="filtro-select"
+    onchange="aplicarFiltros()"
+>
+
+    <option value="todos">
+        Todos os Tipos
+    </option>
+
+    <option value="AGENCIA">
+         Agências
+    </option>
+
+    <option value="BASE_OPERACIONAL">
+         Bases Operacionais
+    </option>
+
+    <option value="SUBESTACAO">
+         Subestações
+    </option>
+
+    <option value="ADMINISTRATIVO">
+         Administrativo
+    </option>
+     <option value="REPETIDORA">
+         Repetidoras
+    </option>
+
+    <option value="SECCIONADORA">
+         Seccionadoras
+    </option>
+
+    <option value="GARAGEM">
+         Garagens
+    </option>
+
+    <option value="CENTRO_CULTURAL">
+         Centros Culturais
+    </option>
+
+</select>
 </div>
 
            <!-- SEÇÃO 1: SEGURANÇA E INCÊNDIO (A sua atual) -->
@@ -216,7 +252,7 @@
 
     <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 
-<script type="module" src="js/email.js"></script>
+    <script src="js/email.js"></script>
     <!-- FIREBASE SDKs -->
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>

@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Programação Semanal | GeoFacilities</title>
+  <link rel="stylesheet" href="css/programacao.css">
+</head>
+<body>
+  <header>
+    <a href="index.html">← Voltar ao mapa</a>
+    <h1>Programação Semanal</h1>
+    <p>Organização de atividades da equipe de Facilities</p>
+  </header>
+  <main>
+    <section class="toolbar" aria-label="Navegação por semanas">
+      <button id="anterior" type="button">← Semana anterior</button>
+      <strong id="periodo"></strong>
+      <button id="proxima" type="button">Próxima semana →</button>
+      <button id="atual" type="button">Semana atual</button>
+      <button id="exportar-png" type="button">⬇ Exportar PNG</button>
+      <button id="btn-compartilhar" type="button">🔗 Copiar link</button>
+    </section>
+    <section class="historico-barra" aria-label="Consulta de semanas anteriores">
+      <label for="historico">Histórico de semanas</label>
+      <select id="historico" aria-label="Selecionar semana arquivada"><option>Carregando...</option></select>
+      <span>As semanas anteriores permanecem salvas no Firebase.</span>
+    </section>
+    <div class="status-servico">
+      <span id="conexao">Conectando ao Firebase...</span>
+      <span id="mensagem" role="status" aria-live="polite"></span>
+    </div>
+    <section class="formulario">
+      <h2>Nova atividade</h2>
+      <form id="form">
+        <label>Data<input required type="date" id="data"></label>
+        <label>Responsáveis<input required maxlength="150" id="responsaveis" placeholder="Ex.: Jamisson e Adriano"></label>
+        <label>Local<input required maxlength="150" id="local" placeholder="Ex.: Mosqueiro"></label>
+        <label>Descrição<input maxlength="300" id="descricao" placeholder="Ex.: Visita técnica"></label>
+        <button id="btn-adicionar" type="submit">Adicionar atividade</button>
+      </form>
+      <button id="btn-importar" class="importar" type="button" hidden>Importar atividades antigas deste navegador</button>
+    </section>
+    <section id="semana" class="semana" aria-label="Atividades da semana"></section>
+    <p class="aviso">Sem login: quem acessar a página poderá cadastrar, alterar ou excluir atividades.
+      As semanas antigas continuam disponíveis no Histórico, exceto atividades excluídas manualmente.
+      Não inclua informações internas sigilosas.</p>
+  </main>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+  <script src="js/programacao.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,107 @@
+/* GeoFacilities - Programação Semanal | Visual inspirado no modelo */
+* { box-sizing: border-box; }
+:root {
+  --azul-escuro: #0f4a6a;
+  --azul-card: #63afcd;
+  --azul-aba: #70c6e7;
+  --laranja: #f58a32;
+  --borda: #161616;
+  --fundo: #e9e9e9;
+}
+body { margin: 0; background: var(--fundo); color: #111; font-family: Arial, Helvetica, sans-serif; }
+header { background: var(--azul-escuro); color: white; padding: 20px max(20px, 5vw); }
+header a { color: #d6f0ff; text-decoration: none; }
+header a:hover { text-decoration: underline; }
+header h1 { font-size: clamp(1.9rem, 3.3vw, 2.7rem); margin: 12px 0 4px; font-weight: 900; }
+header p { margin: 0; color: #dcecf4; }
+main { max-width: 1200px; margin: auto; padding: 22px; }
+.toolbar { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 20px; }
+.toolbar strong { margin-right: auto; }
+button { border: 0; border-radius: 9px; padding: 11px 15px; font: inherit; font-weight: 700; background: #267da3; color: white; cursor: pointer; }
+button:hover { filter: brightness(.94); }
+.formulario { padding: 18px; border: 1px solid #d2d2d2; border-radius: 14px; background: #fff; margin-bottom: 26px; }
+.formulario h2 { margin: 0 0 15px; color: #17384a; }
+form { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; align-items: end; }
+label { display: flex; flex-direction: column; gap: 6px; font-size: 13px; font-weight: 700; }
+input, select, textarea { font: inherit; padding: 10px; border: 1px solid #b9cbd6; border-radius: 9px; background: #fff; max-width: 100%; width: 100%; }
+.semana { display: flex; flex-direction: column; gap: 18px; }
+.dia { min-width: 0; }
+.dia-topo { position: relative; z-index: 1; width: max-content; max-width: 100%; margin: 0 0 -3px 4px; padding: 7px 19px; border: 2px solid var(--borda); border-radius: 999px; font-size: 1.35rem; line-height: 1; font-weight: 900; }
+.dia.azul .dia-topo { background: var(--azul-aba); }
+.dia.laranja .dia-topo { background: var(--laranja); }
+.dia-box { display: grid; grid-template-columns: 98px minmax(0, 1fr); border: 2px solid var(--borda); border-radius: 14px; overflow: hidden; min-height: 100px; }
+.dia.azul .dia-box { background: var(--azul-card); }
+.dia.laranja .dia-box { background: var(--laranja); }
+.data-box { display: flex; align-items: center; justify-content: center; border-right: 2px dotted rgba(0,0,0,.65); font-size: clamp(2.8rem, 5vw, 4rem); font-weight: 900; padding: 8px 5px; }
+.atividades-dia { padding: 6px 18px; min-width: 0; }
+.atividade { padding: 13px 0 15px; overflow-wrap: anywhere; }
+.atividade + .atividade { border-top: 2px solid rgba(0,0,0,.28); }
+.atividade-responsavel { margin: 0 0 10px; font-size: clamp(1.3rem, 2.2vw, 1.9rem); line-height: 1.15; font-weight: 900; }
+.informacao { display: flex; align-items: baseline; gap: 12px; margin: 6px 0; font-size: 1.05rem; }
+.informacao-rotulo { flex: 0 0 112px; min-width: 112px; white-space: nowrap; font-size: .82rem; font-weight: 800; text-transform: uppercase; letter-spacing: .04em; opacity: .8; }
+.informacao-valor { flex: 1; min-width: 0; line-height: 1.35; overflow-wrap: break-word; }
+.controles { display: flex; flex-wrap: wrap; gap: 9px; align-items: flex-start; margin-top: 12px; }
+.controles select { width: min(250px, 100%); }
+.controles textarea { width: min(310px, 100%); min-height: 70px; }
+.controles textarea[hidden] { display: none; }
+.excluir { background: #913d46; padding: 10px 13px; font-size: .85rem; }
+.atividade.realizada { border-left: 4px solid #237e4f; padding-left: 12px; }
+.atividade.nao-realizada { border-left: 4px solid #a92b33; padding-left: 12px; }
+.dia-vazio { margin: 0; padding: 22px 0; font-weight: 600; }
+.aviso { margin-top: 20px; color: #586c78; font-size: .82rem; }
+@media (max-width: 620px) {
+  main { padding: 14px; }
+  .toolbar strong { flex-basis: 100%; order: -1; }
+  .dia-box { grid-template-columns: 66px minmax(0, 1fr); }
+  .data-box { font-size: 2.3rem; }
+  .dia-topo { font-size: 1.1rem; }
+  .atividades-dia { padding: 3px 10px; }
+  .informacao { display: block; }
+  .informacao-rotulo { display: block; min-width: 0; margin-bottom: 2px; }
+  .atividade-responsavel { font-size: 1.25rem; }
+}
+@media print {
+  header a, .toolbar button, .formulario, .controles, .aviso { display: none !important; }
+  body { background: white; }
+  .semana { gap: 10px; }
+  .dia { break-inside: avoid; }
+}
+
+/* Botão de exportação do planejamento */
+.toolbar #exportar-png {
+  background: #f5822a;
+  color: #111;
+  border: 2px solid #1c1c1c;
+  padding: 9px 16px;
+  margin-left: 4px;
+}
+.toolbar #exportar-png:hover { background: #ff9a4e; }
+.toolbar #exportar-png:disabled { opacity: .6; cursor: wait; }
+@media print { .toolbar #exportar-png { display: none !important; } }
+
+/* Firebase / compartilhamento - mantém o visual original aprovado. */
+[hidden] { display: none !important; }
+.status-servico { display: flex; gap: 15px; align-items: baseline; flex-wrap: wrap; margin: -7px 0 17px; font-size: 13px; }
+#conexao { color: #174e68; font-weight: 800; }
+#mensagem { color: #287044; }
+#mensagem.erro { color: #aa2635; font-weight: 700; }
+.admin-barra { display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap;
+  background: #f9fafc; border: 1px solid #cbd8df; padding: 10px 14px; border-radius: 10px; margin-bottom: 18px; font-size: 13px; }
+.admin-botoes { display: flex; flex-wrap: wrap; gap: 8px; }
+.admin-botoes button { font-size: 12px; padding: 9px 12px; }
+#btn-importar { background: #367649; }
+#btn-compartilhar { background: #0f4a6a; }
+.salvar-motivo { background: #225c79; }
+.controles .salvar-motivo { font-size: .85rem; }
+@media(max-width:620px){ .admin-barra { align-items: stretch; } }
+@media print { .admin-barra, .status-servico, #btn-compartilhar { display:none!important; } }
+
+/* Histórico sem login, preservando o layout azul e laranja */
+.historico-barra { display:flex; align-items:center; flex-wrap:wrap; gap:12px; background:#f8fafb;
+  border:1px solid #cbd8df; border-radius:12px; padding:12px 15px; margin-bottom:18px; }
+.historico-barra label { font-size:14px; white-space:nowrap; }
+.historico-barra select { flex:0 1 290px; max-width:100%; }
+.historico-barra span { font-size:12px; color:#576a73; }
+.importar { background:#397149; margin-top:13px; font-size:13px; }
+button:disabled { opacity:.55; cursor:not-allowed; }
+@media print { .historico-barra, .importar, .status-servico {display:none !important;} }

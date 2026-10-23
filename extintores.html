@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Inspeção de Extintores | GeoFacilities</title>
+ <link rel="icon" href="imagens/icone-extintores.png" type="image/x-icon"> 
+  <link rel="stylesheet" href="css/extintores.css">
+  <link rel="stylesheet" href="css/painel-indicadores.css">
+</head>
+<body>
+<header class="topo">
+  <div class="limite">
+    <a href="index.html">← Voltar ao GeoFacilities</a>
+    <h1>Inspeção Mensal de Extintores</h1>
+    <p>Cadastro rápido, histórico fotográfico e e-mail individual</p>
+  </div>
+</header>
+<main class="limite">
+  <div id="mensagem" class="mensagem" role="status" aria-live="polite"></div>
+  <section class="painel painel-indicadores" aria-label="Indicadores do mês">
+    <div class="indicadores-cabecalho">
+      <h2>Visão geral da inspeção</h2>
+      <span id="indicadores-mes">Mês atual</span>
+    </div>
+    <div class="indicadores-grid">
+      <article class="indicador-card"><span>Extintores cadastrados</span><strong id="total-extintores">—</strong><small>Inventário registrado</small></article>
+      <article class="indicador-card"><span>Inspecionados no mês</span><strong id="inspecionados-mes">—</strong><small>Equipamentos distintos</small></article>
+      <article class="indicador-card indicador-alerta"><span>Com irregularidades</span><strong id="irregulares-mes">—</strong><small>Último registro do mês</small></article>
+      <article class="indicador-card"><span>Sem inspeção no mês</span><strong id="pendentes-mes">—</strong><small>Aguardando verificação</small></article>
+    </div>
+    <p class="indicadores-nota" id="indicadores-nota" aria-live="polite">Carregando indicadores...</p>
+  </section>
+  <section class="painel">
+    <h2>1. Selecionar equipamento</h2>
+    <label for="equipamento">Extintor já cadastrado</label>
+    <div class="linha">
+      <select id="equipamento"><option value="">Novo extintor</option></select>
+      <button type="button" id="novo" class="secundario">Novo extintor</button>
+    </div>
+    <form id="formulario">
+      <fieldset><legend>Dados do extintor</legend>
+        <div class="campos">
+          <label>Identificação (automática)<input id="codigo" placeholder="Gerada ao cadastrar" readonly></label>
+          <label>Tipo<select id="tipo" required><option value="">Selecione</option><option>ABC</option><option>BC</option><option>CO₂</option><option>Água</option><option>Outro</option></select></label>
+          <label>Capacidade<input id="capacidade" maxlength="30" required placeholder="Ex.: 8 kg"></label>
+          <label>Localização<input id="local" maxlength="160" required placeholder="Ex.: Corredor da frota"></label>
+          <label>Vencimento da manutenção/recarga (opcional)<input id="vencimento" type="date"></label>
+        </div>
+      </fieldset>
+      <fieldset><legend>2. Checklist mensal</legend>
+        <p class="ajuda">Data da inspeção registrada automaticamente quando você salvar.</p>
+        <div id="checklist" class="checklist"></div>
+        <label>Observações<textarea id="observacoes" rows="3" maxlength="1500" placeholder="Irregularidades e providências necessárias"></textarea></label>
+        <label>Foto do extintor<input id="foto" type="file" accept="image/*" capture="environment"></label>
+        <div id="foto-previa" class="foto-previa" hidden>
+
+  <img
+    id="foto-preview-imagem"
+    alt="Prévia da foto selecionada"
+  >
+
+  <p id="foto-preview-nome"></p>
+
+  <button
+    type="button"
+    class="secundario"
+    id="remover-foto"
+  >
+    Remover foto
+  </button>
+
+</div>
+        <p class="ajuda">Para guardar a foto online, configure sua chave do ImgBB em <code>js/extintores/config.js</code>. Não envie fotos com pessoas ou dados confidenciais.</p>
+      </fieldset>
+      <button id="salvar" type="submit">Salvar inspeção e enviar e-mail</button>
+    </form>
+  </section>
+  <section class="painel">
+    <div class="linha titulo-linha"><h2>Histórico de inspeções</h2><button type="button" id="atualizar" class="secundario">Atualizar</button></div>
+    <div id="historico" class="historico"><p>O histórico geral de inspeções será exibido aqui.</p></div>
+  </section>
+</main>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<script type="module" src="js/extintores/main.js"></script>
+</body>
+</html>

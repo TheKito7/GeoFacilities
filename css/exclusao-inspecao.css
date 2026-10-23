@@ -1,0 +1,6 @@
+.acoes-inspecao { display:flex;justify-content:flex-end;margin-top:16px;padding-top:12px;border-top:1px solid #dce7ed; }
+.botao-excluir-inspecao {background:#b93636;color:#fff;border:0;border-radius:8px;padding:10px 14px;font-size:13px;font-weight:700;cursor:pointer;}
+.botao-excluir-inspecao:hover:not(:disabled) {background:#912626;}
+.botao-excluir-inspecao:focus-visible {outline:3px solid #f58220;outline-offset:3px;}
+.botao-excluir-inspecao:disabled {opacity:.5;cursor:wait;}
+@media(max-width:600px){.botao-excluir-inspecao{width:100%;}}

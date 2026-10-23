@@ -1,0 +1,16 @@
+/* Painel de indicadores — acrescente ao FINAL do seu extintores.css */
+.painel-indicadores { border-top: 5px solid #f58220; }
+.indicadores-cabecalho { display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;margin-bottom:16px; }
+.indicadores-cabecalho h2 { margin:0; }
+#indicadores-mes { color:#155676;background:#e6f3f9;padding:7px 12px;border-radius:999px;text-transform:capitalize;font-size:13px;font-weight:700; }
+.indicadores-grid { display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px; }
+.indicador-card { display:flex;flex-direction:column;gap:8px;padding:18px 16px;border:1px solid #d7e3ea;border-radius:12px;background:#f5f9fc;min-width:0; }
+.indicador-card span { font-size:13px;font-weight:700;color:#31586d; }
+.indicador-card strong { font-size:38px;line-height:1;font-weight:900;color:#123f5a;font-variant-numeric:tabular-nums; }
+.indicador-card small { font-size:11px;color:#667f8d; }
+.indicador-alerta { background:#fff1ec;border-color:#f2c7b8; }
+.indicador-alerta strong { color:#b93636; }
+.indicadores-nota { margin:14px 0 0;font-size:12px;color:#647c8b; }
+@media(max-width:800px){.indicadores-grid{grid-template-columns:repeat(2,minmax(0,1fr));}}
+@media(max-width:380px){.indicador-card{padding:14px 10px;}.indicador-card strong{font-size:30px;}}
+@media print{.indicador-card{break-inside:avoid;}}

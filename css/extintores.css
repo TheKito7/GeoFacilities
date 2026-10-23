@@ -1,0 +1,785 @@
+
+/* =====================================================
+   GEOFACILITIES — INSPEÇÃO MENSAL DE EXTINTORES
+   Tema: Energisa + inspiração institucional CBMSE
+   Arquivo: css/extintores.css
+   ===================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+
+:root {
+  --azul-escuro: #123f5a;
+  --azul-medio: #156d91;
+  --azul-claro: #1597bf;
+
+  --laranja: #f58220;
+  --laranja-claro: #fff2e5;
+
+  --vermelho: #b93636;
+  --vermelho-claro: #fff0ee;
+
+  --verde: #16835d;
+  --verde-claro: #e7f6ef;
+
+  --fundo: #eef3f7;
+  --branco: #ffffff;
+
+  --texto: #18394c;
+  --texto-secundario: #647c8b;
+
+  --borda: #d7e3ea;
+  --sombra: 0 5px 20px rgba(17, 62, 90, 0.07);
+
+  --radius: 14px;
+}
+
+/* =====================================================
+   1. CONFIGURAÇÕES GERAIS
+   ===================================================== */
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: 'Inter', Arial, sans-serif;
+  background: var(--fundo);
+  color: var(--texto);
+  line-height: 1.5;
+}
+
+.limite {
+  width: 100%;
+  max-width: 1120px;
+  margin: 0 auto;
+  padding-left: 20px;
+  padding-right: 20px;
+}
+
+/* =====================================================
+   2. CABEÇALHO INSTITUCIONAL
+   ===================================================== */
+
+.topo {
+  position: relative;
+  background: linear-gradient(
+    115deg,
+    #10354e 0%,
+    #155676 60%,
+    #147b9d 100%
+  );
+  color: white;
+  padding: 26px 0 36px;
+  overflow: hidden;
+  border-bottom: 5px solid var(--laranja);
+}
+
+.topo::after {
+  content: "";
+  position: absolute;
+  right: -90px;
+  top: -100px;
+  width: 350px;
+  height: 350px;
+  border: 45px solid rgba(255,255,255,0.045);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.topo .limite {
+  position: relative;
+  z-index: 1;
+}
+
+.topo a {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #d9f3ff;
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 22px;
+}
+
+.topo a:hover {
+  color: white;
+  text-decoration: underline;
+}
+
+.topo h1 {
+  margin: 0 0 10px;
+  font-size: clamp(26px, 4vw, 39px);
+  font-weight: 900;
+  letter-spacing: -1px;
+  line-height: 1.18;
+  max-width: 760px;
+}
+
+.topo p {
+  margin: 0;
+  font-size: 14px;
+  color: #cde5f0;
+}
+
+/* =====================================================
+   3. ÁREA PRINCIPAL
+   ===================================================== */
+
+main.limite {
+  padding-top: 28px;
+  padding-bottom: 50px;
+}
+
+.painel {
+  position: relative;
+  background: var(--branco);
+  border: 1px solid var(--borda);
+  border-radius: var(--radius);
+  box-shadow: var(--sombra);
+  margin-bottom: 24px;
+  padding: 28px;
+  overflow: hidden;
+}
+
+.painel::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 5px;
+  background: linear-gradient(
+    90deg,
+    var(--azul-claro),
+    var(--laranja)
+  );
+}
+
+.painel h2 {
+  margin: 0 0 22px;
+  color: var(--azul-escuro);
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: -0.4px;
+}
+
+/* =====================================================
+   4. FORMULÁRIOS E CAMPOS
+   ===================================================== */
+
+form {
+  width: 100%;
+}
+
+fieldset {
+  min-width: 0;
+  margin: 24px 0;
+  padding: 22px;
+  border: 1px solid var(--borda);
+  border-radius: 12px;
+  background: #fcfdfe;
+}
+
+legend {
+  padding: 0 12px;
+  color: var(--azul-escuro);
+  font-weight: 800;
+  font-size: 16px;
+}
+
+.campos {
+  display: grid;
+  grid-template-columns: repeat(
+    2,
+    minmax(0, 1fr)
+  );
+  gap: 14px 20px;
+}
+
+label {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 12px;
+  color: #314e60;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+input,
+select,
+textarea {
+  width: 100%;
+  min-width: 0;
+  padding: 13px 14px;
+  border: 1.5px solid #cbdce6;
+  border-radius: 9px;
+  background: var(--branco);
+  color: var(--texto);
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  outline: none;
+  border-color: var(--azul-claro);
+  box-shadow: 0 0 0 3px rgba(21,151,191,0.13);
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: #91a4af;
+}
+
+input[readonly] {
+  background: #eaf0f4;
+  color: #65808f;
+  cursor: default;
+}
+
+textarea {
+  min-height: 90px;
+  resize: vertical;
+  line-height: 1.6;
+}
+
+input[type="file"] {
+  background: #f4f8fb;
+  border: 2px dashed #b8d1df;
+  padding: 16px;
+  cursor: pointer;
+}
+
+input[type="file"]::file-selector-button {
+  border: 0;
+  border-radius: 7px;
+  padding: 10px 13px;
+  margin-right: 12px;
+  background: var(--azul-medio);
+  color: white;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+input[type="file"]:hover {
+  border-color: var(--azul-claro);
+  background: #ebf7fb;
+}
+
+/* =====================================================
+   5. SELEÇÃO DO EXTINTOR
+   ===================================================== */
+
+.linha {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.linha select {
+  flex: 1;
+}
+
+.linha button {
+  flex-shrink: 0;
+}
+
+/* =====================================================
+   6. BOTÕES
+   ===================================================== */
+
+button {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  padding: 13px 20px;
+  border: none;
+  border-radius: 9px;
+  background: var(--azul-medio);
+  color: white;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 800;
+  cursor: pointer;
+  transition:
+    background 0.2s,
+    transform 0.2s,
+    box-shadow 0.2s;
+}
+
+button:hover:not(:disabled) {
+  background: var(--azul-escuro);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(18,63,90,0.14);
+}
+
+button:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+button:focus-visible {
+  outline: 3px solid var(--laranja);
+  outline-offset: 3px;
+}
+
+button.secundario {
+  background: #e5f2f8;
+  color: var(--azul-escuro);
+}
+
+button.secundario:hover {
+  background: #cce6f1;
+}
+
+#salvar {
+  width: 100%;
+  min-height: 53px;
+  background: linear-gradient(
+    100deg,
+    #ea7519,
+    var(--laranja)
+  );
+  font-size: 15px;
+  box-shadow: 0 4px 12px rgba(245,130,32,0.2);
+}
+
+#salvar:hover:not(:disabled) {
+  background: #d96c11;
+}
+
+/* =====================================================
+   7. CHECKLIST DE INSPEÇÃO
+   ===================================================== */
+
+.checklist {
+  display: grid;
+  grid-template-columns: repeat(
+    2,
+    minmax(0, 1fr)
+  );
+  gap: 12px;
+  margin: 20px 0 26px;
+}
+
+.item-check {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 16px;
+  border: 1px solid #dbe8ef;
+  border-left: 4px solid var(--azul-claro);
+  background: #f3f8fb;
+  border-radius: 10px;
+  transition: border-color 0.2s;
+}
+
+.item-check:focus-within {
+  border-color: var(--azul-medio);
+}
+
+.item-check label {
+  font-size: 13px;
+  font-weight: 700;
+  margin: 0 0 10px;
+  color: var(--azul-escuro);
+}
+
+.item-check select {
+  background: white;
+  padding: 11px;
+}
+
+/* Suporte visual para navegadores modernos */
+.item-check:has(select option:checked[value="OK"]) {
+  border-left-color: var(--verde);
+  background: #f1faf5;
+}
+
+.item-check:has(select option:checked[value="Irregular"]) {
+  border-left-color: var(--vermelho);
+  background: #fff4f2;
+}
+
+.item-check:has(select option:checked[value="N/A"]) {
+  border-left-color: #8b9eaa;
+}
+
+/* =====================================================
+   8. AJUDAS E MENSAGENS
+   ===================================================== */
+
+.ajuda {
+  margin: 8px 0 18px;
+  font-size: 12px;
+  line-height: 1.7;
+  color: var(--texto-secundario);
+}
+
+.ajuda code {
+  padding: 2px 5px;
+  border-radius: 4px;
+  background: #e3edf3;
+  color: #0c5c80;
+}
+
+.mensagem {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.mensagem:empty {
+  display: none;
+}
+
+.mensagem:not(:empty) {
+  margin-bottom: 20px;
+  padding: 15px 18px;
+  border: 1px solid #a9d8e9;
+  border-left: 5px solid var(--azul-claro);
+  background: #e8f6fc;
+  border-radius: 9px;
+  color: #155773;
+}
+
+.mensagem.erro {
+  border-color: #f0b3ac;
+  border-left-color: var(--vermelho);
+  background: var(--vermelho-claro);
+  color: #922e2e;
+}
+
+/* =====================================================
+   9. HISTÓRICO DE INSPEÇÕES
+   ===================================================== */
+
+.titulo-linha {
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 22px;
+}
+
+.titulo-linha h2 {
+  margin: 0;
+}
+
+.historico {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.historico > p {
+  padding: 12px;
+  margin: 0;
+  color: var(--texto-secundario);
+  font-size: 14px;
+}
+
+/* Cartão individual da inspeção */
+
+.inspecao {
+  position: relative;
+  margin: 0;
+  padding: 20px 22px;
+  background: white;
+  border: 1px solid var(--borda);
+  border-left: 5px solid #a6b8c3;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(10,40,60,0.035);
+  transition:
+    transform 0.2s,
+    box-shadow 0.2s;
+}
+
+.inspecao:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(16,60,80,0.08);
+}
+
+.inspecao h3 {
+  margin: 0 0 10px;
+  color: var(--azul-escuro);
+  font-size: 17px;
+  font-weight: 800;
+}
+
+.inspecao p {
+  margin: 6px 0;
+  font-size: 13px;
+  line-height: 1.65;
+  color: #496271;
+}
+
+.inspecao p:nth-of-type(1) {
+  color: #254c62;
+  font-weight: 600;
+}
+
+.inspecao a {
+  display: inline-flex;
+  align-items: center;
+  margin-top: 10px;
+  padding: 9px 13px;
+  border-radius: 8px;
+  background: #eaf5fa;
+  color: #08698f;
+  text-decoration: none;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.inspecao a:hover {
+  background: #d6ecf5;
+}
+
+/* Inspeção conforme */
+
+.inspecao.resultado-regular {
+  border-left-color: var(--verde);
+  background: linear-gradient(
+    90deg,
+    #f4fbf7 0%,
+    white 25%
+  );
+}
+
+.inspecao.resultado-regular h3 {
+  color: #176e52;
+}
+
+/* Inspeção com irregularidade */
+
+.inspecao.resultado-irregular {
+  border-left-color: var(--vermelho);
+  background: linear-gradient(
+    90deg,
+    #fff3f1 0%,
+    white 25%
+  );
+}
+
+.inspecao.resultado-irregular h3 {
+  color: #aa3535;
+}
+
+/* =====================================================
+   10. CHECKLIST DENTRO DO HISTÓRICO
+   ===================================================== */
+
+.inspecao details {
+  margin-top: 14px;
+  padding: 12px 14px;
+  background: #f0f5f8;
+  border: 1px solid #e1e9ed;
+  border-radius: 9px;
+}
+
+.inspecao summary {
+  color: var(--azul-medio);
+  font-size: 13px;
+  font-weight: 800;
+  cursor: pointer;
+  user-select: none;
+}
+
+.inspecao summary:hover {
+  color: var(--azul-escuro);
+}
+
+.inspecao details[open] {
+  background: #f6fafc;
+}
+
+.inspecao details p {
+  margin: 10px 0;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #e1e9ed;
+}
+
+.inspecao details p:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+/* =====================================================
+   11. RESPONSIVIDADE - TABLET
+   ===================================================== */
+
+@media (max-width: 800px) {
+  .painel {
+    padding: 20px;
+  }
+
+  .campos,
+  .checklist {
+    grid-template-columns: 1fr;
+  }
+
+  .topo h1 {
+    font-size: 29px;
+  }
+}
+
+/* =====================================================
+   12. RESPONSIVIDADE - CELULAR
+   ===================================================== */
+
+@media (max-width: 600px) {
+  .limite {
+    padding-left: 14px;
+    padding-right: 14px;
+  }
+
+  .topo {
+    padding: 22px 0 28px;
+  }
+
+  .topo a {
+    margin-bottom: 18px;
+  }
+
+  .topo h1 {
+    font-size: 25px;
+    letter-spacing: -0.5px;
+  }
+
+  .topo p {
+    font-size: 12px;
+  }
+
+  main.limite {
+    padding-top: 17px;
+  }
+
+  .painel {
+    padding: 16px;
+    margin-bottom: 16px;
+  }
+
+  .painel h2 {
+    font-size: 19px;
+  }
+
+  fieldset {
+    margin: 19px 0;
+    padding: 14px;
+  }
+
+  legend {
+    font-size: 14px;
+  }
+
+  .linha {
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .linha select {
+    flex-basis: 100%;
+  }
+
+  .linha button {
+    width: 100%;
+  }
+
+  .checklist {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .item-check {
+    padding: 13px;
+  }
+
+  input,
+  select,
+  textarea {
+    font-size: 16px;
+  }
+
+  button {
+    min-height: 46px;
+  }
+
+  #salvar {
+    font-size: 14px;
+    line-height: 1.4;
+  }
+
+  .titulo-linha {
+    align-items: flex-start;
+  }
+
+  .titulo-linha h2 {
+    font-size: 18px;
+  }
+
+  .titulo-linha button {
+    width: auto;
+  }
+
+  .inspecao {
+    padding: 15px;
+  }
+
+  .inspecao h3 {
+    font-size: 15px;
+  }
+}
+
+/* =====================================================
+   13. IMPRESSÃO
+   ===================================================== */
+
+@media print {
+  body {
+    background: white;
+  }
+
+  .topo {
+    background: white;
+    color: black;
+    border-bottom: 2px solid black;
+  }
+
+  .topo h1,
+  .topo p {
+    color: black;
+  }
+
+  .topo a,
+  button,
+  form {
+    display: none !important;
+  }
+
+  .painel,
+  .inspecao {
+    border-radius: 0;
+    box-shadow: none;
+    break-inside: avoid;
+  }
+
+  .inspecao details {
+    background: white;
+  }
+}

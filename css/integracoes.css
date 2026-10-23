@@ -1,0 +1,10 @@
+/* Integrações — CSS complementar, independente do CSS aprovado */
+.integracoes {display:flex;gap:10px;flex-wrap:wrap;margin:0 0 16px}
+.integracoes span{display:inline-flex;align-items:center;border:1px solid #c8dce7;background:#e8f2f8;color:#1b566e;padding:8px 12px;border-radius:999px;font-size:12px;font-weight:800}
+.integracoes .ativo{background:#e9f8f0;border-color:#94d4b4;color:#166747}
+.integracoes .inativo{background:#fff4eb;border-color:#f1c5a5;color:#97511d}
+.foto-previa{padding:14px;border-radius:12px;background:#f2f7fa;border:1px solid #d7e3ea;margin:10px 0 20px}
+.foto-previa[hidden]{display:none}
+.foto-previa img{display:block;max-width:100%;max-height:280px;border-radius:8px;object-fit:contain}
+.foto-previa p{font-size:12px;color:#526b79;overflow-wrap:anywhere}
+.foto-previa button{width:auto}
